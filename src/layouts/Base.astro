@@ -18,7 +18,8 @@ const { lang, title, description, alternate, type = 'website', home = false } = 
 const t = STRINGS[lang];
 const base = import.meta.env.BASE_URL;
 const canonical = new URL(Astro.url.pathname, Astro.site);
-const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} | ${t.title}`;
+// The home page is the author's own; every other page says what it is, then whose site it is
+const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
 ---
 
 <!doctype html>
