@@ -11,7 +11,7 @@ export interface ProjectLook {
 
 const KNOWN: Record<string, ProjectLook> = {
   claudio: { colour: '#2FD7A0', motif: 'phone' },
-  shipcast: { colour: '#FFC400', motif: 'label' },
+  shipcast: { colour: '#FFD43B', motif: 'label' },
 };
 
 const SPARE_COLOURS = ['#FF6FAE', '#FF7A2F', '#7C8CFF', '#FF5A4A'];

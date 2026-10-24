@@ -7,7 +7,7 @@ const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
 
 const night = { ground: '#000000', raised: '#121211', text: '#F5F2EA', body: '#E6E2D8', muted: '#B8B4AA', line: '#6D6A62' };
 const day = { ground: '#FFFFFF', raised: '#F2F1ED', text: '#0D0D0C', body: '#22211F', muted: '#5C5A54', line: '#85827A' };
-const colours = { claudio: '#2FD7A0', shipcast: '#FFC400', pink: '#FF6FAE', orange: '#FF7A2F', blue: '#7C8CFF', red: '#FF5A4A' };
+const colours = { claudio: '#2FD7A0', shipcast: '#FFD43B', pink: '#FF6FAE', orange: '#FF7A2F', blue: '#7C8CFF', red: '#FF5A4A' };
 
 const pairs = [];
 for (const [theme, t] of Object.entries({ night, day })) {
