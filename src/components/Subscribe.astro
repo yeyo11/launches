@@ -1,0 +1,98 @@
+---
+// The newsletter form: ours in look, Brevo's in substance. It posts to the language's Brevo form,
+// which sends the double opt-in email; nobody is on the list until they confirm. Without JavaScript
+// it is a plain form post and Brevo answers; with it, the answer shows here without leaving the page.
+import { SITE, STRINGS, type Locale } from '../site';
+import Headline from './Headline.astro';
+
+interface Props {
+  lang: Locale;
+  /** `band`: on the blue band, white on blue; `page`: on the page's own ground */
+  tone?: 'band' | 'page';
+}
+
+const { lang, tone = 'page' } = Astro.props;
+const action = SITE.newsletterForms[lang];
+const t = STRINGS[lang];
+const id = `nl-${tone}`;
+---
+
+{
+  action && (
+    <form class:list={['subscribe', tone]} method="post" action={action} data-subscribe data-invalid={t.nlInvalid} data-error={t.nlError} data-done={t.nlDone} data-sending={t.nlSending}>
+      <Headline as="h2" text={t.nlTitle} class="nl-title" />
+      <p class="nl-note">{t.nlNote}</p>
+      <label for={id} class="nl-label">{t.nlLabel}</label>
+      <div class="nl-row">
+        <input id={id} type="email" name="EMAIL" required autocomplete="email" placeholder={t.nlPlaceholder} />
+        <button type="submit">{t.nlButton}</button>
+      </div>
+      {/* A trap for bots: hidden from people and from screen readers, so only a script fills it */}
+      <input class="nl-trap" type="text" name="email_address_check" value="" tabindex="-1" autocomplete="off" aria-hidden="true" />
+      <input type="hidden" name="locale" value={lang} />
+      <p class="nl-status" role="status" aria-live="polite"></p>
+      <p class="nl-legal">
+        {t.nlLegal} <a href={`${import.meta.env.BASE_URL}${lang}/privacy/#newsletter`}>{t.privacy}</a>
+      </p>
+    </form>
+  )
+}
+
+<script>
+  for (const form of document.querySelectorAll<HTMLFormElement>('form[data-subscribe]')) {
+    const status = form.querySelector<HTMLElement>('.nl-status')!;
+    const button = form.querySelector<HTMLButtonElement>('button')!;
+    const email = form.querySelector<HTMLInputElement>('input[name="EMAIL"]')!;
+    const say = (text: string, kind: 'done' | 'error' | '') => {
+      status.textContent = text;
+      status.dataset.kind = kind;
+    };
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (!email.checkValidity()) return say(form.dataset.invalid!, 'error');
+      const label = button.textContent;
+      button.disabled = true;
+      button.textContent = form.dataset.sending!;
+      say('', '');
+      try {
+        // Brevo's own script submits with isAjax=1, which answers JSON instead of a page
+        const response = await fetch(`${form.action}${form.action.includes('?') ? '&' : '?'}isAjax=1`, { method: 'POST', body: new FormData(form) });
+        const answer = (await response.json().catch(() => ({}))) as { success?: boolean };
+        if (response.ok && answer.success) {
+          say(form.dataset.done!, 'done');
+          form.reset();
+        } else say(form.dataset.error!, 'error');
+      } catch {
+        say(form.dataset.error!, 'error');
+      } finally {
+        button.disabled = false;
+        button.textContent = label;
+      }
+    });
+  }
+</script>
+
+<style>
+  .subscribe { --fg: var(--text); --soft: var(--muted); --edge: var(--line); --fill: var(--text); --on-fill: var(--ground); display: flex; flex-direction: column; gap: calc(var(--space) * 3); max-width: 36rem; }
+  .subscribe.band { --fg: var(--on-band); --soft: var(--on-band); --edge: var(--on-band); --fill: var(--on-band); --on-fill: #000; }
+  :global(.nl-title) { margin: 0; font-size: clamp(1.6rem, 3vw, 2rem); line-height: 1.1; color: var(--fg); }
+  .nl-note { margin: 0; color: var(--soft); font-size: 1rem; line-height: 1.55; }
+  .nl-label { font-size: var(--fs-meta); font-weight: 600; color: var(--fg); margin-block-start: calc(var(--space) * 2); }
+  .nl-row { display: flex; flex-wrap: wrap; gap: calc(var(--space) * 3); }
+  .nl-row input {
+    flex: 1 1 14rem; min-height: 3.25rem; padding-inline: 1.1rem; font: inherit; color: var(--fg);
+    background: transparent; border: 1.5px solid var(--edge); border-radius: 999px;
+  }
+  .nl-row input::placeholder { color: var(--soft); opacity: 0.75; }
+  .nl-row button {
+    min-height: 3.25rem; padding-inline: 1.6rem; border-radius: 999px; border: 1.5px solid var(--fill);
+    background: var(--fill); color: var(--on-fill); font: inherit; font-weight: 600; cursor: pointer;
+  }
+  .nl-row button:disabled { opacity: 0.7; cursor: progress; }
+  .subscribe :focus-visible { outline: 2px solid var(--fg); outline-offset: 3px; }
+  .nl-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+  .nl-status { margin: 0; min-height: 1.5em; font-size: 0.95rem; color: var(--fg); }
+  .nl-status[data-kind='error'] { font-weight: 600; }
+  .nl-legal { margin: 0; font-size: var(--fs-meta); color: var(--soft); }
+  .nl-legal a { color: inherit; }
+</style>

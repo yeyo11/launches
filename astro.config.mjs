@@ -8,8 +8,9 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   site: 'https://josegarrido.dev',
   trailingSlash: 'always',
-  // The root only redirects to /en/, so it stays out of the sitemap
-  integrations: [sitemap({ filter: (page) => page !== 'https://josegarrido.dev/' })],
+  // The root only redirects to /en/, and /subscribed/ is where the newsletter's confirmation lands:
+  // neither belongs in search results
+  integrations: [sitemap({ filter: (page) => page !== 'https://josegarrido.dev/' && !page.endsWith('/subscribed/') })],
   markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false } },
   i18n: {
     locales: ['en', 'es'],

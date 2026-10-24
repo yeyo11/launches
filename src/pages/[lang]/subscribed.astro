@@ -1,0 +1,33 @@
+---
+// Where the newsletter's confirmation link lands, once the reader has confirmed their email in the
+// double opt-in message. Only that link leads here, so it stays out of search results.
+import Base from '../../layouts/Base.astro';
+import Headline from '../../components/Headline.astro';
+import { LOCALES, STRINGS, type Locale } from '../../site';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const t = STRINGS[lang];
+const base = import.meta.env.BASE_URL;
+---
+
+<Base lang={lang} title={t.subscribedTitle} description={t.subscribedNote} noindex>
+  <section class="wrap done">
+    <Headline as="h1" text={t.subscribedTitle} class="h-done" />
+    <p>{t.subscribedNote}</p>
+    <a href={`${base}${lang}/`} class="back">{t.backToLaunches}</a>
+  </section>
+</Base>
+
+<style>
+  .done { padding-block: calc(var(--space) * 28) calc(var(--space) * 32); max-width: 40rem; }
+  :global(.h-done) { margin: 0; font-size: var(--fs-mast); line-height: 1; }
+  .done p { margin: calc(var(--space) * 6) 0 calc(var(--space) * 10); font-size: var(--fs-body); color: var(--muted); }
+  .back {
+    display: inline-grid; place-items: center; min-height: 3.25rem; padding-inline: 1.6rem; border-radius: 999px;
+    background: var(--text); color: var(--ground); text-decoration: none; font-weight: 600;
+  }
+</style>

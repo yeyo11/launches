@@ -2,6 +2,7 @@
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Headline from '../../components/Headline.astro';
+import Subscribe from '../../components/Subscribe.astro';
 import Illo from '../../components/Illo.astro';
 import { SITE, STRINGS, formatDate, type Locale } from '../../site';
 import { getPosts, projectName, slugOf, translationOf, urlOf, type Post } from '../../posts';
@@ -67,6 +68,10 @@ const minutes = Math.max(1, Math.round(words / 220));
     </div>
   </article>
 
+  <section class="wrap signup">
+    <Subscribe lang={lang} />
+  </section>
+
   {
     more.length > 0 && (
       <section class="wrap more">
@@ -86,6 +91,7 @@ const minutes = Math.max(1, Math.round(words / 220));
 </Base>
 
 <style>
+  .signup { border-block-start: 1px solid var(--rule); padding-block: calc(var(--space) * 12); margin-block-start: calc(var(--space) * 12); }
   .hero { position: relative; margin-block-start: calc(var(--space) * 10); }
   .slab {
     background: var(--c); color: var(--on-colour);
