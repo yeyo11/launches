@@ -7,6 +7,7 @@ interface Brand {
   handles: Partial<Record<'x' | 'linkedin' | 'bluesky' | 'mastodon' | 'devto' | 'reddit' | 'instagram', string>>;
   support?: string;
   analytics?: { cloudflareWebAnalytics?: string };
+  newsletter?: { forms?: Partial<Record<'en' | 'es', string>> };
 }
 
 // brand.yml is the one place the brand is described, for Shipcast and for this site alike.
@@ -28,6 +29,8 @@ export const SITE = {
   ].filter((p): p is [string, string] => Boolean(p[1])),
   support: brand.support,
   analyticsToken: brand.analytics?.cloudflareWebAnalytics,
+  /** Where each language's subscription form posts: a Brevo form with double opt-in */
+  newsletterForms: brand.newsletter?.forms ?? {},
 };
 
 export const LOCALES = ['en', 'es'] as const;
@@ -61,6 +64,19 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     follow: 'Follow on GitHub',
     subscribe: 'Subscribe by RSS',
     readMore: 'More from the workshop',
+    nlTitle: 'Every launch, in your inbox',
+    nlNote: "I write when I ship an open-source project: what it does, how to try it, and what doesn't work yet. No spam.",
+    nlLabel: 'Your email',
+    nlPlaceholder: 'you@email.com',
+    nlButton: 'Subscribe',
+    nlSending: 'Sending…',
+    nlDone: 'Almost there: check your inbox and confirm your email.',
+    nlInvalid: "That doesn't look like an email address. Please check it and try again.",
+    nlError: 'Something went wrong. Please try again in a moment.',
+    nlLegal: 'Sent through Brevo; leave with one click.',
+    subscribedTitle: "You're in.",
+    subscribedNote: "Your email is confirmed. I'll write when the next project ships.",
+    backToLaunches: 'Back to the launches',
   },
   es: {
     title: 'Lanzamientos',
@@ -89,6 +105,19 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     follow: 'Sígueme en GitHub',
     subscribe: 'Suscríbete por RSS',
     readMore: 'Más del taller',
+    nlTitle: 'Cada lanzamiento, en tu correo',
+    nlNote: 'Te escribo cuando publico un proyecto open source: qué hace, cómo probarlo y qué no funciona todavía. Sin spam.',
+    nlLabel: 'Tu email',
+    nlPlaceholder: 'tu@email.com',
+    nlButton: 'Suscribirme',
+    nlSending: 'Enviando…',
+    nlDone: 'Casi listo: revisa tu correo y confirma tu email.',
+    nlInvalid: 'Eso no parece un email. Revísalo e inténtalo de nuevo.',
+    nlError: 'Algo ha fallado. Inténtalo de nuevo en un momento.',
+    nlLegal: 'Se envía con Brevo; te das de baja con un clic.',
+    subscribedTitle: 'Ya estás dentro.',
+    subscribedNote: 'Tu email está confirmado. Te escribiré cuando salga el próximo proyecto.',
+    backToLaunches: 'Volver a los lanzamientos',
   },
 };
 

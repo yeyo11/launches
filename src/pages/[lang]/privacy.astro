@@ -20,8 +20,8 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
   lang={lang}
   title={lang === 'en' ? 'Privacy policy' : 'Política de privacidad'}
   description={lang === 'en'
-    ? 'What Shipcast and this blog collect, how it is used, and how to have it deleted.'
-    : 'Qué recogen Shipcast y este blog, para qué se usa y cómo pedir que se borre.'}
+    ? 'What Shipcast, this blog and its newsletter collect, how it is used, and how to have it deleted.'
+    : 'Qué recogen Shipcast, este blog y su newsletter, para qué se usa y cómo pedir que se borre.'}
   alternate={{ lang: other, href: `${base}${other}/privacy/` }}
 >
   <article class="prose policy">
@@ -73,6 +73,19 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
               GitHub privacy statement
             </a>
             .
+          </p>
+
+          <h2 id="newsletter">The newsletter</h2>
+          <p>
+            If you subscribe to the newsletter, your email address is the only thing kept, together with the
+            language you subscribed in. It is used for one thing: writing to you when a new project ships. The list
+            is held by <a href="https://www.brevo.com/">Brevo</a> (Sendinblue SAS, France), which sends the emails
+            and processes the address under its{' '}
+            <a href="https://www.brevo.com/legal/privacypolicy/">privacy policy</a>. You are added only after you
+            confirm the address from the email Brevo sends when you sign up (double opt-in). The emails record
+            whether they were opened and which links were clicked, so the author knows what readers find useful.
+            Every email has a link to unsubscribe at once, which removes you from the list; you can also ask for it
+            by writing to the address below. The address is never sold, shared or used for anything else.
           </p>
 
           <h2 id="data-deletion">Deleting your data</h2>
@@ -136,6 +149,20 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
               declaración de privacidad de GitHub
             </a>
             .
+          </p>
+
+          <h2 id="newsletter">La newsletter</h2>
+          <p>
+            Si te suscribes a la newsletter, lo único que se guarda es tu dirección de email, junto con el idioma en
+            el que te suscribiste. Se usa para una sola cosa: escribirte cuando sale un proyecto nuevo. La lista la
+            gestiona <a href="https://www.brevo.com/es/">Brevo</a> (Sendinblue SAS, Francia), que envía los correos y
+            trata la dirección según su{' '}
+            <a href="https://www.brevo.com/es/legal/privacypolicy/">política de privacidad</a>. Solo entras en la
+            lista después de confirmar la dirección desde el correo que Brevo envía al apuntarte (doble opt-in). Los
+            correos registran si se abrieron y qué enlaces se pulsaron, para que el autor sepa qué le resulta útil a
+            quien los lee. Cada correo lleva un enlace para darte de baja al momento, que te saca de la lista; también
+            puedes pedirlo escribiendo a la dirección de abajo. La dirección nunca se vende, se comparte ni se usa
+            para nada más.
           </p>
 
           <h2 id="data-deletion">Borrar tus datos</h2>
