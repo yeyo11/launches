@@ -3,7 +3,7 @@
 > **Approval:** published when this pull request is merged. Edit it here if it needs changes.
 
 Subject: Claudio 0.9.0: Claude Code como servicio
-Preview: Una API REST y una web sobre la CLI de Claude Code, con agentes en paralelo y rotación de cuentas. Qué hace y qué no.
+Preview: Una API REST y una web sobre la CLI de Claude Code, con agentes en paralelo y rotación de cuentas.
 
 Hola,
 
@@ -11,7 +11,7 @@ Llevo mucho tiempo usando Claude Code desde la terminal y siempre echaba de meno
 
 Pone la CLI de Claude Code detrás de una API REST y una interfaz web. Ejecuta agentes en paralelo, cada uno en su propio worktree de git, te enseña el diff de lo que cambió y pasa el trabajo a otra cuenta de Claude antes de llegar a un límite. Solo usa la interfaz que la CLI ofrece a los programas, así que llega hasta donde llega la CLI y no más.
 
-También es una versión previa a la 1.0: una sola credencial compartida, sin permisos por usuario, autenticación desactivada en una instalación desde el código hasta que la actives, y Claude Code como único proveedor. El artículo lo explica junto a los comandos de instalación para Docker, la app de escritorio para Linux y el código fuente.
+El artículo trae los comandos de instalación para Docker, la app de escritorio para Linux y el código fuente.
 
 [Lee el artículo](https://josegarrido.dev/es/claudio-claude-code-como-servicio/?ref=newsletter)
 

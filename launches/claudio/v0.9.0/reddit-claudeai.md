@@ -16,7 +16,7 @@ What it does today (v0.9.0):
 - A diff screen that shows the sentence Claude wrote before each edit.
 - Optional guards (`PreToolUse` hooks) that hold even in `bypassPermissions`.
 
-Limits: it can only do what the CLI exposes, so claude.ai artifacts and memory are out. A running `claude` is never moved between accounts, only the next launch. One shared credential, no per-user permissions. Claude Code is the only provider that runs. Linux desktop app and amd64 image only. It is a Claude-only fork of Agentry, independent, not affiliated with Anthropic.
+It is a Claude-only fork of Agentry, independent, not affiliated with Anthropic.
 
 Write-up with install commands: https://josegarrido.dev/en/claudio-run-claude-code-as-a-service/?ref=reddit
 Repo: https://github.com/yeyo11/claudio

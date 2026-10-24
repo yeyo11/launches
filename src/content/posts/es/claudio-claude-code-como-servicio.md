@@ -1,6 +1,6 @@
 ---
 title: "Claudio: Claude Code como servicio"
-description: "Claudio pone la CLI de Claude Code detrás de una API REST y una interfaz web, ejecuta agentes en paralelo en sus propios worktrees y rota entre cuentas. Cómo funciona y qué no hace todavía."
+description: "Claudio pone la CLI de Claude Code detrás de una API REST y una interfaz web, ejecuta agentes en paralelo en sus propios worktrees y rota entre cuentas. Cómo funciona."
 pubDate: 2026-10-24
 lang: es
 translationKey: "claudio-run-claude-code-as-a-service"
@@ -12,7 +12,7 @@ image: "/launches/claudio/v0.9.0/og.png"
 
 Claude Code vive en una terminal. Está bien hasta que quieres iniciar una conversación desde el móvil, mirar cómo va un agente cuando no estás en tu mesa, o lanzar cinco en paralelo sin perder la pista de cuál necesita una respuesta. Hice Claudio para cubrir ese hueco: ejecuta Claude Code como un servicio.
 
-En este artículo cuento qué es Claudio, cómo habla con Claude Code, cómo se instala y, como es una versión 0.9, qué todavía no funciona.
+En este artículo cuento qué es Claudio, cómo habla con Claude Code y cómo se instala.
 
 ## Qué te da
 
@@ -64,8 +64,6 @@ Dos cosas a tener en cuenta: las comprobaciones necesitan `worktree: true` en el
 
 Cada cuenta de Claude tiene su propio `CLAUDE_CONFIG_DIR` y se inicia sesión una sola vez. Claudio lee el uso por ventana, pasa el trabajo nuevo a una cuenta con cuota antes de llegar al límite, repite en la siguiente cuenta un turno que choca con el límite, y espera al reinicio solo cuando ninguna tiene cuota. También hay una CLI pequeña, `claudio-accounts`, en `packages/accounts`.
 
-Límites: un `claude` en marcha nunca se mueve a otra cuenta, solo el siguiente arranque. Y el uso de una cuenta inactiva está tan fresco como su última actualización, porque la CLI no ofrece un evento para eso.
-
 ## Revisar los cambios dentro de Claudio
 
 Para una conversación, una tarea o la rama de integración hay una pantalla de diff construida a partir de git y de la transcripción. Cada edición lleva la frase que Claude escribió justo antes, así que lees el cambio junto con su motivo.
@@ -111,15 +109,6 @@ Después: abre Claudio, deja que el asistente compruebe Claude Code, pulsa Nuevo
 ## Antes de exponerlo
 
 Un contenedor crea un token de propietario en su primer arranque. Una instalación desde el código o la app de escritorio tienen la autenticación desactivada hasta que la actives. Eso es correcto para un puerto ligado a `127.0.0.1` e incorrecto para cualquier otra cosa: sin autenticación, cualquiera que llegue al puerto puede iniciar una conversación en tu cuenta y leer todas las transcripciones de la máquina. Los modos son `none`, `token` (solo se guarda el SHA-256) y `oidc` (Claudio valida un JWT; no inicia sesión a nadie). Claudio no termina TLS, así que pon un proxy delante. [docs/securing.md](https://github.com/yeyo11/claudio/blob/main/docs/securing.md) tiene los detalles.
-
-## Lo que todavía no funciona
-
-- Una sola credencial para todo el que la tenga: no hay aislamiento ni permisos por usuario.
-- Claude Code es el único proveedor que funciona. La documentación describe qué es un proveedor, pero no hay un segundo.
-- La app de escritorio es para Linux x86_64 y la imagen es amd64.
-- Web Push necesita un origen seguro; no funciona en la app de escritorio, y una suscripción pertenece a una instalación, no a una persona.
-- Cancelar un comando concreto requiere Linux, porque lee `/proc`.
-- Es la versión 0.9.0. Espera aristas sin pulir.
 
 Claudio es un fork de Agentry solo para Claude, un proyecto independiente y sin relación con Anthropic.
 

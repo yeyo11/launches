@@ -1,6 +1,6 @@
 ---
 title: "Claudio: run Claude Code as a service"
-description: "Claudio puts the Claude Code CLI behind a REST API and a web UI, runs agents in parallel in their own worktrees and rotates between Claude accounts. Here is how it works and what it cannot do."
+description: "Claudio puts the Claude Code CLI behind a REST API and a web UI, runs agents in parallel in their own worktrees and rotates between Claude accounts. Here is how it works."
 pubDate: 2026-10-24
 lang: en
 translationKey: "claudio-run-claude-code-as-a-service"
@@ -12,7 +12,7 @@ image: "/launches/claudio/v0.9.0/og.png"
 
 Claude Code lives in a terminal. That is fine until you want to start a chat from your phone, check on an agent that is still working while you are away from the desk, or run five of them in parallel without losing track of which one needs an answer. I built Claudio to cover that gap: it runs Claude Code as a service.
 
-This post covers what Claudio is, how it talks to Claude Code, how to install it, and, because it is a 0.9 release, what does not work yet.
+This post covers what Claudio is, how it talks to Claude Code and how to install it.
 
 ## What you get
 
@@ -64,8 +64,6 @@ Two things to watch for: the checks need `worktree: true` on the graph engine, a
 
 Each Claude account gets its own `CLAUDE_CONFIG_DIR` and is signed in once. Claudio reads usage per window, moves new work to an account with quota before a limit is hit, replays a turn that hits its limit on the next account, and waits for the reset only when none has any quota left. There is also a small CLI, `claudio-accounts`, in `packages/accounts`.
 
-Limits: a running `claude` is never moved to another account, only the next launch is. And an idle account's usage is as fresh as its last refresh, because the CLI offers no event for it.
-
 ## Reviewing changes inside Claudio
 
 For a chat, a task or the integration branch there is a diff screen built from git and the transcript. Each edit carries the sentence Claude wrote just before it, so you read the change together with its reason.
@@ -111,15 +109,6 @@ Then: open Claudio, let the setup assistant check Claude Code, press New chat, p
 ## Before you expose it
 
 A container creates an owner token on its first start. A source install or the desktop app has authentication off until you turn it on. That is right for a port bound to `127.0.0.1` and wrong for anything else: with auth off, anyone who reaches the port can start a chat on your account and read every transcript on the machine. The modes are `none`, `token` (only the SHA-256 is stored) and `oidc` (Claudio validates a JWT; it does not log anyone in). Claudio does not terminate TLS, so put a proxy in front. [docs/securing.md](https://github.com/yeyo11/claudio/blob/main/docs/securing.md) has the details.
-
-## What does not work yet
-
-- One credential for everyone who holds it: no per-user isolation or permissions.
-- Claude Code is the only provider that runs. The docs describe what a provider is, but there is no second one.
-- The desktop app is Linux x86_64, the image is amd64.
-- Web Push needs a secure origin; it does not work in the desktop app, and a subscription belongs to an install, not a person.
-- Cancelling a single command needs Linux, because it reads `/proc`.
-- It is version 0.9.0. Expect rough edges.
 
 Claudio is a Claude-only fork of Agentry, an independent project, and is not affiliated with Anthropic.
 

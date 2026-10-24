@@ -17,8 +17,6 @@ What v0.9.0 does:
 
 It only uses the interface the CLI ships for programs. Self-hosted, MIT. Linux desktop app, Docker image, or from source.
 
-Honest limits: one shared credential, no per-user permissions, auth off on source installs until you turn it on, Claude Code is the only provider.
-
 Full write-up and install commands: link in bio.
 
 #claudecode #claude #ai #aiagents #opensource #selfhosted #developer #devtools #coding #programming #typescript #nodejs #docker #linux #rest #api #git #automation #buildinpublic #indiedev

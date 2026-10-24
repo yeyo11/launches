@@ -10,8 +10,6 @@ The rule I held to: only use what the CLI ships for programs (stream-json, flags
 
 It grew into a lot more than I planned: a task board with work items, a team of agents with a flow by column, schedules, usage and cost over time. It is a Claude-only fork of an earlier project, Agentry.
 
-What is not great yet: v0.9.0, a single shared credential with no per-user permissions, Linux and amd64 only for the packaged builds, and Claude Code is the only provider.
-
 Write-up: https://josegarrido.dev/en/claudio-run-claude-code-as-a-service/?ref=reddit
 Code (MIT): https://github.com/yeyo11/claudio
 
