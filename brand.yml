@@ -25,7 +25,7 @@ analytics:
 # forms are public, and the API key stays in Shipcast's .env.
 newsletter:
   sender:
-    name: Jose Garrido
+    name: José Garrido
     email: me@josegarrido.dev
   lists:
     en: 4
