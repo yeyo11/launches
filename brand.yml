@@ -17,6 +17,9 @@ handles:
 # Where readers can support the author; linked from the blog's footer. Optional.
 support: https://buymeacoffee.com/yeyo11
 
+# The author's photo, on the generated assets that show a face (the Instagram carousel's last slide)
+avatar: https://josegarrido.dev/author.jpg
+
 # Cookieless visit counting for the site. The token is public: it ships in every page.
 analytics:
   cloudflareWebAnalytics: 92f225058e744da9ac04fe51a7cab5a5
