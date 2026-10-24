@@ -1,52 +1,76 @@
-/* Shipcast's design system (shipcast/docs/plans/design-system.md). Night is the default, as on every
-   brand surface; day is one click away and remembered. The scale is the system's major third, rooted
-   at 18 px here because this is a reading surface. Contrast is AA in both themes. */
-@import '@fontsource-variable/saira/wdth.css';
-@import '@fontsource-variable/atkinson-hyperlegible-next';
+/* José Antonio Garrido's personal identity: a teaching blackboard. A green slate board, chalk-white
+   text, one yellow chalk accent; Recursive (casual for headings, linear for interface, mono for code)
+   over Literata for reading. Night is the default; day is a paper page with the same structure.
+   The scale is the classic typographic one (14 18 21 24 36 48 60 px), rooted at 18 px because this
+   is a reading surface. Every text pair is WCAG AA in both themes; `--rule` is 3:1 where a line
+   carries meaning. */
+
+@import '@fontsource-variable/literata/opsz.css';
+@import '@fontsource-variable/literata/opsz-italic.css';
+
+/* Recursive ships each axis set as its own file under one family name; naming them apart lets the
+   page load only the sans (with its casual axis) and mono cuts instead of the 300 kB file with every axis. */
+@font-face {
+  font-family: 'Recursive Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 1000;
+  src: url('@fontsource-variable/recursive/files/recursive-latin-casl-normal.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Recursive Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300 1000;
+  src: url('@fontsource-variable/recursive/files/recursive-latin-mono-normal.woff2') format('woff2-variations');
+}
 
 :root {
   color-scheme: dark;
-  --paper: #02142c; /* abyss */
-  --shoal: #0a2142; /* deck */
-  --rule: #4a6c94; /* 3.4:1 on abyss: lines that carry meaning */
-  --ink: #f2ffff; /* ice */
-  --slate: #9db2c9; /* mist */
-  --ignition: #f88e55;
-  --signal: #49dbe9;
+  --board: #17211d; /* background: green slate */
+  --tray: #1f2c26; /* raised surfaces: code, inline code */
+  --rule: #5e7268; /* 3.2:1 on board: lines that carry meaning */
+  --chalk: #eceae2; /* text, 13.7:1 */
+  --dust: #a7b2ab; /* secondary text, 7.6:1 */
+  --accent: #f2d46b; /* yellow chalk: links, focus, the underline, 11.3:1 */
+  --highlight: #f2d46b; /* fills behind board-coloured text (selection), both themes */
+  --stroke: #f2d46b; /* the chalk underline and the mark's tail: decoration, never text */
 
-  --font-display: 'Saira Variable', system-ui, sans-serif;
-  --font-text: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
-  --font-mono: 'Commit Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-sans: 'Recursive Sans', ui-rounded, system-ui, sans-serif;
+  --font-text: 'Literata Variable', Georgia, serif;
+  --font-mono: 'Recursive Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --fs-small: 0.8rem;
-  --fs-body: 1rem;
-  --fs-lead: 1.25rem;
-  --fs-h3: 1.25rem;
-  --fs-h2: 1.5625rem;
-  --fs-h1: 2.4375rem;
-  --fs-display: 3.0625rem;
+  --fs-small: 0.7778rem; /* 14 */
+  --fs-body: 1rem; /* 18 */
+  --fs-lead: 1.1667rem; /* 21 */
+  --fs-h3: 1.1667rem; /* 21 */
+  --fs-h2: 1.3333rem; /* 24 */
+  --fs-h1: 2rem; /* 36 */
+  --fs-title: 2.6667rem; /* 48 */
+  --fs-display: 3.3333rem; /* 60 */
 
-  --measure: 37rem; /* about 66 characters of the text face; rem, so small type does not narrow it */
+  --measure: 34rem; /* about 66 characters of Literata */
+  --gutter: 9rem; /* the date column of the launch list on wide screens */
   --space: 0.25rem;
 }
 
 [data-theme='day'] {
   color-scheme: light;
-  --paper: #f4f7fa;
-  --shoal: #e3ebf2;
-  --rule: #8a9bb0; /* 3:1 on paper */
-  --ink: #02142c;
-  --slate: #4d6078;
-  --ignition: #b4501a;
-  --signal: #0b7380;
+  --board: #f1f4f0;
+  --tray: #e2e8e2;
+  --rule: #7c8b82;
+  --chalk: #17211d;
+  --dust: #4c5a53;
+  --accent: #7a5c00; /* the yellow chalk, darkened to ochre to read on paper */
+  --stroke: #e9b824; /* a highlighter on paper: decoration, so it is exempt from text contrast */
 }
 
 * { box-sizing: border-box; }
 
 html {
   font-size: 112.5%;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--board);
+  color: var(--chalk);
   -webkit-text-size-adjust: 100%;
 }
 
@@ -54,36 +78,38 @@ body {
   margin: 0;
   font-family: var(--font-text);
   font-size: var(--fs-body);
-  line-height: 1.55;
+  line-height: 1.65;
+  font-optical-sizing: auto;
 }
 
 h1, h2, h3 {
-  font-family: var(--font-display);
-  font-weight: 700;
+  font-family: var(--font-sans);
+  font-variation-settings: 'CASL' 1;
+  font-weight: 750;
   line-height: 1.1;
-  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
-a { color: var(--signal); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a { color: var(--accent); text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
 a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 3px solid var(--ignition); outline-offset: 3px; border-radius: 3px; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+::selection { background: var(--highlight); color: #17211d; }
 
-code, pre { font-family: var(--font-mono); font-size: 0.875em; }
-:not(pre) > code { background: var(--shoal); padding: 0.1em 0.35em; border-radius: 3px; }
+code, pre { font-family: var(--font-mono); font-size: 0.85em; font-variation-settings: 'MONO' 1; }
+:not(pre) > code { background: var(--tray); padding: 0.1em 0.35em; border-radius: 4px; }
 /* Shiki writes both themes as variables (astro.config.mjs); the page's theme picks one */
-.astro-code { background-color: var(--shoal) !important; } /* deck, not github-dark's grey */
+.astro-code { background-color: var(--tray) !important; }
 .astro-code span { color: var(--shiki-dark); }
-[data-theme='day'] .astro-code { background-color: var(--shiki-light-bg) !important; }
 [data-theme='day'] .astro-code span { color: var(--shiki-light); }
-pre { padding: calc(var(--space) * 5); border-radius: 8px; overflow-x: auto; border: 1px solid var(--shoal); }
+pre { padding: calc(var(--space) * 5); border-radius: 8px; overflow-x: auto; line-height: 1.5; }
 
 img, video { max-width: 100%; height: auto; border-radius: 8px; }
 
 .wrap { width: min(100% - 2.5rem, var(--measure)); margin-inline: auto; }
-.muted { color: var(--slate); }
-/* Atkinson's slashed zero helps code-like reading, not dates: meta lines use the display face */
-time, .meta { font-family: var(--font-display); }
+.muted { color: var(--dust); }
+/* Interface text (dates, navigation, meta) is Recursive's linear cut: it reads as the board's
+   frame, not as the lesson */
+.ui, time { font-family: var(--font-sans); font-variation-settings: 'CASL' 0; }
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
 }

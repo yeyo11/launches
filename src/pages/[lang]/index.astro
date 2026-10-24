@@ -1,6 +1,6 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { LOCALES, STRINGS, formatDate, type Locale } from '../../site';
+import { LOCALES, SITE, STRINGS, formatDate, type Locale } from '../../site';
 import { getPosts, projectName, urlOf } from '../../posts';
 
 export function getStaticPaths() {
@@ -15,11 +15,17 @@ const other: Locale = lang === 'en' ? 'es' : 'en';
 
 <Base home lang={lang} title={t.title} description={t.tagline} alternate={{ lang: other, href: `${import.meta.env.BASE_URL}${other}/` }}>
   <section class="intro wrap">
-    <h1>{t.title}</h1>
-    <p class="tagline">{t.tagline}</p>
+    <h1>{SITE.author}</h1>
+    <!-- The chalk underline: the monogram's yellow stroke, drawn once under the name -->
+    <svg class="underline" viewBox="0 0 400 24" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+      <path d="M6 15C70 9 150 7 230 9s128 5 164 2" pathLength="1" />
+    </svg>
+    <p class="lead">{t.intro}</p>
+    <p class="ui muted">{t.codeOn} <a href={SITE.github}>{SITE.handle}</a>.</p>
   </section>
 
-  <section class="wrap">
+  <section class="wrap" aria-labelledby="launches">
+    <h2 id="launches">{t.title}</h2>
     {
       posts.length === 0 ? (
         <p class="empty muted">{t.empty}</p>
@@ -30,14 +36,16 @@ const other: Locale = lang === 'en' ? 'es' : 'en';
               <time datetime={post.data.pubDate.toISOString()} class="muted">
                 {formatDate(post.data.pubDate, lang)}
               </time>
-              <h2>
-                <a href={urlOf(post)}>{post.data.title}</a>
-              </h2>
-              <p>{post.data.description}</p>
-              <p class="release meta muted">
-                {projectName(post.data.repo)}
-                {post.data.version && ` ${post.data.version}`}
-              </p>
+              <div>
+                <h3>
+                  <a href={urlOf(post)}>{post.data.title}</a>
+                </h3>
+                <p>{post.data.description}</p>
+                <p class="release muted">
+                  {projectName(post.data.repo)}
+                  {post.data.version && ` ${post.data.version}`}
+                </p>
+              </div>
             </li>
           ))}
         </ol>
@@ -47,39 +55,62 @@ const other: Locale = lang === 'en' ? 'es' : 'en';
 </Base>
 
 <style>
-  .intro { padding-block: calc(var(--space) * 10) calc(var(--space) * 12); }
+  .intro { padding-block: calc(var(--space) * 14) calc(var(--space) * 16); }
   h1 {
-    font-size: clamp(var(--fs-h1), 11vw, var(--fs-display));
-    font-weight: 800;
-    font-stretch: 118%;
+    font-size: clamp(var(--fs-h1) * 1.15, 12vw, var(--fs-display));
+    font-weight: 850;
+    line-height: 1;
+    letter-spacing: -0.01em;
     margin: 0;
   }
-  .tagline { font-size: var(--fs-lead); color: var(--slate); margin: calc(var(--space) * 3) 0 0; }
+  .underline {
+    display: block;
+    width: min(100%, 22rem);
+    height: 0.9rem;
+    margin-block: calc(var(--space) * 2) calc(var(--space) * 8);
+    overflow: visible;
+  }
+  .underline path {
+    fill: none;
+    stroke: var(--stroke);
+    stroke-width: 6;
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 0;
+  }
+  /* The page's one moment of motion: the stroke is drawn as the page opens */
+  @media (prefers-reduced-motion: no-preference) {
+    .underline path { animation: draw 700ms 150ms cubic-bezier(0.6, 0, 0.3, 1) backwards; }
+    @keyframes draw {
+      from { stroke-dashoffset: 1; }
+    }
+  }
+  .lead { font-size: var(--fs-lead); line-height: 1.55; margin: 0 0 calc(var(--space) * 4); }
+  .intro .ui { font-size: var(--fs-small); margin: 0; }
 
-  /* The launches in order: a signal line with one node per release, newest on top */
-  .log {
-    list-style: none;
-    margin: 0;
-    padding: 0 0 0 calc(var(--space) * 8);
-    border-inline-start: 2px solid var(--rule);
+  h2 {
+    font-size: var(--fs-h2);
+    margin: 0 0 calc(var(--space) * 8);
+    padding-block-end: calc(var(--space) * 3);
+    border-block-end: 1px solid var(--rule);
   }
-  .log li { position: relative; padding-block-end: calc(var(--space) * 10); }
-  .log li::before {
-    content: '';
-    position: absolute;
-    inset-inline-start: calc(var(--space) * -8 - 7px);
-    top: 0.35em;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    border: 2px solid var(--ignition);
-    background: var(--paper);
-  }
-  .log h2 { font-size: var(--fs-h2); margin: calc(var(--space) * 1) 0 calc(var(--space) * 2); }
-  .log h2 a { color: var(--ink); text-decoration: none; }
-  .log h2 a:hover { text-decoration: underline; }
+  .log { list-style: none; margin: 0; padding: 0; }
+  .log li { display: grid; gap: calc(var(--space) * 1); padding-block-end: calc(var(--space) * 12); }
+  .log time { font-size: var(--fs-small); padding-block-start: 0.3em; }
+  .log h3 { font-size: var(--fs-h2); margin: 0 0 calc(var(--space) * 2); }
+  .log h3 a { color: var(--chalk); text-decoration: none; }
+  .log h3 a:hover { text-decoration: underline; text-decoration-color: var(--accent); }
   .log p { margin: 0; }
-  .log time, .release { font-size: var(--fs-small); }
-  .release { margin-block-start: calc(var(--space) * 2) !important; }
-  .empty { font-size: var(--fs-lead); }
+  .log .release { font-family: var(--font-mono); font-variation-settings: 'MONO' 1; font-size: var(--fs-small); margin-block-start: calc(var(--space) * 2); }
+  .empty { font-size: var(--fs-lead); margin: 0; }
+
+  /* Wide screens: the dates hang in the left margin, so the titles keep the text column's edge */
+  @media (min-width: 62rem) {
+    .log li {
+      grid-template-columns: var(--gutter) 1fr;
+      gap: 0;
+      margin-inline-start: calc(var(--gutter) * -1);
+    }
+  }
 </style>

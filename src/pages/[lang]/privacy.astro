@@ -29,7 +29,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
       lang === 'en' ? (
         <>
           <h1>Privacy policy</h1>
-          <p class="muted">Last updated on <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
+          <p class="ui muted">Last updated on <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
 
           <p>
             This policy covers <a href="https://github.com/yeyo11/shipcast">Shipcast</a>, an open-source tool that
@@ -86,7 +86,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
       ) : (
         <>
           <h1>Política de privacidad</h1>
-          <p class="muted">Actualizada el <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
+          <p class="ui muted">Actualizada el <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
 
           <p>
             Esta política cubre <a href="https://github.com/yeyo11/shipcast">Shipcast</a>, una herramienta de código
@@ -146,7 +146,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
 </Base>
 
 <style>
-  article { padding-block: calc(var(--space) * 8) 0; }
-  h1 { font-size: clamp(var(--fs-h2), 8vw, var(--fs-h1)); font-weight: 800; font-stretch: 112%; margin: 0 0 calc(var(--space) * 2); }
+  article { padding-block: calc(var(--space) * 12) 0; }
+  h1 { font-size: clamp(var(--fs-h1), 8vw, var(--fs-title)); font-weight: 850; line-height: 1.05; margin: 0 0 calc(var(--space) * 3); }
   h2 { font-size: var(--fs-h3); margin-block: 2em 0.5em; }
 </style>

@@ -1,9 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- The release node and its fan, until the designed mark exists -->
-  <rect width="32" height="32" rx="7" fill="#02142C" stroke="#4A6C94" stroke-width="1"/>
-  <g fill="none" stroke-width="2.4" stroke-linecap="round">
-    <path d="M7 16h6" stroke="#F88E55"/>
-    <path d="M15 16C19 16 21 9 26 9M15 16h11M15 16c4 0 6 7 11 7" stroke="#49DBE9"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- The jg monogram on the board: chalk strokes, the g's tail as the yellow underline -->
+  <rect width="64" height="64" rx="12" fill="#17211D"/>
+  <g transform="translate(1 -3)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
+    <path d="M23 26v17c0 5-3 8-8 8" stroke="#ECEAE2"/>
+    <circle cx="38" cy="31" r="8" stroke="#ECEAE2"/>
+    <path d="M46 23v19" stroke="#ECEAE2"/>
+    <path d="M46 42c0 10-9 15-35 16" stroke="#F2D46B"/>
   </g>
-  <circle cx="14" cy="16" r="2.6" fill="#02142C" stroke="#E75D6E" stroke-width="2"/>
+  <circle cx="24" cy="12" r="3.6" fill="#ECEAE2"/>
 </svg>

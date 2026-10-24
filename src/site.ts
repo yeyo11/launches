@@ -14,6 +14,7 @@ const brand = parse(brandFile) as Brand;
 export const SITE = {
   author: brand.displayName,
   github: `https://github.com/${brand.github}`,
+  handle: brand.github,
   profiles: [
     ['GitHub', `https://github.com/${brand.github}`],
     ['dev.to', brand.handles.devto],
@@ -43,6 +44,10 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     toDay: 'Light theme',
     toNight: 'Dark theme',
     privacy: 'Privacy',
+    home: 'Home',
+    intro:
+      'I build open-source tools for developers. Each one is announced here the day it ships, in English and Spanish: the problem it solves, the commands to try it, and what does not work yet.',
+    codeOn: 'The code is on GitHub as',
   },
   es: {
     title: 'Lanzamientos',
@@ -56,6 +61,10 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     toDay: 'Tema claro',
     toNight: 'Tema oscuro',
     privacy: 'Privacidad',
+    home: 'Inicio',
+    intro:
+      'Hago herramientas de código abierto para desarrolladores. Cada una se anuncia aquí el día que sale, en español y en inglés: el problema que resuelve, los comandos para probarla y lo que todavía no funciona.',
+    codeOn: 'El código está en GitHub como',
   },
 };
 

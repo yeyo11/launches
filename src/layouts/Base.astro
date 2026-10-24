@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Mark from '../components/Mark.astro';
 import { SITE, STRINGS, type Locale } from '../site';
 
 interface Props {
@@ -9,7 +10,7 @@ interface Props {
   /** The same page in the other language, when it exists */
   alternate?: { lang: Locale; href: string };
   type?: 'website' | 'article';
-  /** The index carries the title as its h1, so the header does not repeat it */
+  /** The index carries the author's name as its h1, so the header shows only the mark */
   home?: boolean;
 }
 
@@ -36,15 +37,18 @@ const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} |
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta name="author" content={SITE.author} />
-    <meta name="theme-color" content="#02142C" />
+    <meta name="theme-color" content="#17211D" />
     <!-- Before the first paint, so a reader who chose day never sees a flash of night -->
     <script is:inline>
       if (localStorage.getItem('theme') === 'day') document.documentElement.dataset.theme = 'day';
     </script>
   </head>
   <body>
-    <header class="site wrap">
-      {!home && <a class="home" href={`${base}${lang}/`}>{t.title}</a>}
+    <header class="site wrap ui">
+      <a class="home" href={`${base}${lang}/`} aria-label={home ? t.home : undefined}>
+        <Mark size={34} />
+        {!home && <span>{SITE.author}</span>}
+      </a>
       <nav>
         {alternate && <a href={alternate.href} hreflang={alternate.lang} lang={alternate.lang}>{t.readIn}</a>}
         <button type="button" class="theme" data-to-day={t.toDay} data-to-night={t.toNight}>{t.toDay}</button>
@@ -53,12 +57,15 @@ const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} |
     <main>
       <slot />
     </main>
-    <footer class="site wrap muted">
-      <span>{SITE.author}</span>
-      {SITE.profiles.map(([name, href]) => <a href={href} rel="me">{name}</a>)}
-      <a href={`${base}${lang}/rss.xml`}>RSS</a>
-      <a href={`${base}${lang}/privacy/`}>{t.privacy}</a>
-      {SITE.support && <a class="support" href={SITE.support}>{t.support}</a>}
+    <footer class="site wrap ui muted">
+      <p class="who">{SITE.author}</p>
+      <p>{SITE.profiles.map(([name, href]) => <a href={href} rel="me">{name}</a>)}</p>
+      <p>
+        <a href={`${base}${lang}/rss.xml`}>RSS</a>
+        <a href={`${base}${lang}/privacy/`}>{t.privacy}</a>
+      </p>
+      {/* Its own line: a request to the reader, not one more profile */}
+      {SITE.support && <p><a href={SITE.support}>{t.support}</a></p>}
     </footer>
   </body>
 </html>
@@ -88,43 +95,65 @@ const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} |
   footer.site {
     display: flex;
     gap: calc(var(--space) * 6);
-    align-items: baseline;
+    align-items: center;
     padding-block: calc(var(--space) * 6);
   }
   .home {
-    font-family: var(--font-display);
-    font-weight: 800;
-    font-stretch: 112%;
-    font-size: var(--fs-h3);
-    color: var(--ink);
+    display: flex;
+    align-items: center;
+    gap: calc(var(--space) * 3);
+    color: var(--chalk);
     text-decoration: none;
+    font-weight: 650;
+    font-size: var(--fs-small);
+  }
+  .home:hover span { text-decoration: underline; text-decoration-color: var(--accent); }
+  .home :global(.mark) { flex: none; }
+  /* On a phone the mark alone leads home; the name stays for screen readers */
+  @media (max-width: 30rem) {
+    .home span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   }
   nav {
     margin-inline-start: auto;
     display: flex;
-    gap: calc(var(--space) * 5);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    column-gap: calc(var(--space) * 5);
+    row-gap: calc(var(--space) * 1);
     align-items: baseline;
     font-size: var(--fs-small);
   }
+  /* The frame's links are quiet: chalk with a rule-coloured underline, so yellow stays for links
+     inside the text, focus and the mark */
+  nav a,
+  footer.site a,
+  .theme {
+    color: inherit;
+    text-decoration-color: var(--rule);
+  }
+  nav a:hover,
+  footer.site a:hover,
+  .theme:hover { text-decoration-color: var(--accent); }
+  nav { color: var(--chalk); }
   .theme {
     font: inherit;
-    color: var(--signal);
     background: none;
     border: 0;
     padding: 0;
     cursor: pointer;
-    text-decoration: underline;
-    text-underline-offset: 0.18em;
+    text-underline-offset: 0.2em;
+    text-decoration-line: underline;
     text-decoration-thickness: 1px;
   }
-  .theme:hover { text-decoration-thickness: 2px; }
   footer.site {
-    margin-block-start: calc(var(--space) * 20);
-    border-block-start: 1px solid var(--shoal);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: calc(var(--space) * 3);
+    margin-block-start: calc(var(--space) * 24);
+    padding-block: calc(var(--space) * 8);
+    border-block-start: 1px solid var(--tray);
     font-size: var(--fs-small);
-    flex-wrap: wrap;
   }
-  footer.site span { margin-inline-end: auto; }
-  /* Its own line: a request to the reader, not one more profile */
-  .support { flex-basis: 100%; }
+  footer.site p { display: flex; flex-wrap: wrap; column-gap: calc(var(--space) * 5); row-gap: calc(var(--space) * 1); margin: 0; }
+  .who { color: var(--chalk); font-weight: 650; }
 </style>
