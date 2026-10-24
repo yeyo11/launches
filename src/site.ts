@@ -41,6 +41,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     support: 'Buy me a coffee',
     toDay: 'Light theme',
     toNight: 'Dark theme',
+    privacy: 'Privacy',
   },
   es: {
     title: 'Lanzamientos',
@@ -53,6 +54,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     support: 'Invítame a un café',
     toDay: 'Tema claro',
     toNight: 'Tema oscuro',
+    privacy: 'Privacidad',
   },
 };
 

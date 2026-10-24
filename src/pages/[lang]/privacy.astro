@@ -1,0 +1,152 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LOCALES, SITE, type Locale } from '../../site';
+
+// The privacy policy of Shipcast, the app that publishes this blog's launches on the author's own
+// accounts. Meta asks for its URL to create the Instagram app; other networks may ask for it too.
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const other: Locale = lang === 'en' ? 'es' : 'en';
+const base = import.meta.env.BASE_URL;
+const CONTACT = 'yeyo@inmoseo.net';
+const UPDATED = new Date('2026-10-24');
+const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dateStyle: 'long' }).format(UPDATED);
+---
+
+<Base
+  lang={lang}
+  title={lang === 'en' ? 'Privacy policy' : 'Política de privacidad'}
+  description={lang === 'en'
+    ? 'What Shipcast and this blog collect, how it is used, and how to have it deleted.'
+    : 'Qué recogen Shipcast y este blog, para qué se usa y cómo pedir que se borre.'}
+  alternate={{ lang: other, href: `${base}${other}/privacy/` }}
+>
+  <article class="wrap">
+    {
+      lang === 'en' ? (
+        <>
+          <h1>Privacy policy</h1>
+          <p class="muted">Last updated on <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
+
+          <p>
+            This policy covers <a href="https://github.com/yeyo11/shipcast">Shipcast</a>, an open-source tool that
+            {SITE.author} uses to announce their own software projects, and this blog, where the announcements are
+            published. Shipcast is run by its author, on the author's own computer, to post on the author's own
+            accounts.
+          </p>
+
+          <h2>What Shipcast accesses</h2>
+          <p>
+            To publish an announcement, Shipcast connects to the author's own accounts on Instagram, Bluesky,
+            Mastodon and dev.to, with the permissions each network grants for that purpose. On Instagram these are
+            reading the basic profile of the account (its id and username) and publishing posts to it
+            (<code>instagram_business_basic</code> and <code>instagram_business_content_publish</code>).
+          </p>
+          <p>
+            Shipcast does not collect, read or store data about any other person: not followers, not comments, not
+            messages. It does not use any network's data for advertising, profiling or analytics, and it does not
+            sell or share data with anyone.
+          </p>
+
+          <h2>Where the data is kept</h2>
+          <p>
+            The access tokens the networks issue are stored only on the author's computer, in a local configuration
+            file that is never published. What Shipcast publishes is the announcement itself: the text and images
+            the author approved, which become public on each network and on this blog.
+          </p>
+
+          <h2>This blog</h2>
+          <p>
+            This blog has no cookies, no analytics and no third-party trackers. It remembers your choice of light or
+            dark theme in your own browser (<code>localStorage</code>), and that value never leaves your device. The
+            site is hosted on GitHub Pages, which may keep technical logs such as IP addresses under the{' '}
+            <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">
+              GitHub privacy statement
+            </a>
+            .
+          </p>
+
+          <h2 id="data-deletion">Deleting your data</h2>
+          <p>
+            Shipcast holds no data about anyone other than its author. The author can disconnect Shipcast at any time
+            by removing the app from the account's settings on each network (on Instagram: Settings, Apps and
+            websites) and deleting the local token; Shipcast then keeps nothing. If you believe Shipcast holds data
+            about you and want it deleted, write to <a href={`mailto:${CONTACT}`}>{CONTACT}</a> and it will be
+            answered within 30 days.
+          </p>
+
+          <h2>Contact</h2>
+          <p>
+            {SITE.author}, <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.
+          </p>
+        </>
+      ) : (
+        <>
+          <h1>Política de privacidad</h1>
+          <p class="muted">Actualizada el <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
+
+          <p>
+            Esta política cubre <a href="https://github.com/yeyo11/shipcast">Shipcast</a>, una herramienta de código
+            abierto que {SITE.author} usa para anunciar sus propios proyectos de software, y este blog, donde se
+            publican los anuncios. Shipcast lo ejecuta su autor, en su propio ordenador, para publicar en sus propias
+            cuentas.
+          </p>
+
+          <h2>A qué accede Shipcast</h2>
+          <p>
+            Para publicar un anuncio, Shipcast se conecta a las cuentas del autor en Instagram, Bluesky, Mastodon y
+            dev.to, con los permisos que cada red concede para ello. En Instagram son leer el perfil básico de la
+            cuenta (su id y su nombre de usuario) y publicar en ella (<code>instagram_business_basic</code> e{' '}
+            <code>instagram_business_content_publish</code>).
+          </p>
+          <p>
+            Shipcast no recoge, lee ni guarda datos de ninguna otra persona: ni seguidores, ni comentarios, ni
+            mensajes. No usa los datos de ninguna red para publicidad, perfiles ni analítica, y no vende ni comparte
+            datos con nadie.
+          </p>
+
+          <h2>Dónde se guardan los datos</h2>
+          <p>
+            Los tokens de acceso que emiten las redes se guardan solo en el ordenador del autor, en un fichero de
+            configuración local que nunca se publica. Lo que Shipcast publica es el anuncio en sí: el texto y las
+            imágenes que el autor aprobó, que pasan a ser públicos en cada red y en este blog.
+          </p>
+
+          <h2>Este blog</h2>
+          <p>
+            Este blog no tiene cookies, ni analítica, ni rastreadores de terceros. Recuerda en tu propio navegador si
+            prefieres el tema claro o el oscuro (<code>localStorage</code>), y ese valor nunca sale de tu dispositivo.
+            El sitio está alojado en GitHub Pages, que puede guardar registros técnicos como direcciones IP según la{' '}
+            <a href="https://docs.github.com/es/site-policy/privacy-policies/github-general-privacy-statement">
+              declaración de privacidad de GitHub
+            </a>
+            .
+          </p>
+
+          <h2 id="data-deletion">Borrar tus datos</h2>
+          <p>
+            Shipcast no guarda datos de nadie más que de su autor. El autor puede desconectar Shipcast cuando quiera
+            quitando la app de los ajustes de la cuenta en cada red (en Instagram: Configuración, Apps y sitios web) y
+            borrando el token local; a partir de ahí Shipcast no conserva nada. Si crees que Shipcast tiene datos
+            tuyos y quieres que se borren, escribe a <a href={`mailto:${CONTACT}`}>{CONTACT}</a> y se te responderá
+            en un plazo de 30 días.
+          </p>
+
+          <h2>Contacto</h2>
+          <p>
+            {SITE.author}, <a href={`mailto:${CONTACT}`}>{CONTACT}</a>.
+          </p>
+        </>
+      )
+    }
+  </article>
+</Base>
+
+<style>
+  article { padding-block: calc(var(--space) * 8) 0; }
+  h1 { font-size: clamp(var(--fs-h2), 8vw, var(--fs-h1)); font-weight: 800; font-stretch: 112%; margin: 0 0 calc(var(--space) * 2); }
+  h2 { font-size: var(--fs-h3); margin-block: 2em 0.5em; }
+</style>
