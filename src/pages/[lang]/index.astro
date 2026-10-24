@@ -126,6 +126,7 @@ const meta = (post: Post) =>
   <section class="band">
     <div class="wrap band-in">
       <div>
+        <img class="author" src={`${import.meta.env.BASE_URL}author.jpg`} alt={SITE.author} width="112" height="112" />
         <Headline as="h2" text={t.bandTitle} class="h-band" />
         <p>{t.intro}</p>
       </div>
@@ -195,6 +196,8 @@ const meta = (post: Post) =>
   :global(.h-band) { margin: 0; font-size: clamp(2.2rem, 4.5vw, 3.25rem); line-height: 1.04; }
   .band-actions { display: flex; flex-direction: column; gap: calc(var(--space) * 3); }
   .pill { min-height: 3.25rem; display: grid; place-items: center; padding-inline: 1.5rem; border-radius: 999px; border: 1.5px solid var(--on-band); color: var(--on-band); text-decoration: none; font-weight: 500; }
+  /* The house's hard shadow, as on the illustrations: a sticker, not a soft avatar */
+  .author { display: block; width: 7rem; height: 7rem; border-radius: 50%; object-fit: cover; border: 3px solid #000; box-shadow: 6px 6px 0 #000; margin-block-end: calc(var(--space) * 6); }
   .pill.solid { background: var(--on-band); color: #000; font-weight: 600; }
   .band :focus-visible { outline-color: var(--on-band); }
   @media (min-width: 56rem) { .band-in { grid-template-columns: 1fr 22rem; gap: calc(var(--space) * 20); } }
