@@ -1,0 +1,71 @@
+/* Shipcast's day theme (shipcast/docs/plans/design-system.md): the blog is read in daylight. The
+   scale is the system's major third, rooted at 18 px here because this is a reading surface. */
+@import '@fontsource-variable/saira/wdth.css';
+@import '@fontsource-variable/atkinson-hyperlegible-next';
+
+:root {
+  --paper: #f4f7fa;
+  --shoal: #e3ebf2;
+  --rule: #8a9bb0; /* 3:1 on paper: lines that carry meaning */
+  --ink: #02142c;
+  --slate: #4d6078;
+  --ignition: #b4501a;
+  --signal: #0b7380;
+
+  --font-display: 'Saira Variable', system-ui, sans-serif;
+  --font-text: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
+  --font-mono: 'Commit Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --fs-small: 0.8rem;
+  --fs-body: 1rem;
+  --fs-lead: 1.25rem;
+  --fs-h3: 1.25rem;
+  --fs-h2: 1.5625rem;
+  --fs-h1: 2.4375rem;
+  --fs-display: 3.0625rem;
+
+  --measure: 37rem; /* about 66 characters of the text face; rem, so small type does not narrow it */
+  --space: 0.25rem;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  font-size: 112.5%;
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+a { color: var(--signal); text-underline-offset: 0.18em; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--ignition); outline-offset: 3px; border-radius: 3px; }
+
+code, pre { font-family: var(--font-mono); font-size: 0.875em; }
+:not(pre) > code { background: var(--shoal); padding: 0.1em 0.35em; border-radius: 3px; }
+pre { padding: calc(var(--space) * 5); border-radius: 8px; overflow-x: auto; border: 1px solid var(--shoal); }
+
+img, video { max-width: 100%; height: auto; border-radius: 8px; }
+
+.wrap { width: min(100% - 2.5rem, var(--measure)); margin-inline: auto; }
+.muted { color: var(--slate); }
+/* Atkinson's slashed zero helps code-like reading, not dates: meta lines use the display face */
+time, .meta { font-family: var(--font-display); }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}

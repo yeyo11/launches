@@ -1,0 +1,72 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { STRINGS, formatDate, type Locale } from '../../site';
+import { getPosts, projectName, slugOf, translationOf, urlOf, type Post } from '../../posts';
+
+export async function getStaticPaths() {
+  const all = await getPosts();
+  return all.map((post) => ({
+    params: { lang: post.data.lang, slug: slugOf(post) },
+    props: { post, translation: translationOf(post, all) },
+  }));
+}
+
+interface Props {
+  post: Post;
+  translation?: Post;
+}
+
+const { post, translation } = Astro.props;
+const lang = post.data.lang as Locale;
+const t = STRINGS[lang];
+const { Content } = await render(post);
+const alternate = translation && { lang: translation.data.lang as Locale, href: urlOf(translation) };
+---
+
+<Base lang={lang} title={post.data.title} description={post.data.description} alternate={alternate} type="article">
+  <article class="wrap">
+    <header>
+      <p class="release">
+        <a href={post.data.repo}>{projectName(post.data.repo)}</a>
+        {post.data.version && <span>{post.data.version}</span>}
+      </p>
+      <h1>{post.data.title}</h1>
+      <p class="muted">
+        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, lang)}</time>
+      </p>
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+    <p class="back"><a href={`${import.meta.env.BASE_URL}${lang}/`}>{t.allLaunches}</a></p>
+  </article>
+</Base>
+
+<style>
+  header { padding-block: calc(var(--space) * 8) calc(var(--space) * 6); }
+  /* The release node: where the signal of this launch starts */
+  .release {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--space) * 2);
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+  .release::before {
+    content: '';
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--ignition);
+  }
+  .release a { color: var(--ink); }
+  .release span { font-family: var(--font-mono); font-size: var(--fs-small); color: var(--slate); }
+  h1 { font-size: clamp(var(--fs-h2), 8vw, var(--fs-h1)); font-weight: 800; font-stretch: 112%; margin: calc(var(--space) * 4) 0 calc(var(--space) * 3); }
+  .prose :global(h2) { font-size: var(--fs-h2); margin-block: 2em 0.5em; }
+  .prose :global(h3) { font-size: var(--fs-h3); margin-block: 1.6em 0.4em; }
+  .prose :global(li + li) { margin-block-start: 0.35em; }
+  .prose :global(blockquote) { margin-inline: 0; padding-inline-start: 1em; border-inline-start: 2px solid var(--rule); color: var(--slate); }
+  .back { margin-block-start: calc(var(--space) * 12); }
+</style>

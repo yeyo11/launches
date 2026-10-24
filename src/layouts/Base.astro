@@ -1,0 +1,81 @@
+---
+import '../styles/global.css';
+import { SITE, STRINGS, type Locale } from '../site';
+
+interface Props {
+  lang: Locale;
+  title: string;
+  description: string;
+  /** The same page in the other language, when it exists */
+  alternate?: { lang: Locale; href: string };
+  type?: 'website' | 'article';
+  /** The index carries the title as its h1, so the header does not repeat it */
+  home?: boolean;
+}
+
+const { lang, title, description, alternate, type = 'website', home = false } = Astro.props;
+const t = STRINGS[lang];
+const base = import.meta.env.BASE_URL;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} | ${t.title}`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {alternate && <link rel="alternate" hreflang={alternate.lang} href={new URL(alternate.href, Astro.site)} />}
+    <link rel="alternate" type="application/rss+xml" title={t.title} href={`${base}${lang}/rss.xml`} />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <meta property="og:type" content={type} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="author" content={SITE.author} />
+  </head>
+  <body>
+    <header class="site wrap">
+      {!home && <a class="home" href={`${base}${lang}/`}>{t.title}</a>}
+      {alternate && <a class="lang" href={alternate.href} hreflang={alternate.lang} lang={alternate.lang}>{t.readIn}</a>}
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="site wrap muted">
+      <span>{SITE.author}</span>
+      <a href={SITE.github}>GitHub</a>
+      <a href={SITE.devto}>dev.to</a>
+      <a href={`${base}${lang}/rss.xml`}>RSS</a>
+    </footer>
+  </body>
+</html>
+
+<style>
+  header.site,
+  footer.site {
+    display: flex;
+    gap: calc(var(--space) * 6);
+    align-items: baseline;
+    padding-block: calc(var(--space) * 6);
+  }
+  .home {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-stretch: 112%;
+    font-size: var(--fs-h3);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .lang { margin-inline-start: auto; font-size: var(--fs-small); }
+  footer.site {
+    margin-block-start: calc(var(--space) * 20);
+    border-block-start: 1px solid var(--shoal);
+    font-size: var(--fs-small);
+    flex-wrap: wrap;
+  }
+  footer.site span { margin-inline-end: auto; }
+</style>

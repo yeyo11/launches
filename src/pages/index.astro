@@ -1,0 +1,5 @@
+---
+// Every page lives under a language and a static site cannot negotiate one, so the root sends
+// readers to English, the default; each page links to its Spanish version.
+return Astro.redirect(`${import.meta.env.BASE_URL}en/`);
+---

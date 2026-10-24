@@ -1,0 +1,85 @@
+---
+import Base from '../../layouts/Base.astro';
+import { LOCALES, STRINGS, formatDate, type Locale } from '../../site';
+import { getPosts, projectName, urlOf } from '../../posts';
+
+export function getStaticPaths() {
+  return LOCALES.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Locale;
+const t = STRINGS[lang];
+const posts = await getPosts(lang);
+const other: Locale = lang === 'en' ? 'es' : 'en';
+---
+
+<Base home lang={lang} title={t.title} description={t.tagline} alternate={{ lang: other, href: `${import.meta.env.BASE_URL}${other}/` }}>
+  <section class="intro wrap">
+    <h1>{t.title}</h1>
+    <p class="tagline">{t.tagline}</p>
+  </section>
+
+  <section class="wrap">
+    {
+      posts.length === 0 ? (
+        <p class="empty muted">{t.empty}</p>
+      ) : (
+        <ol class="log">
+          {posts.map((post) => (
+            <li>
+              <time datetime={post.data.pubDate.toISOString()} class="muted">
+                {formatDate(post.data.pubDate, lang)}
+              </time>
+              <h2>
+                <a href={urlOf(post)}>{post.data.title}</a>
+              </h2>
+              <p>{post.data.description}</p>
+              <p class="release meta muted">
+                {projectName(post.data.repo)}
+                {post.data.version && ` ${post.data.version}`}
+              </p>
+            </li>
+          ))}
+        </ol>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .intro { padding-block: calc(var(--space) * 10) calc(var(--space) * 12); }
+  h1 {
+    font-size: clamp(var(--fs-h1), 11vw, var(--fs-display));
+    font-weight: 800;
+    font-stretch: 118%;
+    margin: 0;
+  }
+  .tagline { font-size: var(--fs-lead); color: var(--slate); margin: calc(var(--space) * 3) 0 0; }
+
+  /* The launches in order: a signal line with one node per release, newest on top */
+  .log {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 calc(var(--space) * 8);
+    border-inline-start: 2px solid var(--rule);
+  }
+  .log li { position: relative; padding-block-end: calc(var(--space) * 10); }
+  .log li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(var(--space) * -8 - 7px);
+    top: 0.35em;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--ignition);
+    background: var(--paper);
+  }
+  .log h2 { font-size: var(--fs-h2); margin: calc(var(--space) * 1) 0 calc(var(--space) * 2); }
+  .log h2 a { color: var(--ink); text-decoration: none; }
+  .log h2 a:hover { text-decoration: underline; }
+  .log p { margin: 0; }
+  .log time, .release { font-size: var(--fs-small); }
+  .release { margin-block-start: calc(var(--space) * 2) !important; }
+  .empty { font-size: var(--fs-lead); }
+</style>
