@@ -1,5 +1,7 @@
 # Launches
 
+[![Buy me a coffee](https://img.shields.io/badge/buy%20me%20a%20coffee-ffdd00?logo=buymeacoffee&logoColor=black)](https://buymeacoffee.com/yeyo11)
+
 The blog where [José Antonio Garrido](https://github.com/yeyo11)'s projects are announced the day they
 ship: **<https://yeyo11.github.io/launches/>**, in English and Spanish.
 
