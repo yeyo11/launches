@@ -37,7 +37,7 @@ const words = post.body?.split(/\s+/).length ?? 0;
 const minutes = Math.max(1, Math.round(words / 220));
 ---
 
-<Base lang={lang} title={post.data.title} description={post.data.description} alternate={alternate} type="article">
+<Base lang={lang} title={post.data.title} description={post.data.description} alternate={alternate} type="article" image={post.data.image}>
   <article>
     <header class="wrap hero">
       <Illo project={project} ratio="2 / 1" />

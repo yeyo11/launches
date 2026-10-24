@@ -18,6 +18,8 @@ const posts = defineCollection({
     repo: z.url(),
     version: z.string().optional(),
     tags: z.array(z.string()).default([]),
+    // The launch image Shipcast renders into public/launches/<project>/<ref>/, for og:image
+    image: z.string().startsWith('/').optional(),
     draft: z.boolean().default(false),
   }),
 });
