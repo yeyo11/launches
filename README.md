@@ -11,6 +11,7 @@ and later Hashnode, X, LinkedIn and the drafts for Show HN and Reddit.
 ## Layout
 
 ```
+brand.yml                             the brand: name, profiles, languages, tone (read by Shipcast and the site)
 src/content/posts/<en|es>/<slug>.md   one article per language, linked by translationKey
 launches/<project>/<version>/         the other channels' pieces of a launch (format set by Shipcast)
 ```

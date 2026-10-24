@@ -9,6 +9,8 @@ repo; this one holds the content and the site. Astro's own guidance for agents i
   write articles here by hand unless asked.
 - **Articles:** `src/content/posts/<en|es>/<slug>.md`, front matter validated by
   `src/content.config.ts`. The English and Spanish versions share a `translationKey`.
+- **`brand.yml`** describes the brand (name, profiles, languages, tone) for Shipcast and for the site,
+  which reads it in `src/site.ts`. Public information only, never tokens.
 - **Canonical URLs** are `https://yeyo11.github.io/launches/<lang>/<slug>/`, and dev.to and Hashnode
   copies point to them: never change `site`, `base` or a published slug without a redirect.
 - **Look:** Shipcast's day theme (`shipcast/docs/plans/design-system.md`): Saira for display,

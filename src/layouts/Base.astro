@@ -47,8 +47,7 @@ const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} |
     </main>
     <footer class="site wrap muted">
       <span>{SITE.author}</span>
-      <a href={SITE.github}>GitHub</a>
-      <a href={SITE.devto}>dev.to</a>
+      {SITE.profiles.map(([name, href]) => <a href={href} rel="me">{name}</a>)}
       <a href={`${base}${lang}/rss.xml`}>RSS</a>
     </footer>
   </body>

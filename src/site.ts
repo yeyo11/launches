@@ -1,8 +1,26 @@
-// Who the blog belongs to. Shipcast's brand config will own these values; until then they live here.
+import { parse } from 'yaml';
+import brandFile from '../brand.yml?raw';
+
+interface Brand {
+  displayName: string;
+  github: string;
+  handles: Partial<Record<'x' | 'linkedin' | 'bluesky' | 'mastodon' | 'devto', string>>;
+}
+
+// brand.yml is the one place the brand is described, for Shipcast and for this site alike.
+const brand = parse(brandFile) as Brand;
+
 export const SITE = {
-  author: 'José Antonio Garrido',
-  github: 'https://github.com/yeyo11',
-  devto: 'https://dev.to/yeyo11',
+  author: brand.displayName,
+  github: `https://github.com/${brand.github}`,
+  profiles: [
+    ['GitHub', `https://github.com/${brand.github}`],
+    ['dev.to', brand.handles.devto],
+    ['Mastodon', brand.handles.mastodon],
+    ['Bluesky', brand.handles.bluesky],
+    ['LinkedIn', brand.handles.linkedin],
+    ['X', brand.handles.x],
+  ].filter((p): p is [string, string] => Boolean(p[1])),
 };
 
 export const LOCALES = ['en', 'es'] as const;
