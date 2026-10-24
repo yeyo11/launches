@@ -1,6 +1,6 @@
 # Launches
 
-José Antonio Garrido's launch blog (Astro 7, static, GitHub Pages under `/launches`), written by
+José Antonio Garrido's launch blog (Astro 7, static, GitHub Pages on `josegarrido.dev`), written by
 [Shipcast](https://github.com/yeyo11/shipcast). The design, decisions and schemas live in Shipcast's
 repo; this one holds the content and the site. Astro's own guidance for agents is in
 [AGENTS.md](AGENTS.md).
@@ -11,8 +11,8 @@ repo; this one holds the content and the site. Astro's own guidance for agents i
   `src/content.config.ts`. The English and Spanish versions share a `translationKey`.
 - **`brand.yml`** describes the brand (name, profiles, languages, tone) for Shipcast and for the site,
   which reads it in `src/site.ts`. Public information only, never tokens.
-- **Canonical URLs** are `https://yeyo11.github.io/launches/<lang>/<slug>/`, and dev.to and Hashnode
-  copies point to them: never change `site`, `base` or a published slug without a redirect.
+- **Canonical URLs** are `https://josegarrido.dev/<lang>/<slug>/`, and the dev.to copies point to
+  them: never change `site` or a published slug without a redirect.
 - **Look:** Shipcast's design system (`shipcast/docs/plans/design-system.md`): night theme by default,
   day on a toggle remembered in `localStorage`; Saira for display, Atkinson Hyperlegible Next for
   text, tokens in `src/styles/global.css`, no gradients, contrast AA in both themes.

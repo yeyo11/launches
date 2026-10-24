@@ -1,7 +1,7 @@
 # Launches
 
 The blog where [José Antonio Garrido](https://github.com/yeyo11)'s projects are announced the day they
-ship: **<https://yeyo11.github.io/launches/>**, in English and Spanish.
+ship: **<https://josegarrido.dev>**, in English and Spanish.
 
 Every article here is written by [Shipcast](https://github.com/yeyo11/shipcast) from the project's
 code when a release is published, and arrives as a pull request. Merging it publishes the article on
@@ -22,7 +22,7 @@ The front matter of an article is checked at build time by `src/content.config.t
 
 ```bash
 pnpm install
-pnpm dev        # http://localhost:4321/launches/
+pnpm dev        # http://localhost:4321/
 pnpm check      # type-checks the Astro files
 pnpm build
 ```

@@ -1,7 +1,7 @@
 name: Deploy
 
 # Merging a launch's drafts pull request into main is what publishes its article: this builds the
-# site and puts it on GitHub Pages (https://yeyo11.github.io/launches/).
+# site and puts it on GitHub Pages, served at https://josegarrido.dev.
 on:
   push:
     branches: [main]
