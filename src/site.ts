@@ -4,7 +4,7 @@ import brandFile from '../brand.yml?raw';
 interface Brand {
   displayName: string;
   github: string;
-  handles: Partial<Record<'x' | 'linkedin' | 'bluesky' | 'mastodon' | 'devto' | 'reddit', string>>;
+  handles: Partial<Record<'x' | 'linkedin' | 'bluesky' | 'mastodon' | 'devto' | 'reddit' | 'instagram', string>>;
   support?: string;
 }
 
@@ -19,6 +19,7 @@ export const SITE = {
     ['dev.to', brand.handles.devto],
     ['Mastodon', brand.handles.mastodon],
     ['Bluesky', brand.handles.bluesky],
+    ['Instagram', brand.handles.instagram],
     ['Reddit', brand.handles.reddit],
     ['LinkedIn', brand.handles.linkedin],
     ['X', brand.handles.x],
