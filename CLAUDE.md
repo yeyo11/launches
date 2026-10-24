@@ -13,11 +13,8 @@ repo; this one holds the content and the site. Astro's own guidance for agents i
   which reads it in `src/site.ts`. Public information only, never tokens.
 - **Canonical URLs** are `https://josegarrido.dev/<lang>/<slug>/`, and the dev.to copies point to
   them: never change `site` or a published slug without a redirect.
-- **Look:** the author's personal identity, distinct from his tools' own brands: a blackboard. Green
-  slate board, chalk text, one yellow chalk accent; night by default, day (a paper page) on a toggle
-  remembered in `localStorage`. Recursive for headings (casual axis), interface (linear) and code
-  (mono), Literata for reading. Tokens in `src/styles/global.css`, the `jg` monogram in
-  `src/components/Mark.astro`, `public/favicon.svg` and `public/avatar.svg`. No gradients, contrast
-  AA in both themes, one motion moment (the underline under the name), none under reduced motion.
+- **Look:** the author's personal identity, distinct from the brands of the tools announced here.
+  The current blackboard design (green slate, chalk, yellow accent) was rejected by the owner on
+  2026-10-24 and is being replaced; dark by default, AA contrast in both themes.
 - **Checks:** `pnpm check` and `pnpm build` must pass; every push to `main` deploys.
 - Everything technical in English; the articles exist in both languages.
