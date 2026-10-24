@@ -5,6 +5,7 @@ interface Brand {
   displayName: string;
   github: string;
   handles: Partial<Record<'x' | 'linkedin' | 'bluesky' | 'mastodon' | 'devto', string>>;
+  support?: string;
 }
 
 // brand.yml is the one place the brand is described, for Shipcast and for this site alike.
@@ -21,6 +22,7 @@ export const SITE = {
     ['LinkedIn', brand.handles.linkedin],
     ['X', brand.handles.x],
   ].filter((p): p is [string, string] => Boolean(p[1])),
+  support: brand.support,
 };
 
 export const LOCALES = ['en', 'es'] as const;
@@ -35,6 +37,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     allLaunches: 'All launches',
     source: 'Source',
     release: 'Release',
+    support: 'Buy me a coffee',
   },
   es: {
     title: 'Lanzamientos',
@@ -44,6 +47,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     allLaunches: 'Todos los lanzamientos',
     source: 'Código',
     release: 'Release',
+    support: 'Invítame a un café',
   },
 };
 

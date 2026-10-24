@@ -12,6 +12,9 @@ handles:
   mastodon: https://mastodon.social/@yeyo11
   devto: https://dev.to/yeyo11
 
+# Where readers can support the author; linked from the blog's footer. Optional.
+support: https://buymeacoffee.com/yeyo11
+
 # The blog is written in both; dev.to, Hacker News, Reddit and Mastodon default to English. X and
 # LinkedIn are per brand: provisional until the owner confirms them.
 languages:
