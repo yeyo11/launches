@@ -6,6 +6,7 @@ interface Brand {
   github: string;
   handles: Partial<Record<'x' | 'linkedin' | 'bluesky' | 'mastodon' | 'devto' | 'reddit' | 'instagram', string>>;
   support?: string;
+  analytics?: { cloudflareWebAnalytics?: string };
 }
 
 // brand.yml is the one place the brand is described, for Shipcast and for this site alike.
@@ -26,6 +27,7 @@ export const SITE = {
     ['X', brand.handles.x],
   ].filter((p): p is [string, string] => Boolean(p[1])),
   support: brand.support,
+  analyticsToken: brand.analytics?.cloudflareWebAnalytics,
 };
 
 export const LOCALES = ['en', 'es'] as const;

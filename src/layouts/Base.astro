@@ -43,6 +43,17 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     <script is:inline>
       if (localStorage.getItem('theme') === 'day') document.documentElement.dataset.theme = 'day';
     </script>
+    {
+      // Only the published site counts visits: a dev server or a preview would pollute the numbers
+      import.meta.env.PROD && SITE.analyticsToken && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: SITE.analyticsToken })}
+        />
+      )
+    }
   </head>
   <body>
     <header class="site wrap ui">
