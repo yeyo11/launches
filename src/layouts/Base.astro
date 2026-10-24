@@ -174,13 +174,14 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
   .foot {
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: calc(var(--space) * 10);
     margin-block-start: calc(var(--space) * 24);
-    padding-block: calc(var(--space) * 14) calc(var(--space) * 16);
+    padding-block: calc(var(--space) * 14) calc(var(--space) * 6);
     border-block-start: 1px solid var(--rule);
   }
   .who p { margin: calc(var(--space) * 2) 0 0; }
   .mark { font-size: 2rem; text-decoration: none; }
   .elsewhere { display: flex; flex-direction: column; gap: calc(var(--space) * 5); }
-  .legal { flex-basis: 100%; margin: calc(var(--space) * 6) 0 0; padding-block-start: calc(var(--space) * 6); border-block-start: 1px solid var(--rule); font-size: var(--fs-meta); }
+  /* The page's last line: centred under everything, close to the bottom edge */
+  .legal { flex-basis: 100%; margin: calc(var(--space) * 4) 0 0; padding-block-start: calc(var(--space) * 6); border-block-start: 1px solid var(--rule); font-size: var(--fs-meta); text-align: center; }
   .links { margin: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 6); font-size: var(--fs-meta); }
   .links a { text-decoration: none; }
   .links a:hover { text-decoration: underline; }
