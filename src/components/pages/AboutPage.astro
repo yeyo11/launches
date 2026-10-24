@@ -151,5 +151,7 @@ const COPY = {
   .stack dd { margin: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 2); }
   .chip { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.35rem 0.85rem; border: 1.5px solid var(--line); border-radius: 999px; font-size: var(--fs-meta); color: var(--text); }
   .profiles { display: flex; flex-wrap: wrap; gap: calc(var(--space) * 2) calc(var(--space) * 6); list-style: none; padding: 0; }
+  /* The prose spaces stacked list items; in a row that would push every link but the first down */
+  .profiles li { margin: 0; }
   .signup { border-block-start: 1px solid var(--rule); margin-block-start: calc(var(--space) * 12); padding-block-start: calc(var(--space) * 12); }
 </style>
