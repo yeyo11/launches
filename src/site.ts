@@ -36,6 +36,16 @@ export const SITE = {
 export const LOCALES = ['en', 'es'] as const;
 export type Locale = (typeof LOCALES)[number];
 
+/** Each page's path in each language, in that language's words (Google advises it); never change a published one */
+const PAGES = {
+  privacy: { en: 'privacy', es: 'privacidad' },
+  subscribed: { en: 'subscribed', es: 'suscrito' },
+} as const;
+
+export function pagePath(page: keyof typeof PAGES, lang: Locale): string {
+  return `${import.meta.env.BASE_URL}${lang}/${PAGES[page][lang]}/`;
+}
+
 export const STRINGS: Record<Locale, Record<string, string>> = {
   en: {
     title: 'Launches',

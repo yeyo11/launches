@@ -1,6 +1,6 @@
 ---
 import '../styles/global.css';
-import { SITE, STRINGS, type Locale } from '../site';
+import { SITE, STRINGS, pagePath, type Locale } from '../site';
 
 interface Props {
   lang: Locale;
@@ -34,7 +34,16 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     <meta name="description" content={description} />
     {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
-    {alternate && <link rel="alternate" hreflang={alternate.lang} href={new URL(alternate.href, Astro.site)} />}
+    {
+      // Every language version lists itself, the other one, and English as the default for everyone else
+      alternate && (
+        <>
+          <link rel="alternate" hreflang={lang} href={canonical} />
+          <link rel="alternate" hreflang={alternate.lang} href={new URL(alternate.href, Astro.site)} />
+          <link rel="alternate" hreflang="x-default" href={lang === 'en' ? canonical : new URL(alternate.href, Astro.site)} />
+        </>
+      )
+    }
     <link rel="alternate" type="application/rss+xml" title={t.title} href={`${base}${lang}/rss.xml`} />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <link rel="icon" type="image/png" sizes="32x32" href={`${base}favicon-32.png`} />
@@ -103,7 +112,7 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
       <ul class="links">
         {SITE.profiles.map(([name, href]) => <li><a href={href} rel="me">{name}</a></li>)}
         <li><a href={`${base}${lang}/rss.xml`} class="muted">RSS</a></li>
-        <li><a href={`${base}${lang}/privacy/`} class="muted">{t.privacy}</a></li>
+        <li><a href={pagePath('privacy', lang)} class="muted">{t.privacy}</a></li>
       </ul>
     </footer>
   </body>

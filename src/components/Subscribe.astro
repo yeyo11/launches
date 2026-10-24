@@ -2,7 +2,7 @@
 // The newsletter form: ours in look, Brevo's in substance. It posts to the language's Brevo form,
 // which sends the double opt-in email; nobody is on the list until they confirm. Without JavaScript
 // it is a plain form post and Brevo answers; with it, the answer shows here without leaving the page.
-import { SITE, STRINGS, type Locale } from '../site';
+import { SITE, STRINGS, pagePath, type Locale } from '../site';
 import Headline from './Headline.astro';
 
 interface Props {
@@ -32,7 +32,7 @@ const id = `nl-${tone}`;
       <input type="hidden" name="locale" value={lang} />
       <p class="nl-status" role="status" aria-live="polite"></p>
       <p class="nl-legal">
-        {t.nlLegal} <a href={`${import.meta.env.BASE_URL}${lang}/privacy/#newsletter`}>{t.privacy}</a>
+        {t.nlLegal} <a href={`${pagePath('privacy', lang)}#newsletter`}>{t.privacy}</a>
       </p>
     </form>
   )

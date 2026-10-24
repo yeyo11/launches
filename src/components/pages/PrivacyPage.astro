@@ -1,16 +1,16 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { LOCALES, SITE, type Locale } from '../../site';
+import { SITE, pagePath, type Locale } from '../../site';
 
 // The privacy policy of Shipcast, the app that publishes this blog's launches on the author's own
 // accounts. Meta asks for its URL to create the Instagram app; other networks may ask for it too.
-export function getStaticPaths() {
-  return LOCALES.map((lang) => ({ params: { lang } }));
+// Rendered at /en/privacy/ and /es/privacidad/: each language's path in its own words
+interface Props {
+  lang: Locale;
 }
 
-const lang = Astro.params.lang as Locale;
+const { lang } = Astro.props;
 const other: Locale = lang === 'en' ? 'es' : 'en';
-const base = import.meta.env.BASE_URL;
 const CONTACT = 'yeyochico@gmail.com';
 const UPDATED = new Date('2026-10-24');
 const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dateStyle: 'long' }).format(UPDATED);
@@ -22,7 +22,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
   description={lang === 'en'
     ? 'What Shipcast, this blog and its newsletter collect, how it is used, and how to have it deleted.'
     : 'Qué recogen Shipcast, este blog y su newsletter, para qué se usa y cómo pedir que se borre.'}
-  alternate={{ lang: other, href: `${base}${other}/privacy/` }}
+  alternate={{ lang: other, href: pagePath('privacy', other) }}
 >
   <article class="prose policy">
     {

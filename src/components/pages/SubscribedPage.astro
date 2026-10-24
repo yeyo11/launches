@@ -3,18 +3,20 @@
 // double opt-in message. Only that link leads here, so it stays out of search results.
 import Base from '../../layouts/Base.astro';
 import Headline from '../../components/Headline.astro';
-import { LOCALES, STRINGS, type Locale } from '../../site';
+import { STRINGS, pagePath, type Locale } from '../../site';
 
-export function getStaticPaths() {
-  return LOCALES.map((lang) => ({ params: { lang } }));
+// Rendered at /en/subscribed/ and /es/suscrito/
+interface Props {
+  lang: Locale;
 }
 
-const lang = Astro.params.lang as Locale;
+const { lang } = Astro.props;
+const other: Locale = lang === 'en' ? 'es' : 'en';
 const t = STRINGS[lang];
 const base = import.meta.env.BASE_URL;
 ---
 
-<Base lang={lang} title={t.subscribedTitle} description={t.subscribedNote} noindex>
+<Base lang={lang} title={t.subscribedTitle} description={t.subscribedNote} alternate={{ lang: other, href: pagePath('subscribed', other) }} noindex>
   <section class="wrap done">
     <Headline as="h1" text={t.subscribedTitle} class="h-done" />
     <p>{t.subscribedNote}</p>

@@ -10,7 +10,9 @@ export default defineConfig({
   trailingSlash: 'always',
   // The root only redirects to /en/, and /subscribed/ is where the newsletter's confirmation lands:
   // neither belongs in search results
-  integrations: [sitemap({ filter: (page) => page !== 'https://josegarrido.dev/' && !page.endsWith('/subscribed/') })],
+  integrations: [sitemap({ filter: (page) => page !== 'https://josegarrido.dev/' && !/\/(subscribed|suscrito)\/$/.test(page) })],
+  // The Spanish privacy policy was published at /es/privacy/ before paths were translated
+  redirects: { '/es/privacy/': '/es/privacidad/' },
   markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false } },
   i18n: {
     locales: ['en', 'es'],
