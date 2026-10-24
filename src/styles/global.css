@@ -1,16 +1,18 @@
-/* Shipcast's day theme (shipcast/docs/plans/design-system.md): the blog is read in daylight. The
-   scale is the system's major third, rooted at 18 px here because this is a reading surface. */
+/* Shipcast's design system (shipcast/docs/plans/design-system.md). Night is the default, as on every
+   brand surface; day is one click away and remembered. The scale is the system's major third, rooted
+   at 18 px here because this is a reading surface. Contrast is AA in both themes. */
 @import '@fontsource-variable/saira/wdth.css';
 @import '@fontsource-variable/atkinson-hyperlegible-next';
 
 :root {
-  --paper: #f4f7fa;
-  --shoal: #e3ebf2;
-  --rule: #8a9bb0; /* 3:1 on paper: lines that carry meaning */
-  --ink: #02142c;
-  --slate: #4d6078;
-  --ignition: #b4501a;
-  --signal: #0b7380;
+  color-scheme: dark;
+  --paper: #02142c; /* abyss */
+  --shoal: #0a2142; /* deck */
+  --rule: #4a6c94; /* 3.4:1 on abyss: lines that carry meaning */
+  --ink: #f2ffff; /* ice */
+  --slate: #9db2c9; /* mist */
+  --ignition: #f88e55;
+  --signal: #49dbe9;
 
   --font-display: 'Saira Variable', system-ui, sans-serif;
   --font-text: 'Atkinson Hyperlegible Next Variable', system-ui, sans-serif;
@@ -26,6 +28,17 @@
 
   --measure: 37rem; /* about 66 characters of the text face; rem, so small type does not narrow it */
   --space: 0.25rem;
+}
+
+[data-theme='day'] {
+  color-scheme: light;
+  --paper: #f4f7fa;
+  --shoal: #e3ebf2;
+  --rule: #8a9bb0; /* 3:1 on paper */
+  --ink: #02142c;
+  --slate: #4d6078;
+  --ignition: #b4501a;
+  --signal: #0b7380;
 }
 
 * { box-sizing: border-box; }
@@ -58,6 +71,11 @@ a:hover { text-decoration-thickness: 2px; }
 
 code, pre { font-family: var(--font-mono); font-size: 0.875em; }
 :not(pre) > code { background: var(--shoal); padding: 0.1em 0.35em; border-radius: 3px; }
+/* Shiki writes both themes as variables (astro.config.mjs); the page's theme picks one */
+.astro-code { background-color: var(--shoal) !important; } /* deck, not github-dark's grey */
+.astro-code span { color: var(--shiki-dark); }
+[data-theme='day'] .astro-code { background-color: var(--shiki-light-bg) !important; }
+[data-theme='day'] .astro-code span { color: var(--shiki-light); }
 pre { padding: calc(var(--space) * 5); border-radius: 8px; overflow-x: auto; border: 1px solid var(--shoal); }
 
 img, video { max-width: 100%; height: auto; border-radius: 8px; }

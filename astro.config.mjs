@@ -9,7 +9,7 @@ export default defineConfig({
   base: '/launches',
   trailingSlash: 'always',
   integrations: [sitemap()],
-  markdown: { shikiConfig: { theme: 'github-light' } },
+  markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false } },
   i18n: {
     locales: ['en', 'es'],
     defaultLocale: 'en',

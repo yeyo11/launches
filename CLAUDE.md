@@ -13,7 +13,8 @@ repo; this one holds the content and the site. Astro's own guidance for agents i
   which reads it in `src/site.ts`. Public information only, never tokens.
 - **Canonical URLs** are `https://yeyo11.github.io/launches/<lang>/<slug>/`, and dev.to and Hashnode
   copies point to them: never change `site`, `base` or a published slug without a redirect.
-- **Look:** Shipcast's day theme (`shipcast/docs/plans/design-system.md`): Saira for display,
-  Atkinson Hyperlegible Next for text, tokens in `src/styles/global.css`, no gradients, contrast AA.
+- **Look:** Shipcast's design system (`shipcast/docs/plans/design-system.md`): night theme by default,
+  day on a toggle remembered in `localStorage`; Saira for display, Atkinson Hyperlegible Next for
+  text, tokens in `src/styles/global.css`, no gradients, contrast AA in both themes.
 - **Checks:** `pnpm check` and `pnpm build` must pass; every push to `main` deploys.
 - Everything technical in English; the articles exist in both languages.

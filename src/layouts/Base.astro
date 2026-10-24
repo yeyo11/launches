@@ -36,11 +36,19 @@ const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} |
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta name="author" content={SITE.author} />
+    <meta name="theme-color" content="#02142C" />
+    <!-- Before the first paint, so a reader who chose day never sees a flash of night -->
+    <script is:inline>
+      if (localStorage.getItem('theme') === 'day') document.documentElement.dataset.theme = 'day';
+    </script>
   </head>
   <body>
     <header class="site wrap">
       {!home && <a class="home" href={`${base}${lang}/`}>{t.title}</a>}
-      {alternate && <a class="lang" href={alternate.href} hreflang={alternate.lang} lang={alternate.lang}>{t.readIn}</a>}
+      <nav>
+        {alternate && <a href={alternate.href} hreflang={alternate.lang} lang={alternate.lang}>{t.readIn}</a>}
+        <button type="button" class="theme" data-to-day={t.toDay} data-to-night={t.toNight}>{t.toDay}</button>
+      </nav>
     </header>
     <main>
       <slot />
@@ -53,6 +61,26 @@ const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} |
     </footer>
   </body>
 </html>
+
+<script>
+  const button = document.querySelector<HTMLButtonElement>('button.theme');
+  const root = document.documentElement;
+  const label = () => {
+    if (!button) return;
+    button.textContent = (root.dataset.theme === 'day' ? button.dataset.toNight : button.dataset.toDay) ?? '';
+  };
+  label();
+  button?.addEventListener('click', () => {
+    if (root.dataset.theme === 'day') {
+      delete root.dataset.theme;
+      localStorage.removeItem('theme');
+    } else {
+      root.dataset.theme = 'day';
+      localStorage.setItem('theme', 'day');
+    }
+    label();
+  });
+</script>
 
 <style>
   header.site,
@@ -70,7 +98,25 @@ const pageTitle = title === t.title ? `${t.title}, ${SITE.author}` : `${title} |
     color: var(--ink);
     text-decoration: none;
   }
-  .lang { margin-inline-start: auto; font-size: var(--fs-small); }
+  nav {
+    margin-inline-start: auto;
+    display: flex;
+    gap: calc(var(--space) * 5);
+    align-items: baseline;
+    font-size: var(--fs-small);
+  }
+  .theme {
+    font: inherit;
+    color: var(--signal);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
+    text-decoration-thickness: 1px;
+  }
+  .theme:hover { text-decoration-thickness: 2px; }
   footer.site {
     margin-block-start: calc(var(--space) * 20);
     border-block-start: 1px solid var(--shoal);
