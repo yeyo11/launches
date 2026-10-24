@@ -1,7 +1,9 @@
 ---
 import Base from '../../layouts/Base.astro';
+import Headline from '../../components/Headline.astro';
+import Illo from '../../components/Illo.astro';
 import { LOCALES, SITE, STRINGS, formatDate, type Locale } from '../../site';
-import { getPosts, projectName, urlOf } from '../../posts';
+import { getPosts, projectName, urlOf, type Post } from '../../posts';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -11,106 +13,189 @@ const lang = Astro.params.lang as Locale;
 const t = STRINGS[lang];
 const posts = await getPosts(lang);
 const other: Locale = lang === 'en' ? 'es' : 'en';
+
+// The front page reads like a magazine: the newest launch leads, the next two flank it, the four
+// after that are listed on the right, and anything older goes to the grid below.
+const [lead, ...rest] = posts;
+const side = rest.slice(0, 2);
+const recent = rest.slice(2, 6);
+const older = rest.slice(6);
+
+// The workshop: one card per project that has launched here, newest first
+const projects = new Map<string, { repo: string; count: number; latest: Post }>();
+for (const post of posts) {
+  const name = projectName(post.data.repo);
+  const known = projects.get(name);
+  if (known) known.count += 1;
+  else projects.set(name, { repo: post.data.repo, count: 1, latest: post });
+}
+
+const meta = (post: Post) =>
+  [projectName(post.data.repo), post.data.version, formatDate(post.data.pubDate, lang)].filter(Boolean).join(' · ');
 ---
 
 <Base home lang={lang} title={t.title} description={t.tagline} alternate={{ lang: other, href: `${import.meta.env.BASE_URL}${other}/` }}>
-  <section class="intro wrap">
-    <h1>{SITE.author}</h1>
-    <!-- The chalk underline: the monogram's yellow stroke, drawn once under the name -->
-    <svg class="underline" viewBox="0 0 400 24" preserveAspectRatio="none" aria-hidden="true" focusable="false">
-      <path d="M6 15C70 9 150 7 230 9s128 5 164 2" pathLength="1" />
-    </svg>
-    <p class="lead">{t.intro}</p>
-    <p class="ui muted">{t.codeOn} <a href={SITE.github}>{SITE.handle}</a>.</p>
+  <div class="masthead">
+    <h1 class="serif"><span class="sw">J</span>osé <span class="sw">G</span>arrido</h1>
+    <p class="muted">{t.tagline}</p>
+  </div>
+
+  {
+    lead ? (
+      <section class:list={["wrap front", { solo: side.length === 0 && recent.length === 0 }]}>
+        {side.length > 0 && (
+          <div class="side">
+            {side.map((post) => (
+              <a class="story" href={urlOf(post)}>
+                <Illo project={projectName(post.data.repo)} seed={post.id} />
+                <span class="meta">{meta(post)}</span>
+                <Headline as="h2" text={post.data.title} class="h-side" />
+              </a>
+            ))}
+          </div>
+        )}
+        <a class="lead" href={urlOf(lead)}>
+          <Illo project={projectName(lead.data.repo)} />
+          <span class="meta">{meta(lead)}</span>
+          <Headline as="h2" text={lead.data.title} class="h-lead" />
+          <p class="dek serif">{lead.data.description}</p>
+        </a>
+        {recent.length > 0 && (
+          <div class="recent">
+            <h2 class="label">{t.recent}</h2>
+            <ol>
+              {recent.map((post) => (
+                <li>
+                  <a href={urlOf(post)}>
+                    <Illo project={projectName(post.data.repo)} seed={post.id} ratio="1 / 1" class="thumb" />
+                    <span>
+                      <Headline as="span" text={post.data.title} class="h-recent" />
+                      <span class="meta">{meta(post)}</span>
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </section>
+    ) : (
+      <section class="wrap empty">
+        <p class="serif">{t.empty}</p>
+      </section>
+    )
+  }
+
+  {
+    older.length > 0 && (
+      <section class="wrap block">
+        <Headline as="h2" text={t.more} class="h-section" />
+        <div class="grid">
+          {older.map((post) => (
+            <a class="story" href={urlOf(post)}>
+              <Illo project={projectName(post.data.repo)} seed={post.id} />
+              <span class="meta">{meta(post)}</span>
+              <Headline as="h3" text={post.data.title} class="h-side" />
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <section class="wrap block">
+    <div class="block-head">
+      <Headline as="h2" text={t.workshop} class="h-section" />
+      <p class="muted">{t.workshopNote}</p>
+    </div>
+    <div class="grid four">
+      {
+        [...projects].map(([name, project]) => (
+          <div class="project">
+            <a href={urlOf(project.latest)} tabindex="-1" aria-hidden="true"><Illo project={name} /></a>
+            <h3 class="serif"><span class="sw">{name.charAt(0)}</span>{name.slice(1)}</h3>
+            <p class="muted">{project.count} {project.count === 1 ? t.oneLaunch : t.launchCount}</p>
+            <p class="links"><a href={urlOf(project.latest)}>{project.latest.data.version ?? t.release}</a><a href={project.repo} class="muted">{t.source}</a></p>
+          </div>
+        ))
+      }
+      <div class="project next"><p>{t.nextProject}</p></div>
+    </div>
   </section>
 
-  <section class="wrap" aria-labelledby="launches">
-    <h2 id="launches">{t.title}</h2>
-    {
-      posts.length === 0 ? (
-        <p class="empty muted">{t.empty}</p>
-      ) : (
-        <ol class="log">
-          {posts.map((post) => (
-            <li>
-              <time datetime={post.data.pubDate.toISOString()} class="muted">
-                {formatDate(post.data.pubDate, lang)}
-              </time>
-              <div>
-                <h3>
-                  <a href={urlOf(post)}>{post.data.title}</a>
-                </h3>
-                <p>{post.data.description}</p>
-                <p class="release muted">
-                  {projectName(post.data.repo)}
-                  {post.data.version && ` ${post.data.version}`}
-                </p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      )
-    }
+  <section class="band">
+    <div class="wrap band-in">
+      <div>
+        <Headline as="h2" text={t.bandTitle} class="h-band" />
+        <p>{t.intro}</p>
+      </div>
+      <div class="band-actions">
+        <a href={SITE.github} class="pill solid">{t.follow}</a>
+        <a href={`${import.meta.env.BASE_URL}${lang}/rss.xml`} class="pill">{t.subscribe}</a>
+      </div>
+    </div>
   </section>
 </Base>
 
 <style>
-  .intro { padding-block: calc(var(--space) * 14) calc(var(--space) * 16); }
-  h1 {
-    font-size: clamp(var(--fs-h1) * 1.15, 12vw, var(--fs-display));
-    font-weight: 850;
-    line-height: 1;
-    letter-spacing: -0.01em;
-    margin: 0;
+  .masthead {
+    display: flex; flex-direction: column; align-items: center; gap: calc(var(--space) * 2.5);
+    padding: calc(var(--space) * 10) 1.25rem calc(var(--space) * 9);
+    border-block-end: 1px solid var(--rule); text-align: center;
   }
-  .underline {
-    display: block;
-    width: min(100%, 22rem);
-    height: 0.9rem;
-    margin-block: calc(var(--space) * 2) calc(var(--space) * 8);
-    overflow: visible;
-  }
-  .underline path {
-    fill: none;
-    stroke: var(--stroke);
-    stroke-width: 6;
-    stroke-linecap: round;
-    vector-effect: non-scaling-stroke;
-    stroke-dasharray: 1;
-    stroke-dashoffset: 0;
-  }
-  /* The page's one moment of motion: the stroke is drawn as the page opens */
-  @media (prefers-reduced-motion: no-preference) {
-    .underline path { animation: draw 700ms 150ms cubic-bezier(0.6, 0, 0.3, 1) backwards; }
-    @keyframes draw {
-      from { stroke-dashoffset: 1; }
-    }
-  }
-  .lead { font-size: var(--fs-lead); line-height: 1.55; margin: 0 0 calc(var(--space) * 4); }
-  .intro .ui { font-size: var(--fs-small); margin: 0; }
+  .masthead h1 { margin: 0; font-size: clamp(3rem, 9vw, var(--fs-mast)); line-height: 1; font-variation-settings: 'opsz' 144, 'SOFT' 30; }
+  .masthead p { margin: 0; }
 
-  h2 {
-    font-size: var(--fs-h2);
-    margin: 0 0 calc(var(--space) * 8);
-    padding-block-end: calc(var(--space) * 3);
+  a.story, a.lead, .recent a { text-decoration: none; color: inherit; }
+  a.story:hover :global(.headline), a.lead:hover :global(.headline), .recent a:hover :global(.headline) { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 0.15em; }
+
+  .front {
+    display: grid; grid-template-columns: 1fr; gap: calc(var(--space) * 10);
+    padding-block: calc(var(--space) * 10) calc(var(--space) * 14);
     border-block-end: 1px solid var(--rule);
   }
-  .log { list-style: none; margin: 0; padding: 0; }
-  .log li { display: grid; gap: calc(var(--space) * 1); padding-block-end: calc(var(--space) * 12); }
-  .log time { font-size: var(--fs-small); padding-block-start: 0.3em; }
-  .log h3 { font-size: var(--fs-h2); margin: 0 0 calc(var(--space) * 2); }
-  .log h3 a { color: var(--chalk); text-decoration: none; }
-  .log h3 a:hover { text-decoration: underline; text-decoration-color: var(--accent); }
-  .log p { margin: 0; }
-  .log .release { font-family: var(--font-mono); font-variation-settings: 'MONO' 1; font-size: var(--fs-small); margin-block-start: calc(var(--space) * 2); }
-  .empty { font-size: var(--fs-lead); margin: 0; }
+  .side, .lead, .story { display: flex; flex-direction: column; gap: calc(var(--space) * 3); }
+  .side { gap: calc(var(--space) * 8); }
+  .lead { text-align: center; align-items: center; order: -1; }
+  .lead :global(.illo) { margin-block-end: calc(var(--space) * 1.5); }
+  :global(.h-lead) { margin: 0; font-size: clamp(2rem, 4vw, 2.9rem); line-height: 1.08; font-variation-settings: 'opsz' 96, 'SOFT' 30; }
+  :global(.h-side) { margin: 0; font-size: var(--fs-h3); line-height: 1.18; }
+  .dek { margin: 0; max-width: 30rem; font-size: 1.2rem; line-height: 1.5; color: var(--body); }
+  .label { font-family: var(--font-sans); font-size: var(--fs-ui); font-weight: 600; margin: 0; padding-block-end: calc(var(--space) * 3.5); border-block-end: 1px solid var(--rule); }
+  .recent ol { list-style: none; margin: 0; padding: 0; }
+  .recent li a { display: grid; grid-template-columns: 4rem 1fr; gap: calc(var(--space) * 3.5); padding-block: calc(var(--space) * 4); border-block-end: 1px solid var(--rule); }
+  .recent li a > span { display: flex; flex-direction: column; gap: calc(var(--space) * 1.5); }
+  :global(.h-recent) { font-size: 1.06rem; line-height: 1.25; }
 
-  /* Wide screens: the dates hang in the left margin, so the titles keep the text column's edge */
-  @media (min-width: 62rem) {
-    .log li {
-      grid-template-columns: var(--gutter) 1fr;
-      gap: 0;
-      margin-inline-start: calc(var(--gutter) * -1);
-    }
+  @media (min-width: 64rem) {
+    .front { grid-template-columns: 17.5rem minmax(0, 1fr) 17.5rem; gap: 0; }
+    .front.solo { grid-template-columns: minmax(0, 46rem); justify-content: center; }
+    .side { padding-inline-end: calc(var(--space) * 7); grid-column: 1; }
+    .lead { order: 0; padding-inline: calc(var(--space) * 8); border-inline: 1px solid var(--rule); grid-column: 2; }
+    .front.solo .lead { border: 0; grid-column: 1; }
+    .recent { padding-inline-start: calc(var(--space) * 7); grid-column: 3; }
   }
+
+  .empty { padding-block: calc(var(--space) * 16); text-align: center; border-block-end: 1px solid var(--rule); }
+  .empty p { margin: 0 auto; max-width: 36rem; font-size: 1.6rem; line-height: 1.35; }
+
+  .block { padding-block: calc(var(--space) * 12) calc(var(--space) * 14); border-block-end: 1px solid var(--rule); display: flex; flex-direction: column; gap: calc(var(--space) * 7); }
+  .block-head p { margin: calc(var(--space) * 1) 0 0; }
+  :global(.h-section) { margin: 0; font-size: 2.1rem; }
+  .grid { display: grid; gap: calc(var(--space) * 8); grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
+  .project { display: flex; flex-direction: column; gap: calc(var(--space) * 2.5); }
+  .project h3 { margin: calc(var(--space) * 1) 0 0; font-size: 1.65rem; }
+  .project p { margin: 0; }
+  .project .links { display: flex; gap: calc(var(--space) * 4.5); font-size: var(--fs-meta); }
+  .project.next { aspect-ratio: 3 / 2; border: 1px dashed var(--line); display: grid; place-items: center; padding: calc(var(--space) * 6); text-align: center; color: var(--muted); font-size: var(--fs-meta); }
+
+  .band { background: var(--band); color: var(--on-band); margin-block-start: calc(var(--space) * 16); }
+  .band-in { display: grid; gap: calc(var(--space) * 10); padding-block: calc(var(--space) * 16); align-items: end; }
+  .band p { font-size: 1.125rem; line-height: 1.55; max-width: 39rem; margin: calc(var(--space) * 4.5) 0 0; }
+  :global(.h-band) { margin: 0; font-size: clamp(2.2rem, 4.5vw, 3.25rem); line-height: 1.04; }
+  .band-actions { display: flex; flex-direction: column; gap: calc(var(--space) * 3); }
+  .pill { min-height: 3.25rem; display: grid; place-items: center; padding-inline: 1.5rem; border-radius: 999px; border: 1.5px solid var(--on-band); color: var(--on-band); text-decoration: none; font-weight: 500; }
+  .pill.solid { background: var(--on-band); color: #000; font-weight: 600; }
+  .band :focus-visible { outline-color: var(--on-band); }
+  @media (min-width: 56rem) { .band-in { grid-template-columns: 1fr 22rem; gap: calc(var(--space) * 20); } }
 </style>

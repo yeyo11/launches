@@ -1,11 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <!-- The jg monogram on the board: chalk strokes, the g's tail as the yellow underline -->
-  <rect width="64" height="64" rx="12" fill="#17211D"/>
-  <g transform="translate(1 -3)" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="6">
-    <path d="M23 26v17c0 5-3 8-8 8" stroke="#ECEAE2"/>
-    <circle cx="38" cy="31" r="8" stroke="#ECEAE2"/>
-    <path d="M46 23v19" stroke="#ECEAE2"/>
-    <path d="M46 42c0 10-9 15-35 16" stroke="#F2D46B"/>
-  </g>
-  <circle cx="24" cy="12" r="3.6" fill="#ECEAE2"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#000"/><text x="32" y="46" text-anchor="middle" font-family="Fraunces, Georgia, 'Times New Roman', serif" font-size="40" fill="#F5F2EA"><tspan font-style="italic">j</tspan>g</text><rect x="12" y="52" width="40" height="4" fill="#2FD7A0"/></svg>

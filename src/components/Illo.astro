@@ -1,0 +1,167 @@
+---
+// The house illustration, drawn in CSS: a flat field of the project's colour, a halftone texture and
+// one bold object (the project's motif) with a hard offset shadow. It stands in until Shipcast
+// generates the real cover with the same rules, and keeps every launch illustrated meanwhile.
+import { lookOf, motifFor } from '../projects';
+
+interface Props {
+  project: string;
+  /** Picks the motif for one article; without it the project's own motif is drawn */
+  seed?: string;
+  /** Width over height */
+  ratio?: string;
+  class?: string;
+}
+
+const { project, seed, ratio = '3 / 2', class: className } = Astro.props;
+const look = lookOf(project);
+const colour = look.colour;
+const motif = seed ? motifFor(seed) : look.motif;
+const bars = [30, 55, 80, 45, 95, 70, 40, 88, 60, 100, 52, 76, 34, 64, 42];
+---
+
+<div class:list={['illo', `m-${motif}`, className]} style={`--c: ${colour}; aspect-ratio: ${ratio}`} aria-hidden="true">
+  <div class="dots"></div>
+  <div class="sun"></div>
+  {
+    motif === 'phone' && (
+      <>
+        <div class="screen">
+          <i class="b dots-s" style="width: 80%; background: var(--c)" />
+          <i class="b" style="width: 55%" />
+          <i class="b" style="width: 68%" />
+        </div>
+        <div class="phone">
+          <i class="b ink" style="height: 7%; width: 70%" />
+          <i class="b half" style="width: 90%" />
+          <i class="b half" style="width: 60%" />
+          <i class="key" />
+        </div>
+      </>
+    )
+  }
+  {
+    motif === 'terminal' && (
+      <div class="term">
+        <span class="lights"><i /><i /><i /></span>
+        <i class="b" style="width: 46%; background: var(--c)" />
+        <i class="b" style="width: 72%" />
+        <i class="b half-light" style="width: 58%" />
+        <i class="b" style="width: 6%; background: var(--c)" />
+      </div>
+    )
+  }
+  {
+    motif === 'label' && (
+      <>
+        <div class="tag" />
+        <div class="tag-ink">
+          <i class="b ink" style="height: 14%; width: 70%" />
+          <i class="b half" style="height: 10%; width: 92%" />
+          <span class="code">{[3, 1, 4, 2, 1, 3, 2, 4, 1, 3].map((w) => <i style={`width: ${w}px`} />)}</span>
+        </div>
+        <div class="eyelet" />
+      </>
+    )
+  }
+  {
+    motif === 'wave' && (
+      <div class="wave">{bars.map((h, i) => <i class:list={{ dark: i % 3 === 0 }} style={`height: ${h}%`} />)}</div>
+    )
+  }
+  {
+    motif === 'orb' && (
+      <div class="orb">
+        <i class="shade" />
+        <i class="eye" style="left: 22%" />
+        <i class="eye" style="left: 60%" />
+        <i class="smile" />
+      </div>
+    )
+  }
+  {
+    motif === 'stack' && (
+      <>
+        <div class="card back" />
+        <div class="card mid" />
+        <div class="card front">
+          <i class="b ink" style="height: 12%; width: 60%" />
+          <i class="b" style="height: 8%; width: 85%; background: var(--c); border: 2px solid #000" />
+          <i class="b ink" style="height: 8%; width: 70%" />
+        </div>
+      </>
+    )
+  }
+</div>
+
+<style>
+  .illo { --paper: #f7f5ef; position: relative; width: 100%; overflow: hidden; background: var(--c); container-type: inline-size; }
+  .illo i { display: block; }
+  .dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(circle, #000 1.15px, transparent 1.6px);
+    background-size: 7px 7px;
+    mask-image: radial-gradient(ellipse at 85% 95%, #000 0%, rgb(0 0 0 / 0.85) 25%, transparent 68%);
+  }
+  .sun {
+    position: absolute; left: -12%; top: -30%; width: 62%; aspect-ratio: 1; border-radius: 50%;
+    background-image: radial-gradient(circle, rgb(255 255 255 / 0.9) 1.3px, transparent 1.8px);
+    background-size: 7px 7px;
+    mask-image: radial-gradient(circle at 60% 60%, #000 0%, transparent 70%);
+  }
+  .b { height: 8%; background: var(--paper); border-radius: 1px; }
+  .ink { background: #000; }
+  .half { height: 5%; background: radial-gradient(circle, #000 1.1px, transparent 1.5px) 0 0 / 5px 5px; }
+  .half-light { background: radial-gradient(circle, var(--paper) 1.2px, transparent 1.6px) 0 0 / 6px 6px; }
+  .shadowed { box-shadow: 10px 10px 0 #000; }
+
+  .phone {
+    position: absolute; left: 50%; top: 50%; width: 27%; height: 74%;
+    transform: translate(-50%, -46%) rotate(-8deg);
+    background: var(--paper); border: 3px solid #000; border-radius: 7cqw; box-shadow: 2cqw 2cqw 0 #000;
+    padding: 14% 9% 0; display: flex; flex-direction: column; gap: 7%;
+  }
+  .phone .key { margin-block: auto 14%; height: 12%; border: 3px solid #000; border-radius: 2cqw; background: var(--c); }
+  .screen {
+    position: absolute; left: 14%; top: 26%; width: 30%; height: 38%;
+    background: #000; border-radius: 1.5cqw; padding: 3%; display: flex; flex-direction: column; justify-content: center; gap: 9%;
+  }
+
+  .term {
+    position: absolute; left: 50%; top: 50%; width: 62%; height: 58%;
+    transform: translate(-50%, -46%) rotate(-3deg);
+    background: #000; border: 3px solid var(--paper); border-radius: 2cqw; box-shadow: 2.4cqw 2.4cqw 0 var(--paper);
+    padding: 4% 5%; display: flex; flex-direction: column; gap: 9%;
+  }
+  .lights { display: flex; gap: 1.2cqw; }
+  .lights i { width: 1.8cqw; height: 1.8cqw; border-radius: 50%; background: var(--paper); }
+  .lights i:first-child { background: var(--c); }
+
+  .tag, .tag-ink {
+    position: absolute; left: 50%; top: 50%; width: 58%; height: 44%;
+    transform: translate(-50%, -50%) rotate(-10deg);
+  }
+  .tag { background: var(--paper); border: 3px solid #000; clip-path: polygon(0 0, 80% 0, 100% 50%, 80% 100%, 0 100%); filter: drop-shadow(2.4cqw 2.4cqw 0 #000); }
+  .tag-ink { padding: 6% 26% 6% 7%; display: flex; flex-direction: column; gap: 10%; }
+  .code { display: flex; gap: 3px; height: 30%; margin-block-start: auto; }
+  .code i { background: #000; }
+  .eyelet { position: absolute; left: 66%; top: 41%; width: 3.6cqw; height: 3.6cqw; border-radius: 50%; background: var(--c); border: 3px solid #000; }
+
+  .wave { position: absolute; inset: 22% 12%; display: flex; align-items: center; justify-content: space-between; }
+  .wave i { width: 4.2%; border: 3px solid #000; background: var(--paper); box-shadow: 1cqw 1cqw 0 #000; }
+  .wave i.dark { background: #000; }
+
+  .orb {
+    position: absolute; left: 50%; top: 52%; width: 46%; aspect-ratio: 1;
+    transform: translate(-50%, -50%); border-radius: 50%;
+    background: var(--paper); border: 3px solid #000; box-shadow: 2.4cqw 2.4cqw 0 #000; overflow: hidden;
+  }
+  .orb .shade { position: absolute; inset: 0; background: radial-gradient(circle, #000 1.4px, transparent 1.9px) 0 0 / 6px 6px; mask-image: linear-gradient(120deg, transparent 35%, #000 85%); }
+  .orb .eye { position: absolute; top: 30%; width: 14%; height: 14%; border-radius: 50%; background: #000; }
+  .orb .smile { position: absolute; left: 30%; top: 62%; width: 40%; height: 9%; border-radius: 0 0 40px 40px; background: var(--c); border: 3px solid #000; }
+
+  .card { position: absolute; width: 44%; height: 50%; border: 3px solid #000; }
+  .back { left: 30%; top: 22%; background: #000; border-color: var(--paper); transform: rotate(-12deg); }
+  .mid { left: 28%; top: 26%; transform: rotate(-3deg); box-shadow: 2cqw 2cqw 0 #000; background: var(--paper) radial-gradient(circle, #000 1.1px, transparent 1.5px) 0 0 / 6px 6px; }
+  .front { left: 26%; top: 30%; background: var(--paper); transform: rotate(6deg); padding: 5%; display: flex; flex-direction: column; gap: 8%; }
+</style>

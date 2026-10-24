@@ -50,6 +50,17 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     intro:
       'I build open-source tools for developers. Each one is announced here the day it ships, in English and Spanish: the problem it solves, the commands to try it, and what does not work yet.',
     codeOn: 'The code is on GitHub as',
+    recent: 'Recent launches',
+    more: 'More launches',
+    workshop: 'The workshop',
+    workshopNote: 'The tools I build and keep running. Each one has its own colour.',
+    nextProject: 'The next project lands here with its first release.',
+    launchCount: 'launches',
+    oneLaunch: 'launch',
+    bandTitle: 'I build the tools I need, then I ship them.',
+    follow: 'Follow on GitHub',
+    subscribe: 'Subscribe by RSS',
+    readMore: 'More from the workshop',
   },
   es: {
     title: 'Lanzamientos',
@@ -67,6 +78,17 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     intro:
       'Hago herramientas de código abierto para desarrolladores. Cada una se anuncia aquí el día que sale, en español y en inglés: el problema que resuelve, los comandos para probarla y lo que todavía no funciona.',
     codeOn: 'El código está en GitHub como',
+    recent: 'Últimos lanzamientos',
+    more: 'Más lanzamientos',
+    workshop: 'El taller',
+    workshopNote: 'Las herramientas que construyo y mantengo. Cada una tiene su color.',
+    nextProject: 'El próximo proyecto llegará aquí con su primera release.',
+    launchCount: 'lanzamientos',
+    oneLaunch: 'lanzamiento',
+    bandTitle: 'Construyo las herramientas que necesito y luego las lanzo.',
+    follow: 'Sígueme en GitHub',
+    subscribe: 'Suscríbete por RSS',
+    readMore: 'Más del taller',
   },
 };
 

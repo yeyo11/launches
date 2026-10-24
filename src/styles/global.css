@@ -1,115 +1,160 @@
-/* José Antonio Garrido's personal identity: a teaching blackboard. A green slate board, chalk-white
-   text, one yellow chalk accent; Recursive (casual for headings, linear for interface, mono for code)
-   over Literata for reading. Night is the default; day is a paper page with the same structure.
-   The scale is the classic typographic one (14 18 21 24 36 48 60 px), rooted at 18 px because this
-   is a reading surface. Every text pair is WCAG AA in both themes; `--rule` is 3:1 where a line
-   carries meaning. */
+/* José Antonio Garrido's personal identity: an editorial magazine of launches. Pure black, one
+   serif (Fraunces) whose headlines set the first letter of every word in its "wonky" italic, a quiet
+   sans (Instrument Sans) for the interface, and colour only where a project is: each project owns one
+   flat colour, used on its illustration and behind its headline, always with black text on it.
+   Night is the default; day is a white page with the same structure. Every text pair is WCAG AA in
+   both themes (scripts/contrast.mjs). */
 
-@import '@fontsource-variable/literata/opsz.css';
-@import '@fontsource-variable/literata/opsz-italic.css';
+@import '@fontsource-variable/instrument-sans/wght.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';
 
-/* Recursive ships each axis set as its own file under one family name; naming them apart lets the
-   page load only the sans (with its casual axis) and mono cuts instead of the 300 kB file with every axis. */
+/* Fraunces ships its axes in separate files; only the full one carries WONK and SOFT, which the
+   headline initials need, so it is declared here for latin alone instead of importing every subset. */
 @font-face {
-  font-family: 'Recursive Sans';
+  font-family: 'Fraunces';
   font-style: normal;
   font-display: swap;
-  font-weight: 300 1000;
-  src: url('@fontsource-variable/recursive/files/recursive-latin-casl-normal.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  src: url('@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2') format('woff2-variations');
 }
 @font-face {
-  font-family: 'Recursive Mono';
-  font-style: normal;
+  font-family: 'Fraunces';
+  font-style: italic;
   font-display: swap;
-  font-weight: 300 1000;
-  src: url('@fontsource-variable/recursive/files/recursive-latin-mono-normal.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  src: url('@fontsource-variable/fraunces/files/fraunces-latin-full-italic.woff2') format('woff2-variations');
 }
 
 :root {
   color-scheme: dark;
-  --board: #17211d; /* background: green slate */
-  --tray: #1f2c26; /* raised surfaces: code, inline code */
-  --rule: #5e7268; /* 3.2:1 on board: lines that carry meaning */
-  --chalk: #eceae2; /* text, 13.7:1 */
-  --dust: #a7b2ab; /* secondary text, 7.6:1 */
-  --accent: #f2d46b; /* yellow chalk: links, focus, the underline, 11.3:1 */
-  --highlight: #f2d46b; /* fills behind board-coloured text (selection), both themes */
-  --stroke: #f2d46b; /* the chalk underline and the mark's tail: decoration, never text */
+  --ground: #000000; /* the page */
+  --raised: #121211; /* code blocks */
+  --rule: #33322e; /* hairlines between columns and rows, decorative */
+  --line: #6d6a62; /* lines that carry meaning: control borders, 3.6:1 */
+  --text: #f5f2ea; /* 18.9:1 */
+  --muted: #b8b4aa; /* secondary text, 10.0:1 */
+  --body: #e6e2d8; /* running text, slightly softer than headlines */
+  --on-colour: #000000; /* text on a project colour */
+  --band: #3b4bf0; /* the author's own band on the home page */
+  --on-band: #ffffff; /* 5.6:1 on the band */
 
-  --font-sans: 'Recursive Sans', ui-rounded, system-ui, sans-serif;
-  --font-text: 'Literata Variable', Georgia, serif;
-  --font-mono: 'Recursive Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Instrument Sans Variable', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --fs-small: 0.7778rem; /* 14 */
-  --fs-body: 1rem; /* 18 */
-  --fs-lead: 1.1667rem; /* 21 */
-  --fs-h3: 1.1667rem; /* 21 */
-  --fs-h2: 1.3333rem; /* 24 */
-  --fs-h1: 2rem; /* 36 */
-  --fs-title: 2.6667rem; /* 48 */
-  --fs-display: 3.3333rem; /* 60 */
+  --fs-meta: 0.875rem; /* 14 */
+  --fs-ui: 1rem; /* 16 */
+  --fs-body: 1.25rem; /* 20, reading */
+  --fs-h3: 1.5rem; /* 24 */
+  --fs-h2: 2rem; /* 32 */
+  --fs-h1: 3rem; /* 48 */
+  --fs-lead-title: 3.5rem; /* 56 */
+  --fs-mast: 4.75rem; /* 76 */
 
-  --measure: 34rem; /* about 66 characters of Literata */
-  --gutter: 9rem; /* the date column of the launch list on wide screens */
+  --measure: 42.5rem; /* 680 px of Fraunces at 20 px, about 70 characters */
+  --page: 75rem; /* 1200 px */
   --space: 0.25rem;
 }
 
 [data-theme='day'] {
   color-scheme: light;
-  --board: #f1f4f0;
-  --tray: #e2e8e2;
-  --rule: #7c8b82;
-  --chalk: #17211d;
-  --dust: #4c5a53;
-  --accent: #7a5c00; /* the yellow chalk, darkened to ochre to read on paper */
-  --stroke: #e9b824; /* a highlighter on paper: decoration, so it is exempt from text contrast */
+  --ground: #ffffff;
+  --raised: #f2f1ed;
+  --rule: #dddad2;
+  --line: #85827a; /* 3.8:1 */
+  --text: #0d0d0c;
+  --muted: #5c5a54; /* 6.9:1 */
+  --body: #22211f;
 }
 
 * { box-sizing: border-box; }
 
 html {
-  font-size: 112.5%;
-  background: var(--board);
-  color: var(--chalk);
+  background: var(--ground);
+  color: var(--text);
   -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  font-family: var(--font-text);
-  font-size: var(--fs-body);
-  line-height: 1.65;
-  font-optical-sizing: auto;
-}
-
-h1, h2, h3 {
   font-family: var(--font-sans);
-  font-variation-settings: 'CASL' 1;
-  font-weight: 750;
-  line-height: 1.1;
-  text-wrap: balance;
+  font-size: var(--fs-ui);
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
 }
 
-a { color: var(--accent); text-underline-offset: 0.2em; text-decoration-thickness: 1px; }
+.wrap {
+  width: min(100% - 2.5rem, var(--page));
+  margin-inline: auto;
+}
+
+.serif {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-variation-settings: 'SOFT' 30;
+}
+
+/* The house device: the first letter of each headline word in Fraunces' wonky italic */
+.sw {
+  font-style: italic;
+  font-variation-settings: 'WONK' 1, 'SOFT' 100;
+}
+
+h1, h2, h3 { font-family: var(--font-serif); font-weight: 400; font-variation-settings: 'SOFT' 30; line-height: 1.1; text-wrap: balance; }
+
+a { color: inherit; text-underline-offset: 0.22em; text-decoration-thickness: 1px; }
 a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
-::selection { background: var(--highlight); color: #17211d; }
 
-code, pre { font-family: var(--font-mono); font-size: 0.85em; font-variation-settings: 'MONO' 1; }
-:not(pre) > code { background: var(--tray); padding: 0.1em 0.35em; border-radius: 4px; }
-/* Shiki writes both themes as variables (astro.config.mjs); the page's theme picks one */
-.astro-code { background-color: var(--tray) !important; }
-.astro-code span { color: var(--shiki-dark); }
-[data-theme='day'] .astro-code span { color: var(--shiki-light); }
-pre { padding: calc(var(--space) * 5); border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 3px; }
 
-img, video { max-width: 100%; height: auto; border-radius: 8px; }
+::selection { background: var(--text); color: var(--ground); }
 
-.wrap { width: min(100% - 2.5rem, var(--measure)); margin-inline: auto; }
-.muted { color: var(--dust); }
-/* Interface text (dates, navigation, meta) is Recursive's linear cut: it reads as the board's
-   frame, not as the lesson */
-.ui, time { font-family: var(--font-sans); font-variation-settings: 'CASL' 0; }
-.visually-hidden {
-  position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+.muted { color: var(--muted); }
+.meta { font-family: var(--font-sans); font-size: var(--fs-meta); color: var(--muted); }
+
+/* Running text: the article body and the privacy policy */
+.prose {
+  font-family: var(--font-serif);
+  font-variation-settings: 'SOFT' 30, 'opsz' 14;
+  font-size: var(--fs-body);
+  line-height: 1.68;
+  color: var(--body);
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+.prose h2 { font-size: var(--fs-h2); margin-block: 2.2em 0.55em; color: var(--text); }
+.prose h3 { font-size: var(--fs-h3); margin-block: 1.8em 0.4em; color: var(--text); }
+.prose p, .prose ul, .prose ol { margin-block: 0 1.25em; }
+.prose li + li { margin-block-start: 0.4em; }
+.prose a { color: var(--text); }
+.prose blockquote { margin-inline: 0; padding-inline-start: 1em; border-inline-start: 2px solid var(--line); color: var(--muted); }
+.prose hr { border: 0; border-block-start: 1px solid var(--rule); margin-block: 2.5em; }
+.prose img { max-width: 100%; height: auto; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.82em;
+  background: var(--raised);
+  padding: 0.12em 0.35em;
+  border-radius: 3px;
+}
+
+pre {
+  font-size: 0.8rem;
+  line-height: 1.7;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-block: 1.6em;
+}
+pre code { background: none; padding: 0; font-size: inherit; }
+
+/* Shiki writes both themes as variables; the page picks the one that matches */
+.astro-code, .astro-code span { color: var(--shiki-dark); background-color: var(--raised) !important; }
+.astro-code span { background-color: transparent !important; }
+[data-theme='day'] .astro-code, [data-theme='day'] .astro-code span { color: var(--shiki-light); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }

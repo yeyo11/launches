@@ -13,8 +13,10 @@ repo; this one holds the content and the site. Astro's own guidance for agents i
   which reads it in `src/site.ts`. Public information only, never tokens.
 - **Canonical URLs** are `https://josegarrido.dev/<lang>/<slug>/`, and the dev.to copies point to
   them: never change `site` or a published slug without a redirect.
-- **Look:** the author's personal identity, distinct from the brands of the tools announced here.
-  The current blackboard design (green slate, chalk, yellow accent) was rejected by the owner on
-  2026-10-24 and is being replaced; dark by default, AA contrast in both themes.
+- **Look:** the author's personal identity, distinct from the brands of the tools announced here:
+  an editorial magazine on pure black, Fraunces headlines with each word's initial in its wonky
+  italic (`Headline.astro`), Instrument Sans for the interface, and one flat colour per project
+  (`src/projects.ts`) on its house illustration (`Illo.astro`) and behind its headline. Dark by
+  default, AA contrast in both themes (`node scripts/contrast.mjs`).
 - **Checks:** `pnpm check` and `pnpm build` must pass; every push to `main` deploys.
 - Everything technical in English; the articles exist in both languages.

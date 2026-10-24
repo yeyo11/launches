@@ -24,12 +24,12 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
     : 'Qué recogen Shipcast y este blog, para qué se usa y cómo pedir que se borre.'}
   alternate={{ lang: other, href: `${base}${other}/privacy/` }}
 >
-  <article class="wrap">
+  <article class="prose policy">
     {
       lang === 'en' ? (
         <>
           <h1>Privacy policy</h1>
-          <p class="ui muted">Last updated on <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
+          <p class="meta">Last updated on <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
 
           <p>
             This policy covers <a href="https://github.com/yeyo11/shipcast">Shipcast</a>, an open-source tool that
@@ -92,7 +92,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
       ) : (
         <>
           <h1>Política de privacidad</h1>
-          <p class="ui muted">Actualizada el <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
+          <p class="meta">Actualizada el <time datetime={UPDATED.toISOString()}>{updated}</time>.</p>
 
           <p>
             Esta política cubre <a href="https://github.com/yeyo11/shipcast">Shipcast</a>, una herramienta de código
@@ -158,7 +158,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
 </Base>
 
 <style>
-  article { padding-block: calc(var(--space) * 12) 0; }
-  h1 { font-size: clamp(var(--fs-h1), 8vw, var(--fs-title)); font-weight: 850; line-height: 1.05; margin: 0 0 calc(var(--space) * 3); }
-  h2 { font-size: var(--fs-h3); margin-block: 2em 0.5em; }
+  .policy { width: min(100% - 2.5rem, var(--measure)); padding-block: calc(var(--space) * 14) 0; }
+  h1 { font-size: clamp(2.4rem, 7vw, var(--fs-h1)); line-height: 1.05; margin: 0 0 calc(var(--space) * 3); }
+  h2 { font-size: 1.6rem; }
 </style>

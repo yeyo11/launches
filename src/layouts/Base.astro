@@ -1,6 +1,5 @@
 ---
 import '../styles/global.css';
-import Mark from '../components/Mark.astro';
 import { SITE, STRINGS, type Locale } from '../site';
 
 interface Props {
@@ -10,7 +9,7 @@ interface Props {
   /** The same page in the other language, when it exists */
   alternate?: { lang: Locale; href: string };
   type?: 'website' | 'article';
-  /** The index carries the author's name as its h1, so the header shows only the mark */
+  /** The index carries the author's name as its masthead, so the header leaves it out */
   home?: boolean;
 }
 
@@ -38,7 +37,7 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta name="author" content={SITE.author} />
-    <meta name="theme-color" content="#17211D" />
+    <meta name="theme-color" content="#000000" />
     <!-- Before the first paint, so a reader who chose day never sees a flash of night -->
     <script is:inline>
       if (localStorage.getItem('theme') === 'day') document.documentElement.dataset.theme = 'day';
@@ -56,28 +55,35 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     }
   </head>
   <body>
-    <header class="site wrap ui">
-      <a class="home" href={`${base}${lang}/`} aria-label={home ? t.home : undefined}>
-        <Mark size={34} />
-        {!home && <span>{SITE.author}</span>}
-      </a>
-      <nav>
-        {alternate && <a href={alternate.href} hreflang={alternate.lang} lang={alternate.lang}>{t.readIn}</a>}
-        <button type="button" class="theme" data-to-day={t.toDay} data-to-night={t.toNight}>{t.toDay}</button>
+    <header class="bar">
+      <nav class="left" aria-label={t.home}>
+        {home ? <a href={`${base}${lang}/`} aria-current="page">{t.title}</a> : <a class="wordmark serif" href={`${base}${lang}/`}><span class="sw">J</span>osé <span class="sw">G</span>arrido</a>}
+        <a href={SITE.github} class="hide-s">GitHub</a>
+      </nav>
+      <nav class="right">
+        {alternate && <a href={alternate.href} hreflang={alternate.lang} lang={alternate.lang} class="muted">{t.readIn}</a>}
+        <a href={`${base}${lang}/rss.xml`} class="muted hide-s">RSS</a>
+        <button type="button" class="theme" data-to-day={t.toDay} data-to-night={t.toNight} aria-label={t.toDay}>
+          <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
+          <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg>
+        </button>
       </nav>
     </header>
     <main>
       <slot />
     </main>
-    <footer class="site wrap ui muted">
-      <p class="who">{SITE.author}</p>
-      <p>{SITE.profiles.map(([name, href]) => <a href={href} rel="me">{name}</a>)}</p>
-      <p>
-        <a href={`${base}${lang}/rss.xml`}>RSS</a>
-        <a href={`${base}${lang}/privacy/`}>{t.privacy}</a>
-      </p>
-      {/* Its own line: a request to the reader, not one more profile */}
-      {SITE.support && <p><a href={SITE.support}>{t.support}</a></p>}
+    <footer class="wrap foot">
+      <div class="who">
+        <a class="serif mark" href={`${base}${lang}/`}><span class="sw">J</span>osé <span class="sw">G</span>arrido</a>
+        <p class="muted">{SITE.author}</p>
+        {/* Its own line: a request to the reader, not one more profile */}
+        {SITE.support && <p><a href={SITE.support}>{t.support}</a></p>}
+      </div>
+      <ul class="links">
+        {SITE.profiles.map(([name, href]) => <li><a href={href} rel="me">{name}</a></li>)}
+        <li><a href={`${base}${lang}/rss.xml`} class="muted">RSS</a></li>
+        <li><a href={`${base}${lang}/privacy/`} class="muted">{t.privacy}</a></li>
+      </ul>
     </footer>
   </body>
 </html>
@@ -87,7 +93,7 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
   const root = document.documentElement;
   const label = () => {
     if (!button) return;
-    button.textContent = (root.dataset.theme === 'day' ? button.dataset.toNight : button.dataset.toDay) ?? '';
+    button.setAttribute('aria-label', (root.dataset.theme === 'day' ? button.dataset.toNight : button.dataset.toDay) ?? '');
   };
   label();
   button?.addEventListener('click', () => {
@@ -103,69 +109,45 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
 </script>
 
 <style>
-  header.site,
-  footer.site {
+  .bar {
     display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: calc(var(--space) * 6);
-    align-items: center;
-    padding-block: calc(var(--space) * 6);
+    min-height: 4rem;
+    padding-inline: clamp(1.25rem, 3vw, 2.5rem);
+    border-block-end: 1px solid var(--rule);
   }
-  .home {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--space) * 3);
-    color: var(--chalk);
-    text-decoration: none;
-    font-weight: 650;
-    font-size: var(--fs-small);
-  }
-  .home:hover span { text-decoration: underline; text-decoration-color: var(--accent); }
-  .home :global(.mark) { flex: none; }
-  /* On a phone the mark alone leads home; the name stays for screen readers */
-  @media (max-width: 30rem) {
-    .home span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  }
-  nav {
-    margin-inline-start: auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    column-gap: calc(var(--space) * 5);
-    row-gap: calc(var(--space) * 1);
-    align-items: baseline;
-    font-size: var(--fs-small);
-  }
-  /* The frame's links are quiet: chalk with a rule-coloured underline, so yellow stays for links
-     inside the text, focus and the mark */
-  nav a,
-  footer.site a,
+  .bar nav { display: flex; align-items: center; gap: calc(var(--space) * 7); font-size: var(--fs-ui); }
+  .bar a { text-decoration: none; }
+  .bar a:hover { text-decoration: underline; }
+  .wordmark { font-size: 1.6rem; line-height: 1; }
+  .bar a { white-space: nowrap; }
+  @media (max-width: 40rem) { .wordmark { font-size: 1.3rem; } .bar nav { gap: calc(var(--space) * 4); } }
   .theme {
-    color: inherit;
-    text-decoration-color: var(--rule);
+    width: 44px; height: 44px; flex: none;
+    display: grid; place-items: center;
+    border: 1px solid var(--line); border-radius: 22px;
+    background: transparent; color: var(--text); cursor: pointer;
   }
-  nav a:hover,
-  footer.site a:hover,
-  .theme:hover { text-decoration-color: var(--accent); }
-  nav { color: var(--chalk); }
-  .theme {
-    font: inherit;
-    background: none;
-    border: 0;
-    padding: 0;
-    cursor: pointer;
-    text-underline-offset: 0.2em;
-    text-decoration-line: underline;
-    text-decoration-thickness: 1px;
-  }
-  footer.site {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: calc(var(--space) * 3);
+  .theme .moon { display: none; }
+  :global([data-theme='day']) .theme .sun { display: none; }
+  :global([data-theme='day']) .theme .moon { display: block; }
+  @media (max-width: 40rem) { .hide-s { display: none; } }
+
+  .foot {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: calc(var(--space) * 10);
     margin-block-start: calc(var(--space) * 24);
-    padding-block: calc(var(--space) * 8);
-    border-block-start: 1px solid var(--tray);
-    font-size: var(--fs-small);
+    padding-block: calc(var(--space) * 14) calc(var(--space) * 16);
+    border-block-start: 1px solid var(--rule);
   }
-  footer.site p { display: flex; flex-wrap: wrap; column-gap: calc(var(--space) * 5); row-gap: calc(var(--space) * 1); margin: 0; }
-  .who { color: var(--chalk); font-weight: 650; }
+  .who p { margin: calc(var(--space) * 2) 0 0; }
+  .mark { font-size: 2rem; text-decoration: none; }
+  .links {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; grid-template-columns: repeat(2, minmax(8rem, auto)); column-gap: calc(var(--space) * 12); row-gap: calc(var(--space) * 2.5);
+    align-content: start;
+  }
+  .links a { text-decoration: none; }
+  .links a:hover { text-decoration: underline; }
 </style>

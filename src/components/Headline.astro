@@ -1,0 +1,29 @@
+---
+// A headline in the house style: every word's first letter in Fraunces' wonky italic. The text stays
+// one string for screen readers and search; only the rendering is split.
+interface Props {
+  text: string;
+  as?: 'h1' | 'h2' | 'h3' | 'span';
+  class?: string;
+}
+
+const { text, as: Tag = 'h2', class: className } = Astro.props;
+const words = text.split(/\s+/).filter(Boolean);
+---
+
+<Tag class:list={['headline', className]} aria-label={text}>
+  {
+    words.map((word) => (
+      <span class="word" aria-hidden="true">
+        <span class="sw">{word.charAt(0)}</span>
+        {word.slice(1)}
+      </span>
+    ))
+  }
+</Tag>
+
+<style>
+  .headline { font-family: var(--font-serif); font-weight: 400; font-variation-settings: 'SOFT' 30; }
+  .word { display: inline-block; margin-inline-end: 0.22em; }
+  .word:last-child { margin-inline-end: 0; }
+</style>

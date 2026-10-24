@@ -1,72 +1,124 @@
 ---
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { STRINGS, formatDate, type Locale } from '../../site';
+import Headline from '../../components/Headline.astro';
+import Illo from '../../components/Illo.astro';
+import { SITE, STRINGS, formatDate, type Locale } from '../../site';
 import { getPosts, projectName, slugOf, translationOf, urlOf, type Post } from '../../posts';
+import { lookOf } from '../../projects';
 
 export async function getStaticPaths() {
   const all = await getPosts();
   return all.map((post) => ({
     params: { lang: post.data.lang, slug: slugOf(post) },
-    props: { post, translation: translationOf(post, all) },
+    props: {
+      post,
+      translation: translationOf(post, all),
+      // Three more launches in the same language, for the end of the article
+      more: all.filter((p) => p.data.lang === post.data.lang && p.id !== post.id).slice(0, 3),
+    },
   }));
 }
 
 interface Props {
   post: Post;
   translation?: Post;
+  more: Post[];
 }
 
-const { post, translation } = Astro.props;
+const { post, translation, more } = Astro.props;
 const lang = post.data.lang as Locale;
 const t = STRINGS[lang];
 const { Content } = await render(post);
 const alternate = translation && { lang: translation.data.lang as Locale, href: urlOf(translation) };
+const project = projectName(post.data.repo);
+const { colour } = lookOf(project);
+const words = post.body?.split(/\s+/).length ?? 0;
+const minutes = Math.max(1, Math.round(words / 220));
 ---
 
 <Base lang={lang} title={post.data.title} description={post.data.description} alternate={alternate} type="article">
-  <article class="wrap">
-    <header>
-      <p class="release ui">
-        <a href={post.data.repo}>{projectName(post.data.repo)}</a>
-        {post.data.version && <span>{post.data.version}</span>}
-      </p>
-      <h1>{post.data.title}</h1>
-      <p class="date muted">
-        <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, lang)}</time>
-      </p>
+  <article>
+    <header class="wrap hero">
+      <Illo project={project} ratio="2 / 1" />
+      <div class="slab" style={`--c: ${colour}`}>
+        <p class="release">
+          <a href={post.data.repo}>{project}</a>
+          {post.data.version && <span>{post.data.version}</span>}
+        </p>
+        <Headline as="h1" text={post.data.title} class="h-article" />
+        <p class="dek serif">{post.data.description}</p>
+      </div>
     </header>
-    <div class="prose">
+
+    <div class="byline">
+      <span class="avatar serif" aria-hidden="true"><span class="sw">j</span>g</span>
+      <span>
+        <span class="name">{SITE.author}</span>
+        <span class="meta"><time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, lang)}</time> · {minutes} min</span>
+      </span>
+      <span class="byline-links meta">
+        <a href={post.data.repo}>{t.source}</a>
+      </span>
+    </div>
+
+    <div class="prose body">
       <Content />
     </div>
-    <p class="back ui"><a href={`${import.meta.env.BASE_URL}${lang}/`}>{t.allLaunches}</a></p>
   </article>
+
+  {
+    more.length > 0 && (
+      <section class="wrap more">
+        <Headline as="h2" text={t.readMore} class="h-more" />
+        <div class="more-grid">
+          {more.map((p) => (
+            <a href={urlOf(p)}>
+              <Illo project={projectName(p.data.repo)} seed={p.id} />
+              <span class="meta">{[projectName(p.data.repo), p.data.version].filter(Boolean).join(' · ')}</span>
+              <Headline as="h3" text={p.data.title} class="h-card" />
+            </a>
+          ))}
+        </div>
+      </section>
+    )
+  }
 </Base>
 
 <style>
-  header { padding-block: calc(var(--space) * 12) calc(var(--space) * 8); }
-  .release {
-    display: flex;
-    align-items: baseline;
-    gap: calc(var(--space) * 2);
-    margin: 0;
-    font-weight: 650;
+  .hero { position: relative; margin-block-start: calc(var(--space) * 10); }
+  .slab {
+    background: var(--c); color: var(--on-colour);
+    padding: calc(var(--space) * 7) calc(var(--space) * 8);
+    display: flex; flex-direction: column; gap: calc(var(--space) * 3.5);
   }
-  .release a { color: var(--chalk); }
-  .release span { font-family: var(--font-mono); font-variation-settings: 'MONO' 1; font-size: var(--fs-small); color: var(--dust); }
-  h1 {
-    font-size: clamp(var(--fs-h1), 8vw, var(--fs-title));
-    font-weight: 850;
-    line-height: 1.05;
-    margin: calc(var(--space) * 4) 0 calc(var(--space) * 4);
+  @media (min-width: 56rem) {
+    .hero { padding-block-end: 9rem; }
+    .slab { position: absolute; left: 0; bottom: 0; width: min(44rem, 62%); }
   }
-  .date { font-size: var(--fs-small); margin: 0; }
-  .prose :global(h2) { font-size: var(--fs-h2); margin-block: 2.2em 0.6em; }
-  .prose :global(h3) { font-size: var(--fs-h3); margin-block: 1.8em 0.4em; }
-  .prose :global(p), .prose :global(ul), .prose :global(ol) { margin-block: 0 1.1em; }
-  .prose :global(li + li) { margin-block-start: 0.35em; }
-  .prose :global(pre) { margin-block: 1.4em; }
-  .prose :global(blockquote) { margin-inline: 0; padding-inline-start: 1em; border-inline-start: 3px solid var(--accent); color: var(--dust); }
-  .prose :global(hr) { border: 0; border-block-start: 1px solid var(--rule); margin-block: 2.5em; }
-  .back { margin-block-start: calc(var(--space) * 14); font-size: var(--fs-small); }
+  .release { margin: 0; display: flex; gap: calc(var(--space) * 2); font-size: var(--fs-meta); font-weight: 600; }
+  .release a { color: inherit; }
+  .release span { font-family: var(--font-mono); font-weight: 500; }
+  :global(.h-article) { margin: 0; font-size: clamp(2.2rem, 5vw, 3.4rem); line-height: 1.04; font-variation-settings: 'opsz' 120, 'SOFT' 30; }
+  .dek { margin: 0; font-size: 1.25rem; line-height: 1.45; }
+  .slab :focus-visible { outline-color: #000; }
+
+  .byline {
+    max-width: var(--measure); margin: calc(var(--space) * 9) auto 0;
+    width: min(100% - 2.5rem, var(--measure));
+    display: flex; align-items: center; gap: calc(var(--space) * 3);
+    padding-block-end: calc(var(--space) * 6); border-block-end: 1px solid var(--rule);
+  }
+  .byline > span:nth-child(2) { display: flex; flex-direction: column; }
+  .name { font-weight: 600; font-size: 0.95rem; }
+  .avatar { width: 2.75rem; height: 2.75rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--text); color: var(--ground); font-size: 1.15rem; flex: none; }
+  .byline-links { margin-inline-start: auto; }
+  .body { width: min(100% - 2.5rem, var(--measure)); margin-block-start: calc(var(--space) * 10); }
+
+  .more { margin-block-start: calc(var(--space) * 18); padding-block-start: calc(var(--space) * 10); border-block-start: 1px solid var(--rule); }
+  :global(.h-more) { margin: 0 0 calc(var(--space) * 6); font-size: 1.9rem; }
+  .more-grid { display: grid; gap: calc(var(--space) * 8); grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
+  .more-grid a { display: flex; flex-direction: column; gap: calc(var(--space) * 3); text-decoration: none; color: inherit; }
+  .more-grid a:hover :global(.headline) { text-decoration: underline; text-decoration-thickness: 1px; }
+  :global(.h-card) { margin: 0; font-size: var(--fs-h3); line-height: 1.2; }
 </style>
