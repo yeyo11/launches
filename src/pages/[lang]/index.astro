@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Headline from '../../components/Headline.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import Illo from '../../components/Illo.astro';
-import { LOCALES, SITE, STRINGS, formatDate, type Locale } from '../../site';
+import { LOCALES, SITE, STRINGS, formatDate, pagePath, type Locale } from '../../site';
 import { getPosts, projectName, urlOf, type Post } from '../../posts';
 
 export function getStaticPaths() {
@@ -130,6 +130,7 @@ const meta = (post: Post) =>
         <img class="author" src={`${import.meta.env.BASE_URL}author.jpg`} alt={SITE.author} width="112" height="112" />
         <Headline as="h2" text={t.bandTitle} class="h-band" />
         <p>{t.intro}</p>
+        <p><a href={pagePath('about', lang)} class="about-link">{t.aboutLink} →</a></p>
       </div>
       <div class="band-actions">
         <Subscribe lang={lang} tone="band" />
@@ -201,6 +202,7 @@ const meta = (post: Post) =>
   .pill { min-height: 3.25rem; display: grid; place-items: center; padding-inline: 1.5rem; border-radius: 999px; border: 1.5px solid var(--on-band); color: var(--on-band); text-decoration: none; font-weight: 500; }
   /* The house's hard shadow, as on the illustrations: a sticker, not a soft avatar */
   .author { display: block; width: 7rem; height: 7rem; border-radius: 50%; object-fit: cover; border: 3px solid #000; box-shadow: 6px 6px 0 #000; margin-block-end: calc(var(--space) * 6); }
+  .about-link { color: var(--on-band); font-weight: 600; }
   .pill.solid { background: var(--on-band); color: #000; font-weight: 600; }
   .band :focus-visible { outline-color: var(--on-band); }
   @media (min-width: 56rem) { .band-in { grid-template-columns: 1fr minmax(22rem, 28rem); gap: calc(var(--space) * 20); } }

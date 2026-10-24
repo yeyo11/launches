@@ -1,0 +1,150 @@
+---
+// Who the author is, at /en/about/ and /es/sobre-mi/. Built from the owner's own profile: their words,
+// their stack, their quote (kept in English in both languages, as they wrote it).
+import Base from '../../layouts/Base.astro';
+import Headline from '../Headline.astro';
+import Subscribe from '../Subscribe.astro';
+import { SITE, pagePath, type Locale } from '../../site';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const other: Locale = lang === 'en' ? 'es' : 'en';
+const base = import.meta.env.BASE_URL;
+const EMAIL = 'me@josegarrido.dev';
+
+const STACK = [
+  { en: 'Frontend', es: 'Frontend', items: ['React', 'TanStack Start', 'TanStack Query', 'Tailwind', 'Material UI', 'Semantic UI', 'shadcn/ui'] },
+  { en: 'Backend', es: 'Backend', items: ['Node.js', 'NestJS', 'Fastify', 'Express', 'PostgreSQL', 'MongoDB', 'Redis', 'MQTT', 'BullMQ'] },
+  { en: 'DevOps and tools', es: 'DevOps y herramientas', items: ['Docker', 'Docker Swarm', 'Kubernetes', 'GitLab CI', 'Webpack', 'SWC', 'Jest', 'Playwright'] },
+  { en: 'AI', es: 'IA', items: ['Agents', 'RAG', 'MCP', 'AI API design'] },
+  { en: 'How I like to work', es: 'Cómo me gusta trabajar', items: ['Clean Code', 'SOLID', 'Domain-Driven Design', 'TDD', 'Agile', 'PWA'] },
+];
+
+const COPY = {
+  en: {
+    title: 'About me',
+    description: 'José Antonio Garrido, a full-stack web developer from Spain who builds open-source tools for developers.',
+    hello: "Hi, I'm José.",
+    lead: "I'm José Antonio Garrido, a full-stack web developer from Spain. I like building software that is clean, fast and pleasant to use, and I'm always after the next thing to learn.",
+    hereTitle: "What you'll find here",
+    here: [
+      "This is where I tell you about the open-source tools I build. Every launch comes with an article in English and Spanish: the problem it solves, how it works, the commands to try it and, just as important, what doesn't work yet. If something is half-done, I'll say so.",
+      'Right now that means <a href="https://github.com/yeyo11/claudio">claudio</a>, Claude Code as a service, and <a href="https://github.com/yeyo11/shipcast">Shipcast</a>, the tool that writes and publishes these very launches.',
+    ],
+    meTitle: 'A bit about me',
+    me: [
+      "After years working across the stack, I've built web applications from the ground up: APIs, PWA frontends, microservices, real-time data pipelines and AI-integrated systems. I care about clean architecture, modular code and open conversations about software quality.",
+      "I'm happiest where people value continuous improvement and working together. Whether it's debugging a stubborn containerised service or making a UI fast and intuitive, I enjoy every step of the process.",
+    ],
+    stackTitle: 'What I work with',
+    factsTitle: 'A few things about me',
+    facts: [
+      'I live happily in TypeScript-land.',
+      'I enjoy making backend services talk to each other: reliably, observably, efficiently.',
+      "Sometimes I build things that shouldn't work, just to see if they do.",
+      'My best friend might be the Linux terminal.',
+    ],
+    contactTitle: 'Say hi',
+    contact: `The quickest way to reach me is email: <a href="mailto:${EMAIL}">${EMAIL}</a>. I read everything, and I usually answer. You'll also find me here:`,
+  },
+  es: {
+    title: 'Sobre mí',
+    description: 'José Antonio Garrido, desarrollador web full-stack en España que construye herramientas open source para desarrolladores.',
+    hello: 'Hola, soy José.',
+    lead: 'Soy José Antonio Garrido, desarrollador web full-stack en España. Me gusta construir software limpio, rápido y agradable de usar, y siempre ando detrás de lo siguiente que aprender.',
+    hereTitle: 'Qué vas a encontrar aquí',
+    here: [
+      'Aquí te cuento las herramientas open source que construyo. Cada lanzamiento llega con un artículo en español y en inglés: el problema que resuelve, cómo funciona, los comandos para probarla y, igual de importante, lo que todavía no funciona. Si algo está a medias, te lo digo.',
+      'Ahora mismo eso es <a href="https://github.com/yeyo11/claudio">claudio</a>, Claude Code como servicio, y <a href="https://github.com/yeyo11/shipcast">Shipcast</a>, la herramienta que escribe y publica estos mismos lanzamientos.',
+    ],
+    meTitle: 'Un poco sobre mí',
+    me: [
+      'Después de años trabajando en todo el stack, he construido aplicaciones web desde cero: APIs, frontends PWA, microservicios, pipelines de datos en tiempo real y sistemas con IA integrada. Me importan la arquitectura limpia, el código modular y hablar abiertamente de la calidad del software.',
+      'Donde mejor estoy es donde se valora mejorar continuamente y trabajar en equipo. Tanto si toca depurar un servicio en contenedores que se resiste como hacer que una interfaz sea rápida e intuitiva, disfruto de cada paso.',
+    ],
+    stackTitle: 'Con qué trabajo',
+    factsTitle: 'Algunas cosas sobre mí',
+    facts: [
+      'Vivo feliz en TypeScript-landia.',
+      'Disfruto haciendo que los servicios de backend hablen entre sí: de forma fiable, observable y eficiente.',
+      'A veces construyo cosas que no deberían funcionar, solo para ver si funcionan.',
+      'Puede que mi mejor amigo sea el terminal de Linux.',
+    ],
+    contactTitle: 'Escríbeme',
+    contact: `Lo más rápido para hablar conmigo es el correo: <a href="mailto:${EMAIL}">${EMAIL}</a>. Lo leo todo y suelo contestar. También me encontrarás aquí:`,
+  },
+}[lang];
+---
+
+<Base lang={lang} title={COPY.title} description={COPY.description} alternate={{ lang: other, href: pagePath('about', other) }}>
+  <section class="wrap about">
+    <header class="intro">
+      <img class="photo" src={`${base}author.jpg`} alt={SITE.author} width="220" height="220" />
+      <div>
+        <Headline as="h1" text={COPY.hello} class="h-about" />
+        <p class="lead serif">{COPY.lead}</p>
+      </div>
+    </header>
+
+    <div class="prose body">
+      <h2>{COPY.hereTitle}</h2>
+      {COPY.here.map((p) => <p set:html={p} />)}
+
+      <h2>{COPY.meTitle}</h2>
+      {COPY.me.map((p) => <p>{p}</p>)}
+    </div>
+
+    <section class="stack" aria-labelledby="stack">
+      <h2 id="stack">{COPY.stackTitle}</h2>
+      <dl>
+        {STACK.map((group) => (
+          <div>
+            <dt class="meta">{group[lang]}</dt>
+            <dd>{group.items.map((item) => <span class="chip">{item}</span>)}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+
+    <div class="prose body">
+      <h2>{COPY.factsTitle}</h2>
+      <ul>{COPY.facts.map((f) => <li>{f}</li>)}</ul>
+
+      <blockquote lang="en">
+        <p>Build software like you mean it. Break things to understand them. Repeat.</p>
+      </blockquote>
+
+      <h2>{COPY.contactTitle}</h2>
+      <p set:html={COPY.contact} />
+      <ul class="profiles">
+        {SITE.profiles.map(([name, url]) => <li><a href={url} rel="me">{name}</a></li>)}
+      </ul>
+    </div>
+
+    <div class="signup">
+      <Subscribe lang={lang} />
+    </div>
+  </section>
+</Base>
+
+<style>
+  .about { padding-block: calc(var(--space) * 14) calc(var(--space) * 20); }
+  /* One reading column for the whole page, as an article: the photo, the prose, the stack and the form */
+  .about > * { max-width: var(--measure); margin-inline: auto; }
+  .intro { display: grid; gap: calc(var(--space) * 8); align-items: center; margin-block-end: calc(var(--space) * 12); }
+  @media (min-width: 48rem) { .intro { grid-template-columns: auto 1fr; gap: calc(var(--space) * 12); } }
+  .photo { width: 10rem; height: 10rem; border-radius: 50%; object-fit: cover; border: 3px solid var(--text); box-shadow: 8px 8px 0 var(--text); }
+  :global(.h-about) { margin: 0; font-size: var(--fs-mast); line-height: 1; }
+  .lead { margin: calc(var(--space) * 5) 0 0; font-size: 1.4rem; line-height: 1.5; color: var(--body); max-width: 40rem; }
+  .stack { margin-block: calc(var(--space) * 10); }
+  .stack h2 { font-family: var(--font-serif); font-weight: 400; font-size: var(--fs-h2); margin: 0 0 calc(var(--space) * 6); }
+  .stack dl { margin: 0; display: grid; gap: calc(var(--space) * 5); }
+  .stack dt { margin-block-end: calc(var(--space) * 2); }
+  .stack dd { margin: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 2); }
+  .chip { display: inline-block; padding: 0.3rem 0.8rem; border: 1.5px solid var(--line); border-radius: 999px; font-size: var(--fs-meta); color: var(--text); }
+  .profiles { display: flex; flex-wrap: wrap; gap: calc(var(--space) * 2) calc(var(--space) * 6); list-style: none; padding: 0; }
+  .signup { border-block-start: 1px solid var(--rule); margin-block-start: calc(var(--space) * 12); padding-block-start: calc(var(--space) * 12); }
+</style>

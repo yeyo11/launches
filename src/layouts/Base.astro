@@ -88,6 +88,7 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     <header class="bar">
       <nav class="left" aria-label={t.home}>
         {home ? <a href={`${base}${lang}/`} aria-current="page">{t.title}</a> : <a class="wordmark serif" href={`${base}${lang}/`}><span class="sw">J</span>osé <span class="sw">G</span>arrido</a>}
+        <a href={pagePath('about', lang)}>{t.about}</a>
         <a href={SITE.github} class="hide-s">GitHub</a>
       </nav>
       <nav class="right">
