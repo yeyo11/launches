@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import Profiles from '../components/Profiles.astro';
 import { SITE, STRINGS, pagePath, type Locale } from '../site';
 
 interface Props {
@@ -110,11 +111,16 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
         {/* Its own line: a request to the reader, not one more profile */}
         {SITE.support && <p><a href={SITE.support}>{t.support}</a></p>}
       </div>
-      <ul class="links">
-        {SITE.profiles.map(([name, href]) => <li><a href={href} rel="me">{name}</a></li>)}
-        <li><a href={`${base}${lang}/rss.xml`} class="muted">RSS</a></li>
-        <li><a href={pagePath('privacy', lang)} class="muted">{t.privacy}</a></li>
-      </ul>
+      <div class="elsewhere">
+        <Profiles />
+        <p class="links">
+          <a href={`${base}${lang}/rss.xml`} class="muted">RSS</a>
+          <a href={pagePath('about', lang)} class="muted">{t.about}</a>
+          <a href={pagePath('privacy', lang)} class="muted">{t.privacy}</a>
+        </p>
+      </div>
+      {/* The year of the build: the site is rebuilt on every launch, so it stays current */}
+      <p class="legal muted">© {new Date().getFullYear()} {SITE.author}</p>
     </footer>
   </body>
 </html>
@@ -174,11 +180,9 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
   }
   .who p { margin: calc(var(--space) * 2) 0 0; }
   .mark { font-size: 2rem; text-decoration: none; }
-  .links {
-    list-style: none; margin: 0; padding: 0;
-    display: grid; grid-template-columns: repeat(2, minmax(8rem, auto)); column-gap: calc(var(--space) * 12); row-gap: calc(var(--space) * 2.5);
-    align-content: start;
-  }
+  .elsewhere { display: flex; flex-direction: column; gap: calc(var(--space) * 5); }
+  .legal { flex-basis: 100%; margin: calc(var(--space) * 6) 0 0; padding-block-start: calc(var(--space) * 6); border-block-start: 1px solid var(--rule); font-size: var(--fs-meta); }
+  .links { margin: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 6); font-size: var(--fs-meta); }
   .links a { text-decoration: none; }
   .links a:hover { text-decoration: underline; }
 </style>

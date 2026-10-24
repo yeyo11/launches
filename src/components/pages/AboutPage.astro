@@ -3,6 +3,7 @@
 // their stack, their quote (kept in English in both languages, as they wrote it).
 import Base from '../../layouts/Base.astro';
 import Headline from '../Headline.astro';
+import Profiles from '../Profiles.astro';
 import Subscribe from '../Subscribe.astro';
 import * as simpleIcons from 'simple-icons';
 import { SITE, pagePath, type Locale } from '../../site';
@@ -25,7 +26,6 @@ const STACK: Array<{ en: string; es: string; items: Array<[string, string?]> }> 
 ];
 const icons = Object.values(simpleIcons) as Array<{ slug: string; path: string }>;
 const pathOf = (slug?: string) => (slug ? icons.find((i) => i.slug === slug)?.path : undefined);
-const NETWORK_ICON: Record<string, string> = { GitHub: 'github', 'dev.to': 'devdotto', Mastodon: 'mastodon', Bluesky: 'bluesky', Instagram: 'instagram', Reddit: 'reddit' };
 
 const COPY = {
   en: {
@@ -125,18 +125,7 @@ const COPY = {
 
       <h2>{COPY.contactTitle}</h2>
       <p set:html={COPY.contact} />
-      <ul class="profiles">
-        {SITE.profiles.map(([name, url]) => {
-          const d = pathOf(NETWORK_ICON[name]);
-          return (
-            <li>
-              <a href={url} rel="me" aria-label={name} title={name}>
-                {d ? <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d={d} fill="currentColor" /></svg> : name}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
+      <Profiles />
     </div>
 
     <div class="signup">
@@ -160,13 +149,6 @@ const COPY = {
   .stack dt { margin-block-end: calc(var(--space) * 2); }
   .stack dd { margin: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 2); }
   .chip { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.35rem 0.85rem; border: 1.5px solid var(--line); border-radius: 999px; font-size: var(--fs-meta); color: var(--text); }
-  .profiles { display: flex; flex-wrap: wrap; gap: calc(var(--space) * 3); list-style: none; padding: 0; }
-  .profiles a {
-    display: grid; place-items: center; width: 3rem; height: 3rem; border-radius: 50%;
-    border: 1.5px solid var(--line); color: var(--text); text-decoration: none;
-  }
-  .profiles a:hover { border-color: var(--text); }
-  /* The prose spaces stacked list items; in a row that would push every link but the first down */
-  .profiles li { margin: 0; }
+  :global(.profiles) { margin-block: 0 1.25em; }
   .signup { border-block-start: 1px solid var(--rule); margin-block-start: calc(var(--space) * 12); padding-block-start: calc(var(--space) * 12); }
 </style>

@@ -1,0 +1,48 @@
+---
+// The author's profiles as their logos (Simple Icons, CC0), in the text colour. `rel="me"` lets
+// Mastodon and others verify the site; the name stays for screen readers and as a tooltip.
+import * as simpleIcons from 'simple-icons';
+import { SITE } from '../site';
+
+interface Props {
+  class?: string;
+}
+
+const SLUG: Record<string, string> = {
+  GitHub: 'github',
+  'dev.to': 'devdotto',
+  Mastodon: 'mastodon',
+  Bluesky: 'bluesky',
+  Instagram: 'instagram',
+  Reddit: 'reddit',
+  LinkedIn: 'linkedin',
+  X: 'x',
+};
+const icons = Object.values(simpleIcons) as Array<{ slug: string; path: string }>;
+const pathOf = (name: string) => icons.find((i) => i.slug === SLUG[name])?.path;
+---
+
+<ul class:list={['profiles', Astro.props.class]}>
+  {
+    SITE.profiles.map(([name, url]) => {
+      const d = pathOf(name);
+      return (
+        <li>
+          <a href={url} rel="me" aria-label={name} title={name}>
+            {d ? <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d={d} fill="currentColor" /></svg> : name}
+          </a>
+        </li>
+      );
+    })
+  }
+</ul>
+
+<style>
+  .profiles { display: flex; flex-wrap: wrap; gap: calc(var(--space) * 3); list-style: none; margin: 0; padding: 0; }
+  .profiles li { margin: 0; }
+  .profiles a {
+    display: grid; place-items: center; width: 2.75rem; height: 2.75rem; border-radius: 50%;
+    border: 1.5px solid var(--line); color: var(--text); text-decoration: none;
+  }
+  .profiles a:hover { border-color: var(--text); }
+</style>
