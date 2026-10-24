@@ -40,7 +40,7 @@ const minutes = Math.max(1, Math.round(words / 220));
 <Base lang={lang} title={post.data.title} description={post.data.description} alternate={alternate} type="article" image={post.data.image}>
   <article>
     <header class="wrap hero">
-      <Illo project={project} ratio="2 / 1" />
+      <Illo project={project} ratio="2 / 1" cover={post.data.cover} />
       <div class="slab" style={`--c: ${colour}`}>
         <p class="release">
           <a href={post.data.repo}>{project}</a>
@@ -74,7 +74,7 @@ const minutes = Math.max(1, Math.round(words / 220));
         <div class="more-grid">
           {more.map((p) => (
             <a href={urlOf(p)}>
-              <Illo project={projectName(p.data.repo)} seed={p.id} />
+              <Illo project={projectName(p.data.repo)} seed={p.id} cover={p.data.cover} />
               <span class="meta">{[projectName(p.data.repo), p.data.version].filter(Boolean).join(' · ')}</span>
               <Headline as="h3" text={p.data.title} class="h-card" />
             </a>

@@ -10,16 +10,32 @@ interface Props {
   seed?: string;
   /** Width over height */
   ratio?: string;
+  /** The article's own cover, a site path; else the project's, else the CSS drawing */
+  cover?: string;
   class?: string;
 }
 
-const { project, seed, ratio = '3 / 2', class: className } = Astro.props;
+const { project, seed, ratio = '3 / 2', cover: own, class: className } = Astro.props;
 const look = lookOf(project);
+const cover = own ?? look.cover;
 const colour = look.colour;
 const motif = seed ? motifFor(seed) : look.motif;
 const bars = [30, 55, 80, 45, 95, 70, 40, 88, 60, 100, 52, 76, 34, 64, 42];
 ---
 
+{
+  cover && (
+    <img
+      class:list={['illo', 'cover', className]}
+      src={`${import.meta.env.BASE_URL}${cover.replace(/^\//, '')}`}
+      alt=""
+      loading="lazy"
+      decoding="async"
+      style={`--c: ${colour}; aspect-ratio: ${ratio}`}
+    />
+  )
+}
+{!cover && (
 <div class:list={['illo', `m-${motif}`, className]} style={`--c: ${colour}; aspect-ratio: ${ratio}`} aria-hidden="true">
   <div class="dots"></div>
   <div class="sun"></div>
@@ -93,8 +109,11 @@ const bars = [30, 55, 80, 45, 95, 70, 40, 88, 60, 100, 52, 76, 34, 64, 42];
     )
   }
 </div>
+)}
 
 <style>
+  /* A cover keeps its subject, which the drawings place right of centre, in every frame */
+  .cover { display: block; width: 100%; height: auto; object-fit: cover; object-position: 72% 50%; background: var(--c); }
   .illo { --paper: #f7f5ef; position: relative; width: 100%; overflow: hidden; background: var(--c); container-type: inline-size; }
   .illo i { display: block; }
   .dots {

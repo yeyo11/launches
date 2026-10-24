@@ -47,7 +47,7 @@ const meta = (post: Post) =>
           <div class="side">
             {side.map((post) => (
               <a class="story" href={urlOf(post)}>
-                <Illo project={projectName(post.data.repo)} seed={post.id} />
+                <Illo project={projectName(post.data.repo)} seed={post.id} cover={post.data.cover} />
                 <span class="meta">{meta(post)}</span>
                 <Headline as="h2" text={post.data.title} class="h-side" />
               </a>
@@ -55,7 +55,7 @@ const meta = (post: Post) =>
           </div>
         )}
         <a class="lead" href={urlOf(lead)}>
-          <Illo project={projectName(lead.data.repo)} />
+          <Illo project={projectName(lead.data.repo)} cover={lead.data.cover} />
           <span class="meta">{meta(lead)}</span>
           <Headline as="h2" text={lead.data.title} class="h-lead" />
           <p class="dek serif">{lead.data.description}</p>
@@ -67,7 +67,7 @@ const meta = (post: Post) =>
               {recent.map((post) => (
                 <li>
                   <a href={urlOf(post)}>
-                    <Illo project={projectName(post.data.repo)} seed={post.id} ratio="1 / 1" class="thumb" />
+                    <Illo project={projectName(post.data.repo)} seed={post.id} cover={post.data.cover} ratio="1 / 1" class="thumb" />
                     <span>
                       <Headline as="span" text={post.data.title} class="h-recent" />
                       <span class="meta">{meta(post)}</span>
@@ -93,7 +93,7 @@ const meta = (post: Post) =>
         <div class="grid">
           {older.map((post) => (
             <a class="story" href={urlOf(post)}>
-              <Illo project={projectName(post.data.repo)} seed={post.id} />
+              <Illo project={projectName(post.data.repo)} seed={post.id} cover={post.data.cover} />
               <span class="meta">{meta(post)}</span>
               <Headline as="h3" text={post.data.title} class="h-side" />
             </a>

@@ -7,10 +7,12 @@ export type Motif = 'phone' | 'terminal' | 'label' | 'wave' | 'orb' | 'stack';
 export interface ProjectLook {
   colour: string;
   motif: Motif;
+  /** A drawn cover, a site path; it replaces the CSS illustration wherever the project appears */
+  cover?: string;
 }
 
 const KNOWN: Record<string, ProjectLook> = {
-  claudio: { colour: '#2FD7A0', motif: 'phone' },
+  claudio: { colour: '#2FD7A0', motif: 'phone', cover: '/covers/claudio.jpg' },
   shipcast: { colour: '#FFD43B', motif: 'label' },
 };
 
