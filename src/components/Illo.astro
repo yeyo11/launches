@@ -2,7 +2,7 @@
 // The house illustration, drawn in CSS: a flat field of the project's colour, a halftone texture and
 // one bold object (the project's motif) with a hard offset shadow. It stands in until Shipcast
 // generates the real cover with the same rules, and keeps every launch illustrated meanwhile.
-import { lookOf, motifFor } from '../projects';
+import { lookOf, motifFor, type ProjectLook } from '../projects';
 
 interface Props {
   project: string;
@@ -12,11 +12,13 @@ interface Props {
   ratio?: string;
   /** The article's own cover, a site path; else the project's, else the CSS drawing */
   cover?: string;
+  /** A look of its own, for a page that belongs to no project (the 404) */
+  look?: ProjectLook;
   class?: string;
 }
 
-const { project, seed, ratio = '3 / 2', cover: own, class: className } = Astro.props;
-const look = lookOf(project);
+const { project, seed, ratio = '3 / 2', cover: own, look: given, class: className } = Astro.props;
+const look = given ?? lookOf(project);
 const cover = own ?? look.cover;
 const colour = look.colour;
 const motif = seed ? motifFor(seed) : look.motif;

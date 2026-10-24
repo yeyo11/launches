@@ -13,9 +13,11 @@ interface Props {
   image?: string;
   /** The index carries the author's name as its masthead, so the header leaves it out */
   home?: boolean;
+  /** Kept out of search results, for pages only a link in an email leads to */
+  noindex?: boolean;
 }
 
-const { lang, title, description, alternate, type = 'website', image, home = false } = Astro.props;
+const { lang, title, description, alternate, type = 'website', image, home = false, noindex = false } = Astro.props;
 const t = STRINGS[lang];
 const base = import.meta.env.BASE_URL;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -30,6 +32,7 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <link rel="canonical" href={canonical} />
     {alternate && <link rel="alternate" hreflang={alternate.lang} href={new URL(alternate.href, Astro.site)} />}
     <link rel="alternate" type="application/rss+xml" title={t.title} href={`${base}${lang}/rss.xml`} />

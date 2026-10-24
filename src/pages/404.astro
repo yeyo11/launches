@@ -1,0 +1,98 @@
+---
+// GitHub Pages serves this for every path that does not exist, in either language, so the page
+// carries both and shows the one the visitor's URL asked for. It is the only error page a static
+// site has. Its illustration is the house's: a shipping label, sent back.
+import Base from '../layouts/Base.astro';
+import Headline from '../components/Headline.astro';
+import Illo from '../components/Illo.astro';
+import { getPosts, projectName, urlOf } from '../posts';
+import { LOCALES, type Locale } from '../site';
+
+const COPY: Record<Locale, { title: string; note: string; home: string; recent: string }> = {
+  en: {
+    title: 'Return to sender.',
+    note: "This page doesn't exist, or it has moved. The launches are all still here.",
+    home: 'Go to the launches',
+    recent: 'The latest',
+  },
+  es: {
+    title: 'Devuelto al remitente.',
+    note: 'Esta página no existe o se ha movido. Los lanzamientos siguen todos aquí.',
+    home: 'Ir a los lanzamientos',
+    recent: 'Lo último',
+  },
+};
+const base = import.meta.env.BASE_URL;
+const latest = Object.fromEntries(await Promise.all(LOCALES.map(async (l) => [l, (await getPosts(l)).slice(0, 3)] as const)));
+---
+
+<Base lang="en" title={`404 · ${COPY.en.title}`} description={COPY.en.note} noindex>
+  <script is:inline define:vars={{ esTitle: `404 · ${COPY.es.title}` }}>
+    // Before the first paint, so a Spanish visitor never sees the English page flash by
+    if (location.pathname.startsWith('/es/') || location.pathname === '/es') {
+      document.documentElement.dataset.lost = 'es';
+      document.documentElement.lang = 'es';
+      document.title = document.title.replace(/^404 · [^|]+/, `${esTitle} `);
+    }
+  </script>
+  {
+    LOCALES.map((lang) => (
+      <section class:list={['wrap', 'lost', `lost-${lang}`]} lang={lang}>
+        <div class="hero">
+          <Illo project="404" look={{ colour: '#FF7A2F', motif: 'label' }} ratio="2 / 1" />
+          <div class="slab">
+            <p class="code">404</p>
+            <Headline as="h1" text={COPY[lang].title} class="h-lost" />
+            <p class="note">{COPY[lang].note}</p>
+          </div>
+        </div>
+        <div class="next">
+          <a href={`${base}${lang}/`} class="home">{COPY[lang].home}</a>
+          {latest[lang]!.length > 0 && (
+            <div class="recent">
+              <p class="meta">{COPY[lang].recent}</p>
+              <ul>
+                {latest[lang]!.map((p) => (
+                  <li>
+                    <a href={urlOf(p)}>{p.data.title}</a>
+                    <span class="meta"> · {projectName(p.data.repo)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  .lost-es { display: none; }
+  :global(html[data-lost='es']) .lost-es { display: block; }
+  :global(html[data-lost='es']) .lost-en { display: none; }
+
+  .lost { padding-block: calc(var(--space) * 10) calc(var(--space) * 20); }
+  .hero { position: relative; }
+  .slab {
+    background: #ff7a2f; color: var(--on-colour);
+    padding: calc(var(--space) * 7) calc(var(--space) * 8);
+    display: flex; flex-direction: column; gap: calc(var(--space) * 3.5);
+  }
+  @media (min-width: 56rem) {
+    .hero { padding-block-end: 7rem; }
+    .slab { position: absolute; left: 0; bottom: 0; width: min(40rem, 58%); }
+  }
+  .code { margin: 0; font-family: var(--font-mono); font-size: var(--fs-meta); font-weight: 600; }
+  :global(.h-lost) { margin: 0; font-size: var(--fs-mast); line-height: 1; }
+  .note { margin: 0; font-family: var(--font-serif); font-size: var(--fs-body); line-height: 1.45; }
+
+  .next { display: grid; gap: calc(var(--space) * 10); margin-block-start: calc(var(--space) * 12); }
+  @media (min-width: 56rem) { .next { grid-template-columns: auto 1fr; align-items: start; gap: calc(var(--space) * 20); } }
+  .home {
+    display: inline-grid; place-items: center; min-height: 3.25rem; padding-inline: 1.6rem; border-radius: 999px;
+    background: var(--text); color: var(--ground); text-decoration: none; font-weight: 600; justify-self: start;
+  }
+  .recent ul { list-style: none; margin: calc(var(--space) * 3) 0 0; padding: 0; display: grid; gap: calc(var(--space) * 3); }
+  .recent a { font-family: var(--font-serif); font-size: 1.25rem; color: var(--text); }
+</style>
