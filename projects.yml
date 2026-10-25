@@ -1,0 +1,12 @@
+# The known projects: each one's flat colour, its motif and, when it has one, a drawn cover (a site
+# path under public/). The blog reads this file at build time and Shipcast reads it when it launches
+# a project, so the site and the generated images agree. A project that is not listed gets a colour
+# and a motif picked from its name. Every colour carries black text at AA or better.
+# Keys are lowercase repo names. Motifs: phone, terminal, label, wave, orb, stack.
+claudio:
+  colour: "#2FD7A0"
+  motif: phone
+  cover: /covers/claudio.jpg
+shipcast:
+  colour: "#FFD43B"
+  motif: label
