@@ -23,7 +23,8 @@ const cloudflareHeaders = {
   },
 };
 
-// Served on the owner's domain through GitHub Pages (custom domain set in the repo's Pages settings).
+// Served on the owner's domain by Cloudflare Workers static assets (wrangler.jsonc); GitHub Pages until
+// the cutover in README.md.
 // The canonical URLs that dev.to and the other copies point to are built from `site`: never change it,
 // or a published slug, without a redirect.
 export default defineConfig({
