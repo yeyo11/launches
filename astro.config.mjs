@@ -53,7 +53,8 @@ export default defineConfig({
       directives: [
         "default-src 'self'",
         "img-src 'self' data:",
-        "font-src 'self'",
+        // Vite inlines the smallest font subsets into the CSS as data: URLs
+        "font-src 'self' data:",
         "media-src 'self'",
         "manifest-src 'self'",
         `connect-src 'self' https://cloudflareinsights.com ${formHosts}`,

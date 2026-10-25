@@ -2,9 +2,11 @@
 # assistants answering a question, and by those training models. Every crawler below is welcome, and
 # so is any other.
 
-# Content signals (https://contentsignals.org): search, use in AI answers and AI training all allowed
+# Content signals (https://contentsignals.org): search, use in AI answers and AI training are all
+# allowed. Written as a comment: Lighthouse and robots.txt validators reject the Content-Signal
+# directive as unknown, and nothing here is restricted, so the open Allow rules already say it all.
+# Content-Signal: search=yes, ai-input=yes, ai-train=yes
 User-agent: *
-Content-Signal: search=yes, ai-input=yes, ai-train=yes
 Allow: /
 
 # Search engines
