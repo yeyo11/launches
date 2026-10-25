@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Profiles from '../components/Profiles.astro';
 import { SITE, STRINGS, pagePath, type Locale } from '../site';
+import { breadcrumbs, graph, type JsonLdNode } from '../seo';
 // The same files global.css declares, so each preload and its @font-face share one request
 import frauncesUrl from '@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2?url';
 import frauncesItalicUrl from '@fontsource-variable/fraunces/files/fraunces-latin-full-italic.woff2?url';
@@ -19,14 +20,30 @@ interface Props {
   home?: boolean;
   /** Kept out of search results, for pages only a link in an email leads to */
   noindex?: boolean;
+  /** What the share image shows; without it, the title */
+  imageAlt?: string;
+  /** An article's dates and tags, for the article:* Open Graph properties */
+  article?: { published: Date; modified: Date; tags: string[] };
+  /** The page's own nodes for the JSON-LD graph; the author and the site are always there */
+  jsonLd?: JsonLdNode[];
+  /** The page as Markdown, a site path, for AI assistants and readers that want the source */
+  markdown?: string;
+  /** Adds Home › this page to the JSON-LD graph, under this name */
+  breadcrumb?: string;
 }
 
-const { lang, title, description, alternate, type = 'website', image, home = false, noindex = false } = Astro.props;
+const { lang, title, description, alternate, type = 'website', image, home = false, noindex = false, imageAlt, article, jsonLd = [], markdown, breadcrumb } = Astro.props;
 const t = STRINGS[lang];
 const base = import.meta.env.BASE_URL;
 const canonical = new URL(Astro.url.pathname, Astro.site);
 // The home page is the author's own; every other page says what it is, then whose site it is
 const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
+// A page without a launch image of its own is shared with the site's card, in its language
+const shareImage = new URL(image ?? `${base}og-default-${lang}.png`, Astro.site);
+const nodes = breadcrumb
+  ? [...jsonLd, breadcrumbs({ name: t.home, url: new URL(`${base}${lang}/`, Astro.site) }, { name: breadcrumb, url: canonical })]
+  : jsonLd;
+const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
 ---
 
 <!doctype html>
@@ -42,8 +59,8 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     <link rel="preload" href={frauncesUrl} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={frauncesItalicUrl} as="font" type="font/woff2" crossorigin />
     <meta name="description" content={description} />
-    {noindex && <meta name="robots" content="noindex" />}
-    <link rel="canonical" href={canonical} />
+    <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
+    {!noindex && <link rel="canonical" href={canonical} />}
     {
       // Every language version lists itself, the other one, and English as the default for everyone else
       alternate && (
@@ -55,7 +72,12 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
       )
     }
     <link rel="alternate" type="application/rss+xml" title={t.title} href={`${base}${lang}/rss.xml`} />
+    {markdown && <link rel="alternate" type="text/markdown" title={title} href={markdown} />}
+    <link rel="manifest" href={`${base}site.webmanifest`} />
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    {/* Google's results want a square raster icon, a multiple of 48 px */}
+    <link rel="icon" type="image/png" sizes="96x96" href={`${base}favicon-96.png`} />
+    <link rel="icon" type="image/png" sizes="48x48" href={`${base}favicon-48.png`} />
     <link rel="icon" type="image/png" sizes="32x32" href={`${base}favicon-32.png`} />
     <link rel="icon" type="image/png" sizes="16x16" href={`${base}favicon-16.png`} />
     <link rel="apple-touch-icon" href={`${base}apple-touch-icon.png`} />
@@ -64,18 +86,24 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content={SITE.author} />
-    <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_US'} />
+    <meta property="og:locale" content={ogLocale(lang)} />
+    {alternate && <meta property="og:locale:alternate" content={ogLocale(alternate.lang)} />}
+    <meta property="og:image" content={shareImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt ?? title} />
+    <meta name="twitter:card" content="summary_large_image" />
     {
-      image && (
+      article && (
         <>
-          <meta property="og:image" content={new URL(image, Astro.site)} />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="630" />
-          <meta property="og:image:alt" content={title} />
-          <meta name="twitter:card" content="summary_large_image" />
+          <meta property="article:published_time" content={article.published.toISOString()} />
+          <meta property="article:modified_time" content={article.modified.toISOString()} />
+          <meta property="article:author" content={new URL(pagePath('about', lang), Astro.site)} />
+          {article.tags.map((tag) => <meta property="article:tag" content={tag} />)}
         </>
       )
     }
+    <script type="application/ld+json" set:html={graph(nodes)} />
     <meta name="author" content={SITE.author} />
     <meta name="theme-color" content="#000000" />
     <!-- Before the first paint, so a reader who chose day never sees a flash of night -->
@@ -95,6 +123,7 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
     }
   </head>
   <body>
+    <a class="skip" href="#main">{t.skip}</a>
     <header class="bar">
       <nav class="left" aria-label={t.home}>
         {home ? <a href={`${base}${lang}/`} aria-current="page">{t.title}</a> : <a class="wordmark serif" href={`${base}${lang}/`}><span class="sw">J</span>osé <span class="sw">G</span>arrido</a>}
@@ -109,7 +138,7 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
         </button>
       </nav>
     </header>
-    <main>
+    <main id="main" tabindex="-1">
       <slot />
     </main>
     <footer class="wrap foot">
@@ -154,6 +183,14 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
 </script>
 
 <style>
+  /* Off screen until a keyboard reaches it: the first stop of the page */
+  .skip {
+    position: absolute; left: 1rem; top: -4rem; z-index: 10;
+    padding: 0.75rem 1.1rem; border-radius: 999px;
+    background: var(--text); color: var(--ground); font-weight: 600; text-decoration: none;
+  }
+  .skip:focus { top: 0.75rem; }
+  main:focus { outline: none; }
   .bar {
     display: flex;
     align-items: center;

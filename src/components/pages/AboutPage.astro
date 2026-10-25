@@ -7,6 +7,7 @@ import Profiles from '../Profiles.astro';
 import Subscribe from '../Subscribe.astro';
 import * as simpleIcons from 'simple-icons';
 import { SITE, pagePath, type Locale } from '../../site';
+import { profilePage } from '../../seo';
 
 interface Props {
   lang: Locale;
@@ -77,7 +78,14 @@ const COPY = {
 }[lang];
 ---
 
-<Base lang={lang} title={COPY.title} description={COPY.description} alternate={{ lang: other, href: pagePath('about', other) }}>
+<Base
+  lang={lang}
+  title={COPY.title}
+  description={COPY.description}
+  alternate={{ lang: other, href: pagePath('about', other) }}
+  breadcrumb={COPY.title}
+  jsonLd={[profilePage(new URL(pagePath('about', lang), Astro.site), lang, COPY.title)]}
+>
   <section class="wrap about">
     <header class="intro">
       <img class="photo" src={`${base}author.jpg`} alt={SITE.author} width="220" height="220" />

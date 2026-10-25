@@ -23,6 +23,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
     ? 'What Shipcast, this blog and its newsletter collect, how it is used, and how to have it deleted.'
     : 'Qué recogen Shipcast, este blog y su newsletter, para qué se usa y cómo pedir que se borre.'}
   alternate={{ lang: other, href: pagePath('privacy', other) }}
+  breadcrumb={lang === 'en' ? 'Privacy policy' : 'Política de privacidad'}
 >
   <article class="prose policy">
     {

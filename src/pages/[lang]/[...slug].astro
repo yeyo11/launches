@@ -9,6 +9,7 @@ import { getPosts, projectName, slugOf, translationOf, urlOf, type Post } from '
 import { lookOf } from '../../projects';
 import { Image } from 'astro:assets';
 import { publicImage } from '../../images';
+import { blogPosting } from '../../seo';
 
 export async function getStaticPaths() {
   const all = await getPosts();
@@ -40,9 +41,38 @@ const { colour } = lookOf(project ?? post.data.translationKey);
 const words = post.body?.split(/\s+/).length ?? 0;
 const minutes = Math.max(1, Math.round(words / 220));
 const avatar = publicImage('/author.jpg');
+const canonical = new URL(urlOf(post), Astro.site);
+const modified = post.data.updatedDate ?? post.data.pubDate;
+const jsonLd = [
+  blogPosting({
+    url: canonical,
+    title: post.data.title,
+    description: post.data.description,
+    image: new URL(post.data.image ?? `/og-default-${lang}.png`, Astro.site),
+    published: post.data.pubDate,
+    modified,
+    lang,
+    tags: post.data.tags,
+    repo: post.data.repo,
+    project,
+    version: post.data.version,
+  }),
+];
 ---
 
-<Base lang={lang} title={post.data.title} description={post.data.description} alternate={alternate} type="article" image={post.data.image}>
+<Base
+  lang={lang}
+  title={post.data.title}
+  description={post.data.description}
+  alternate={alternate}
+  type="article"
+  image={post.data.image}
+  imageAlt={post.data.imageAlt}
+  article={{ published: post.data.pubDate, modified, tags: post.data.tags }}
+  jsonLd={jsonLd}
+  breadcrumb={post.data.title}
+  markdown={`${import.meta.env.BASE_URL}${lang}/${slugOf(post)}.md`}
+>
   <article>
     <header class="wrap hero">
       <Illo project={project ?? post.data.translationKey} ratio="2 / 1" cover={post.data.cover} alt={post.data.coverAlt} priority sizes="(min-width: 77.5rem) 75rem, calc(100vw - 2.5rem)" />
