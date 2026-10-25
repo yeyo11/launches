@@ -10,6 +10,7 @@ import { lookOf } from '../../projects';
 import { Image } from 'astro:assets';
 import { publicImage } from '../../images';
 import { blogPosting } from '../../seo';
+import { markdownPath } from '../../markdown';
 
 export async function getStaticPaths() {
   const all = await getPosts();
@@ -71,7 +72,7 @@ const jsonLd = [
   article={{ published: post.data.pubDate, modified, tags: post.data.tags }}
   jsonLd={jsonLd}
   breadcrumb={post.data.title}
-  markdown={`${import.meta.env.BASE_URL}${lang}/${slugOf(post)}.md`}
+  markdown={markdownPath(post)}
 >
   <article>
     <header class="wrap hero">
