@@ -45,22 +45,14 @@ pings IndexNow with the articles that changed; every pull request uploads a prev
 comments its URL, and runs the Lighthouse gate. The Cloudflare steps need the repository secrets
 `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, and end with a notice without them.
 
-### Cutover from GitHub Pages
+### Served by Cloudflare since 2026-10-25
 
-GitHub Pages keeps serving `josegarrido.dev` until these steps, done by the maintainer:
+GitHub Pages served the site until 2026-10-25. The cutover, for the record:
 
-1. An API token (My Profile › API Tokens › Create custom token) with Account › Workers Scripts: Edit,
-   Account › Account Settings: Read, Zone › Workers Routes: Edit and Zone › Zone: Read (zone
-   `josegarrido.dev`); add it and the account id as the repository secrets `CLOUDFLARE_API_TOKEN` and
-   `CLOUDFLARE_ACCOUNT_ID`.
-2. Merge to `main` (or run the workflow by hand): `wrangler deploy` publishes the Worker
-   `josegarrido-dev`; check it at its `workers.dev` URL.
-3. Workers & Pages › josegarrido-dev › Settings › Domains & Routes › Add › Custom domain:
-   `josegarrido.dev`. Cloudflare replaces the apex's DNS records pointing at GitHub Pages with the
-   Worker's; remove any that remain.
-4. Security › Bots (zone): turn off "Block AI bots" and AI Labyrinth, and the managed robots.txt
-   (AI Crawl Control), so the site's own `robots.txt` is the one served and every crawler gets in.
-5. Rules › Redirect Rules: `www.josegarrido.dev/*` → `https://josegarrido.dev/${1}`, 301, with a
-   proxied DNS record for `www` (GitHub Pages did this redirect before).
-6. In this repository: set the variable `GITHUB_PAGES` to `off`, unpublish GitHub Pages in Settings ›
-   Pages, and later delete the `pages-*` jobs from the workflow.
+- The Worker `josegarrido-dev` has `josegarrido.dev` as its custom domain; the apex's A and AAAA
+  records pointing at GitHub Pages were removed.
+- `www` is a proxied placeholder record (`AAAA 100::`) and a Redirect Rule sends
+  `www.josegarrido.dev/*` to `https://josegarrido.dev/…` with a 301.
+- The zone's AI bot settings are off (no blocking, no managed robots.txt), so the site's own
+  `robots.txt` is the one served and every crawler gets in.
+- GitHub Pages is unpublished and its jobs are gone from the workflow.
