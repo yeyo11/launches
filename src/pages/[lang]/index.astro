@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Headline from '../../components/Headline.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import Illo from '../../components/Illo.astro';
-import { LOCALES, SITE, STRINGS, formatDate, pagePath, type Locale } from '../../site';
+import { LOCALES, SITE, STRINGS, formatDate, pagePath, projectPath, type Locale } from '../../site';
 import { getPosts, projectName, urlOf, type Post } from '../../posts';
 import { Image } from 'astro:assets';
 import { publicImage } from '../../images';
@@ -111,14 +111,14 @@ const meta = (post: Post) =>
   <section class="wrap block">
     <div class="block-head">
       <Headline as="h2" text={t.workshop} class="h-section" />
-      <p class="muted">{t.workshopNote}</p>
+      <p class="muted">{t.workshopNote} <a href={pagePath('projects', lang)}>{t.allProjects} →</a></p>
     </div>
     <div class="grid four">
       {
         [...projects].map(([name, project]) => (
           <div class="project">
-            <a href={urlOf(project.latest)} tabindex="-1" aria-hidden="true"><Illo project={name} sizes="(min-width: 77.5rem) 18rem, (min-width: 40rem) 50vw, calc(100vw - 2.5rem)" /></a>
-            <h3 class="serif"><span class="sw">{name.charAt(0)}</span>{name.slice(1)}</h3>
+            <a href={projectPath(name.toLowerCase(), lang)} tabindex="-1" aria-hidden="true"><Illo project={name} sizes="(min-width: 77.5rem) 18rem, (min-width: 40rem) 50vw, calc(100vw - 2.5rem)" /></a>
+            <h3 class="serif"><a href={projectPath(name.toLowerCase(), lang)}><span class="sw">{name.charAt(0)}</span>{name.slice(1)}</a></h3>
             <p class="muted">{project.count} {project.count === 1 ? t.oneLaunch : t.launchCount}</p>
             <p class="links"><a href={urlOf(project.latest)}>{project.latest.data.version ?? t.release}</a><a href={project.repo} class="muted">{t.source}</a></p>
           </div>
@@ -192,6 +192,8 @@ const meta = (post: Post) =>
   .grid { display: grid; gap: calc(var(--space) * 8); grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr)); }
   .project { display: flex; flex-direction: column; gap: calc(var(--space) * 2.5); }
   .project h3 { margin: calc(var(--space) * 1) 0 0; font-size: 1.65rem; }
+  .project h3 a { text-decoration: none; }
+  .project h3 a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
   .project p { margin: 0; }
   .project .links { display: flex; gap: calc(var(--space) * 4.5); font-size: var(--fs-meta); }
   .project.next { aspect-ratio: 3 / 2; border: 1px dashed var(--line); display: grid; place-items: center; padding: calc(var(--space) * 6); text-align: center; color: var(--muted); font-size: var(--fs-meta); }

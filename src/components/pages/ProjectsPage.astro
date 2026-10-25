@@ -1,0 +1,83 @@
+---
+// Every project, at /en/projects/ and /es/proyectos/: one card each, linking to the project's page.
+// The newest launch comes first, the projects never launched here last.
+import Base from '../../layouts/Base.astro';
+import Crumbs from '../Crumbs.astro';
+import Headline from '../Headline.astro';
+import Illo from '../Illo.astro';
+import { STRINGS, pagePath, projectPath, type Locale } from '../../site';
+import { getProjects } from '../../catalog';
+import { collectionPage } from '../../seo';
+
+interface Props {
+  lang: Locale;
+}
+
+const { lang } = Astro.props;
+const t = STRINGS[lang];
+const other: Locale = lang === 'en' ? 'es' : 'en';
+const projects = await getProjects(lang);
+const canonical = new URL(pagePath('projects', lang), Astro.site);
+const jsonLd = [
+  collectionPage({
+    url: canonical,
+    name: t.projects,
+    description: t.projectsNote,
+    lang,
+    items: projects.map((p) => ({ name: p.name, url: new URL(projectPath(p.name, lang), Astro.site) })),
+  }),
+];
+const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+---
+
+<Base lang={lang} title={t.projects} description={t.projectsNote} alternate={{ lang: other, href: pagePath('projects', other) }} jsonLd={jsonLd} breadcrumb={t.projects} section="projects">
+  <header class="wrap pagehead">
+    <Crumbs lang={lang} trail={[]} current={t.projects} />
+    <Headline as="h1" text={t.projects} class="h-page" />
+    <p class="muted">{t.projectsNote}</p>
+  </header>
+
+  <ul class="wrap cards">
+    {
+      projects.map((p, i) => (
+        <li class="card">
+          <div><Illo project={p.name} priority={i === 0} sizes="(min-width: 77.5rem) 36.5rem, (min-width: 52rem) calc(50vw - 2.5rem), calc(100vw - 2.5rem)" /></div>
+          <div class="card-body">
+            <h2 class="serif name">
+              <a href={projectPath(p.name, lang)}><span class="sw">{p.name.charAt(0)}</span>{p.name.slice(1)}</a>
+            </h2>
+            {p.tagline && <p class="tagline serif">{p.tagline}</p>}
+            <p class="figures meta">
+              {p.version && <span class="mono">{p.version}</span>}
+              {p.launchCount > 0 && <span>{count(p.launchCount, t.oneLaunch, t.launchCount)}</span>}
+              {p.figures.stars !== undefined && <span>★ {count(p.figures.stars, t.star, t.starsLower)}</span>}
+              {p.figures.licence && <span>{p.figures.licence}</span>}
+            </p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</Base>
+
+<style>
+  .pagehead { display: flex; flex-direction: column; gap: calc(var(--space) * 3); padding-block: calc(var(--space) * 10) calc(var(--space) * 9); border-block-end: 1px solid var(--rule); }
+  .pagehead p { margin: 0; max-width: 36rem; font-size: 1.125rem; }
+  :global(.h-page) { margin: calc(var(--space) * 2) 0 0; font-size: clamp(2.75rem, 7vw, var(--fs-mast)); line-height: 1; font-variation-settings: 'opsz' 144, 'SOFT' 30; }
+
+  .cards { list-style: none; padding: calc(var(--space) * 12) 0 0; margin-block: 0; display: grid; gap: calc(var(--space) * 12) calc(var(--space) * 10); }
+  @media (min-width: 52rem) { .cards { grid-template-columns: 1fr 1fr; } }
+  /* The whole card is the link's target; the link itself stays on the name for screen readers */
+  .card { position: relative; display: flex; flex-direction: column; gap: calc(var(--space) * 4); }
+  .card-body { display: flex; flex-direction: column; gap: calc(var(--space) * 2.5); }
+  .name { margin: 0; font-size: clamp(2rem, 4vw, 2.6rem); line-height: 1.05; }
+  .name a { text-decoration: none; }
+  .name a::after { content: ''; position: absolute; inset: 0; }
+  .card:hover .name a { text-decoration: underline; text-decoration-thickness: 1px; }
+  .name a:focus-visible { outline: none; }
+  .card:has(a:focus-visible) { outline: 2px solid var(--text); outline-offset: 6px; }
+  .tagline { margin: 0; font-size: 1.2rem; line-height: 1.45; color: var(--body); max-width: 34rem; }
+  .figures { margin: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 1) calc(var(--space) * 4); }
+  .figures span + span::before { content: '·'; margin-inline-end: calc(var(--space) * 4); color: var(--line); }
+  .mono { font-family: var(--font-mono); }
+</style>

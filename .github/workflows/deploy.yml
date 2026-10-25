@@ -31,7 +31,11 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
       - run: pnpm test
+      # The project pages read stars and releases from GitHub's API at build time; the job's own token
+      # lifts the anonymous limit a shared runner address often hits (without it, figures are omitted)
       - run: pnpm build
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
       - run: node scripts/contrast.mjs > /dev/null
       - uses: actions/upload-artifact@v7
         with:
@@ -41,7 +45,8 @@ jobs:
           retention-days: 3
 
   # A Lighthouse gate on the built site, mobile profile, the median of three runs: the English front
-  # page and its newest article (thresholds in lighthouserc.json)
+  # page, its newest article, the article index and the first project's page (thresholds in
+  # lighthouserc.json)
   lighthouse:
     needs: build
     runs-on: ubuntu-latest
@@ -55,7 +60,8 @@ jobs:
       - name: Lighthouse CI
         run: |
           article=$(sed -n 's#.*<a class="lead" href="\([^"]*\)".*#\1#p' dist/en/index.html | head -1)
-          npx --yes @lhci/cli@0.15.1 autorun --collect.url=http://localhost/en/ ${article:+--collect.url=http://localhost$article}
+          project=$(sed -n 's#.*<h2 class="serif name"[^>]*> *<a href="\([^"]*\)".*#\1#p' dist/en/projects/index.html | head -1)
+          npx --yes @lhci/cli@0.15.1 autorun --collect.url=http://localhost/en/ ${article:+--collect.url=http://localhost$article} --collect.url=http://localhost/en/articles/ ${project:+--collect.url=http://localhost$project}
 
   cloudflare:
     needs: build

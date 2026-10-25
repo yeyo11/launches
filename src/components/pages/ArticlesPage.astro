@@ -1,0 +1,148 @@
+---
+// The article index, at /en/articles/ and /es/articulos/: every article in the language, newest
+// first, narrowed by project or topic through plain links (a page each, see src/article-index.ts) and
+// cut into pages when it grows long. A filtered page is kept out of search: it repeats what the full
+// index and the project pages already say.
+import Base from '../../layouts/Base.astro';
+import Crumbs from '../Crumbs.astro';
+import Headline from '../Headline.astro';
+import Illo from '../Illo.astro';
+import { STRINGS, articlesPath, formatDate, pagePath, projectPath, topicSlug, type Locale } from '../../site';
+import { projectName, urlOf } from '../../posts';
+import { collectionPage } from '../../seo';
+import type { IndexView } from '../../article-index';
+
+interface Props {
+  lang: Locale;
+  view: IndexView;
+}
+
+const { lang, view } = Astro.props;
+const t = STRINGS[lang];
+const other: Locale = lang === 'en' ? 'es' : 'en';
+const { filter, page, pages } = view;
+const fill = (text: string, values: Record<string, string>) => text.replace(/\{(\w+)\}/g, (_, k: string) => values[k] ?? '');
+const shown = filter ? (filter.kind === 'topic' ? `#${view.label}` : (view.label ?? filter.value)) : undefined;
+const heading = shown ? fill(t.articlesAbout, { x: shown }) : t.articles;
+const title = pages > 1 ? `${heading} (${fill(t.pageOf, { n: String(page), total: String(pages) })})` : heading;
+const description = shown ? `${heading}. ${t.articlesNote}` : t.articlesNote;
+const canonical = new URL(articlesPath(lang, filter, page), Astro.site);
+const jsonLd = filter
+  ? []
+  : [collectionPage({ url: canonical, name: title, description, lang, items: view.posts.map((p) => ({ name: p.data.title, url: new URL(urlOf(p), Astro.site) })) })];
+const isProject = (value: string) => filter?.kind === 'project' && filter.value === value;
+const isTopic = (tag: string) => filter?.kind === 'topic' && filter.value === topicSlug(tag);
+const count = (n: number) => `${n} ${n === 1 ? t.oneArticle : t.articleCount}`;
+---
+
+<Base
+  lang={lang}
+  title={title}
+  description={description}
+  alternate={view.alternate ? { lang: other, href: view.alternate } : undefined}
+  jsonLd={jsonLd}
+  breadcrumb={shown ?? t.articles}
+  trail={filter ? [{ name: t.articles, href: pagePath('articles', lang) }] : []}
+  noindex={Boolean(filter)}
+  section="articles"
+>
+  <header class="wrap pagehead">
+    <Crumbs lang={lang} trail={filter ? [{ name: t.articles, href: pagePath('articles', lang) }] : []} current={shown ?? t.articles} />
+    <Headline as="h1" text={heading} class="h-page" />
+    <p class="muted">
+      {count(view.total)}
+      {filter?.kind === 'project' && <> · <a href={projectPath(filter.value, lang)}>{t.openProject} →</a></>}
+    </p>
+  </header>
+
+  <nav class="wrap filters" aria-label={t.filterBy}>
+    <div class="frow">
+      <span class="flabel meta">{t.project}</span>
+      <ul class="chips">
+        <li><a href={articlesPath(lang)} aria-current={filter ? undefined : 'page'}>{t.all}</a></li>
+        {view.projects.map((name) => <li><a href={articlesPath(lang, { kind: 'project', value: name })} aria-current={isProject(name) ? 'page' : undefined}>{name}</a></li>)}
+      </ul>
+    </div>
+    {
+      view.topics.length > 0 && (
+        <div class="frow">
+          <span class="flabel meta">{t.topic}</span>
+          <ul class="chips">
+            {view.topics.map(({ tag }) => <li><a href={articlesPath(lang, { kind: 'topic', value: tag })} aria-current={isTopic(tag) ? 'page' : undefined}>#{tag}</a></li>)}
+          </ul>
+        </div>
+      )
+    }
+  </nav>
+
+  {
+    view.posts.length > 0 ? (
+      <ol class="wrap rows">
+        {view.posts.map((post, i) => {
+          const project = projectName(post.data.repo);
+          return (
+            <li class="row">
+              <div class="thumb"><Illo project={project ?? post.data.translationKey} seed={post.id} cover={post.data.cover} ratio="1 / 1" sizes="6rem" priority={i === 0} /></div>
+              <div class="text">
+                <span class="meta">{[project, post.data.version].filter(Boolean).join(' · ')}</span>
+                <h2 class="row-title"><a href={urlOf(post)}><Headline as="span" text={post.data.title} class="h-row" /></a></h2>
+                <p class="dek">{post.data.description}</p>
+              </div>
+              <time class="meta when" datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, lang)}</time>
+            </li>
+          );
+        })}
+      </ol>
+    ) : (
+      <p class="wrap empty serif">{t.empty}</p>
+    )
+  }
+
+  {
+    pages > 1 && (
+      <nav class="wrap pager meta" aria-label={fill(t.pageOf, { n: String(page), total: String(pages) })}>
+        {page > 1 ? <a rel="prev" href={articlesPath(lang, filter, page - 1)}>← {t.newer}</a> : <span />}
+        <span>{fill(t.pageOf, { n: String(page), total: String(pages) })}</span>
+        {page < pages ? <a rel="next" href={articlesPath(lang, filter, page + 1)}>{t.older} →</a> : <span />}
+      </nav>
+    )
+  }
+</Base>
+
+<style>
+  .pagehead { display: flex; flex-direction: column; gap: calc(var(--space) * 3); padding-block: calc(var(--space) * 10) calc(var(--space) * 8); }
+  .pagehead p { margin: 0; font-size: 1.125rem; }
+  :global(.h-page) { margin: calc(var(--space) * 2) 0 0; font-size: clamp(2.75rem, 7vw, var(--fs-mast)); line-height: 1; font-variation-settings: 'opsz' 144, 'SOFT' 30; overflow-wrap: anywhere; }
+
+  .filters { display: flex; flex-direction: column; gap: calc(var(--space) * 3); padding-block: calc(var(--space) * 5); border-block: 1px solid var(--rule); }
+  .frow { display: grid; gap: calc(var(--space) * 2); align-items: baseline; }
+  @media (min-width: 40rem) { .frow { grid-template-columns: 5.5rem minmax(0, 1fr); } }
+  .flabel { font-weight: 600; }
+  .chips { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 2); }
+  .chips a { display: inline-flex; align-items: center; min-height: 2.25rem; padding-inline: 0.85rem; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; font-size: var(--fs-meta); }
+  .chips a:hover { border-color: var(--text); }
+  .chips a[aria-current='page'] { background: var(--text); color: var(--ground); border-color: var(--text); font-weight: 600; }
+
+  .rows { list-style: none; padding: 0; margin-block: 0; }
+  .row { position: relative; display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: calc(var(--space) * 2) calc(var(--space) * 5); padding-block: calc(var(--space) * 7); border-block-end: 1px solid var(--rule); align-items: start; }
+  .thumb { grid-row: span 2; }
+  .text { display: flex; flex-direction: column; gap: calc(var(--space) * 2); min-width: 0; }
+  .when { grid-column: 2; }
+  @media (min-width: 48rem) {
+    .row { grid-template-columns: 6rem minmax(0, 1fr) 10rem; gap: calc(var(--space) * 8); }
+    .thumb { grid-row: auto; }
+    .when { grid-column: 3; text-align: end; padding-block-start: 0.15rem; }
+  }
+  .row-title { margin: 0; }
+  .row-title a { text-decoration: none; }
+  /* The whole row opens the article; the link stays on the title for screen readers */
+  .row-title a::after { content: ''; position: absolute; inset: 0; }
+  .row:hover :global(.headline) { text-decoration: underline; text-decoration-thickness: 1px; }
+  .row-title a:focus-visible { outline: none; }
+  .row:has(a:focus-visible) { outline: 2px solid var(--text); outline-offset: 4px; }
+  :global(.h-row) { font-size: clamp(1.4rem, 2.6vw, 1.75rem); line-height: 1.15; }
+  .dek { margin: 0; color: var(--body); line-height: 1.55; max-width: 44rem; }
+  .empty { padding-block: calc(var(--space) * 14); font-size: 1.4rem; text-align: center; margin-block: 0; }
+  .pager { display: flex; justify-content: space-between; align-items: center; gap: calc(var(--space) * 4); padding-block: calc(var(--space) * 8); }
+  .pager a { min-height: 2.75rem; display: inline-flex; align-items: center; font-weight: 600; color: var(--text); }
+</style>

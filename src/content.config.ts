@@ -31,4 +31,28 @@ const posts = defineCollection({
   }),
 });
 
-export const collections = { posts };
+// What each project's page says about it, in both languages: one YAML file per project at
+// src/content/projects/<name>.yml, the name being the repo's. Its look (colour, motif, cover) stays in
+// projects.yml, which Shipcast also reads and validates strictly, so the page's copy lives here
+// instead and a field added for the site can never make a launch fail. Every field is optional: a
+// project without a file gets its words from GitHub and its latest article.
+const bilingual = z.object({ en: z.string().optional(), es: z.string().optional() });
+const projects = defineCollection({
+  loader: glob({ pattern: '*.{yml,yaml}', base: './src/content/projects' }),
+  schema: z.object({
+    /** One line, the card's: what it is in a sentence */
+    tagline: bilingual.optional(),
+    /** A paragraph or two for "What it is"; blank lines split paragraphs */
+    description: bilingual.optional(),
+    /** The repository, when no article names it or it is not github.com/<author>/<name> */
+    repo: z.url().optional(),
+    /** The project's own website or documentation */
+    site: z.url().optional(),
+    /** A video or GIF of it in use, a site path; without it, the newest one a launch brought */
+    demo: z.string().startsWith('/').optional(),
+    /** Its Wikidata item, so search engines join the page to the entity */
+    wikidata: z.url().optional(),
+  }),
+});
+
+export const collections = { posts, projects };
