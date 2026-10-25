@@ -4,7 +4,6 @@ description: "Shipcast goes from a command to a web app: launches, accounts, dra
 pubDate: 2026-10-25
 lang: en
 translationKey: "shipcast-now-has-its-own-app"
-repo: "https://github.com/yeyo11/launches"
 tags: ["devtools", "opensource", "automation"]
 image: "/articles/shipcast-ya-tiene-su-propia-app/og.png"
 ---

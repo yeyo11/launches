@@ -24,6 +24,7 @@ export function translationOf(post: Post, all: Post[]): Post | undefined {
 }
 
 /** `github.com/yeyo11/claudio` → `claudio` */
-export function projectName(repo: string): string {
+export function projectName(repo: string | undefined): string | undefined {
+  if (!repo) return undefined;
   return new URL(repo).pathname.split('/').filter(Boolean).at(-1) ?? repo;
 }

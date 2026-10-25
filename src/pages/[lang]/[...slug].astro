@@ -33,7 +33,8 @@ const t = STRINGS[lang];
 const { Content } = await render(post);
 const alternate = translation && { lang: translation.data.lang as Locale, href: urlOf(translation) };
 const project = projectName(post.data.repo);
-const { colour } = lookOf(project);
+// An article without a project takes its colour and drawing from its own key
+const { colour } = lookOf(project ?? post.data.translationKey);
 const words = post.body?.split(/\s+/).length ?? 0;
 const minutes = Math.max(1, Math.round(words / 220));
 ---
@@ -41,12 +42,14 @@ const minutes = Math.max(1, Math.round(words / 220));
 <Base lang={lang} title={post.data.title} description={post.data.description} alternate={alternate} type="article" image={post.data.image}>
   <article>
     <header class="wrap hero">
-      <Illo project={project} ratio="2 / 1" cover={post.data.cover} />
+      <Illo project={project ?? post.data.translationKey} ratio="2 / 1" cover={post.data.cover} />
       <div class="slab" style={`--c: ${colour}`}>
-        <p class="release">
-          <a href={post.data.repo}>{project}</a>
-          {post.data.version && <span>{post.data.version}</span>}
-        </p>
+        {post.data.repo && (
+          <p class="release">
+            <a href={post.data.repo}>{project}</a>
+            {post.data.version && <span>{post.data.version}</span>}
+          </p>
+        )}
         <Headline as="h1" text={post.data.title} class="h-article" />
         <p class="dek serif">{post.data.description}</p>
       </div>
@@ -58,9 +61,11 @@ const minutes = Math.max(1, Math.round(words / 220));
         <span class="name">{SITE.author}</span>
         <span class="meta"><time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, lang)}</time> · {minutes} min</span>
       </span>
-      <span class="byline-links meta">
-        <a href={post.data.repo}>{t.source}</a>
-      </span>
+      {post.data.repo && (
+        <span class="byline-links meta">
+          <a href={post.data.repo}>{t.source}</a>
+        </span>
+      )}
     </div>
 
     <div class="prose body">
@@ -79,7 +84,7 @@ const minutes = Math.max(1, Math.round(words / 220));
         <div class="more-grid">
           {more.map((p) => (
             <a href={urlOf(p)}>
-              <Illo project={projectName(p.data.repo)} seed={p.id} cover={p.data.cover} />
+              <Illo project={projectName(p.data.repo) ?? p.data.translationKey} seed={p.id} cover={p.data.cover} />
               <span class="meta">{[projectName(p.data.repo), p.data.version].filter(Boolean).join(' · ')}</span>
               <Headline as="h3" text={p.data.title} class="h-card" />
             </a>

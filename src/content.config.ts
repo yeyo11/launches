@@ -15,7 +15,8 @@ const posts = defineCollection({
     // The same key on the English and Spanish versions links them as translations
     translationKey: z.string(),
     // The launched project and the release that triggered the article
-    repo: z.url(),
+    // A launch's project; an article written in Shipcast's app belongs to none
+    repo: z.url().optional(),
     version: z.string().optional(),
     tags: z.array(z.string()).default([]),
     // The launch image Shipcast renders into public/launches/<project>/<ref>/, for og:image

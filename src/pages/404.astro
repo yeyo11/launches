@@ -55,7 +55,7 @@ const latest = Object.fromEntries(await Promise.all(LOCALES.map(async (l) => [l,
                 {latest[lang]!.map((p) => (
                   <li>
                     <a href={urlOf(p)}>{p.data.title}</a>
-                    <span class="meta"> · {projectName(p.data.repo)}</span>
+                    {p.data.repo && <span class="meta"> · {projectName(p.data.repo)}</span>}
                   </li>
                 ))}
               </ul>
