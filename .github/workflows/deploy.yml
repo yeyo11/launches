@@ -3,8 +3,7 @@ name: Deploy
 # Merging a launch's drafts pull request into main is what publishes its article. Every push to main
 # builds the site and deploys it to Cloudflare Workers (wrangler.jsonc); every pull request uploads a
 # preview version of the Worker and comments its URL, so an article can be read rendered before it is
-# merged. GitHub Pages keeps serving josegarrido.dev until the cutover described in README.md: its
-# jobs run while the repository variable GITHUB_PAGES is not "off".
+# merged.
 on:
   push:
     branches: [main]
@@ -167,31 +166,3 @@ jobs:
       - name: IndexNow
         if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'push'
         run: node scripts/indexnow.mjs "${{ github.event.before }}" "${{ github.sha }}"
-
-  # GitHub Pages, until the cutover: set the repository variable GITHUB_PAGES to "off" once the
-  # domain is served by the Worker, then delete these two jobs
-  pages-build:
-    if: github.event_name != 'pull_request' && vars.GITHUB_PAGES != 'off'
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - uses: withastro/action@v6
-        with:
-          node-version: 24.22.1
-
-  pages-deploy:
-    needs: pages-build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    concurrency:
-      group: pages
-      cancel-in-progress: false
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v5
