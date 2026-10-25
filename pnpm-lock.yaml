@@ -33,6 +33,9 @@ importers:
       '@astrojs/check':
         specifier: ^0.9.12
         version: 0.9.12(@emnapi/runtime@1.11.3)(prettier@3.9.10)(typescript@6.0.3)
+      '@shikijs/themes':
+        specifier: 4.5.0
+        version: 4.5.0
       simple-icons:
         specifier: ^16.35.0
         version: 16.35.0

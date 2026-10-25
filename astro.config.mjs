@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { codeColours } from './src/code-colours.mjs';
 
 // Served on the owner's domain through GitHub Pages (custom domain set in the repo's Pages settings).
 // The canonical URLs that dev.to and the other copies point to are built from `site`: never change it,
@@ -13,7 +14,9 @@ export default defineConfig({
   integrations: [sitemap({ filter: (page) => page !== 'https://josegarrido.dev/' && !/\/(subscribed|suscrito)\/$/.test(page) })],
   // The Spanish privacy policy was published at /es/privacy/ before paths were translated
   redirects: { '/es/privacy/': '/es/privacidad/' },
-  markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false } },
+  // Both code themes ship as CSS variables and follow the page's theme; codeColours() lifts the few
+  // colours that fail AA on the code background (checked by scripts/contrast.mjs)
+  markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [codeColours()] } },
   i18n: {
     locales: ['en', 'es'],
     defaultLocale: 'en',
