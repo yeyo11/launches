@@ -12,7 +12,7 @@ interface Props {
 const { lang } = Astro.props;
 const other: Locale = lang === 'en' ? 'es' : 'en';
 const CONTACT = 'yeyochico@gmail.com';
-const UPDATED = new Date('2026-10-24');
+const UPDATED = new Date('2026-10-25');
 const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dateStyle: 'long' }).format(UPDATED);
 ---
 
@@ -41,9 +41,13 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
           <h2>What Shipcast accesses</h2>
           <p>
             To publish an announcement, Shipcast connects to the author's own accounts on Instagram, Bluesky,
-            Mastodon and dev.to, with the permissions each network grants for that purpose. On Instagram these are
-            reading the basic profile of the account (its id and username) and publishing posts to it
-            (<code>instagram_business_basic</code> and <code>instagram_business_content_publish</code>).
+            Mastodon, dev.to, Hashnode, Telegram and Discord, and to the newsletter's Brevo account, with the
+            permissions each network grants for that purpose. On Instagram these are reading the basic profile of
+            the account (its id and username), publishing posts and stories to it, commenting on its own posts, and
+            reading the numbers of its own posts, such as reach and likes (<code>instagram_business_basic</code>,{' '}
+            <code>instagram_business_content_publish</code>, <code>instagram_business_manage_comments</code> and{' '}
+            <code>instagram_business_manage_insights</code>). On the other networks it reads the same kind of
+            totals for the author's own posts.
           </p>
           <p>
             Shipcast does not collect, read or store data about any other person: not followers, not comments, not
@@ -53,8 +57,8 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
 
           <h2>Where the data is kept</h2>
           <p>
-            The access tokens the networks issue are stored only on the author's computer, in a local configuration
-            file that is never published. What Shipcast publishes is the announcement itself: the text and images
+            The access tokens the networks issue are stored only on the author's computer, in its operating system's
+            keychain or a local configuration file, and are never published. What Shipcast publishes is the announcement itself: the text and images
             the author approved, which become public on each network and on this blog.
           </p>
 
@@ -116,10 +120,14 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
 
           <h2>A qué accede Shipcast</h2>
           <p>
-            Para publicar un anuncio, Shipcast se conecta a las cuentas del autor en Instagram, Bluesky, Mastodon y
-            dev.to, con los permisos que cada red concede para ello. En Instagram son leer el perfil básico de la
-            cuenta (su id y su nombre de usuario) y publicar en ella (<code>instagram_business_basic</code> e{' '}
-            <code>instagram_business_content_publish</code>).
+            Para publicar un anuncio, Shipcast se conecta a las cuentas del autor en Instagram, Bluesky, Mastodon,
+            dev.to, Hashnode, Telegram y Discord, y a la cuenta de Brevo de la newsletter, con los permisos que cada
+            red concede para ello. En Instagram son leer el perfil básico de la cuenta (su id y su nombre de
+            usuario), publicar en ella publicaciones e historias, comentar sus propias publicaciones y leer las
+            cifras de sus propias publicaciones, como el alcance y los me gusta (<code>instagram_business_basic</code>,{' '}
+            <code>instagram_business_content_publish</code>, <code>instagram_business_manage_comments</code> e{' '}
+            <code>instagram_business_manage_insights</code>). En las demás redes lee el mismo tipo de totales de las
+            publicaciones del autor.
           </p>
           <p>
             Shipcast no recoge, lee ni guarda datos de ninguna otra persona: ni seguidores, ni comentarios, ni
@@ -129,8 +137,8 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
 
           <h2>Dónde se guardan los datos</h2>
           <p>
-            Los tokens de acceso que emiten las redes se guardan solo en el ordenador del autor, en un fichero de
-            configuración local que nunca se publica. Lo que Shipcast publica es el anuncio en sí: el texto y las
+            Los tokens de acceso que emiten las redes se guardan solo en el ordenador del autor, en el llavero de su
+            sistema operativo o en un fichero de configuración local, y nunca se publican. Lo que Shipcast publica es el anuncio en sí: el texto y las
             imágenes que el autor aprobó, que pasan a ser públicos en cada red y en este blog.
           </p>
 
