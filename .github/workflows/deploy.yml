@@ -94,9 +94,27 @@ jobs:
       # Pull requests: a version of the Worker that serves no traffic, reachable at its own preview
       # URL and at a stable alias for the branch (lowercase, a letter first, short enough for a
       # DNS label together with the Worker's name)
+      # A version can only be uploaded to a Worker that exists, and only `wrangler deploy` creates
+      # it: until the first production deploy (the first push to main), previews are skipped
+      - name: Check the Worker exists
+        id: worker
+        if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'pull_request'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          name=$(sed -n 's/^ *"name": *"\([^"]*\)".*/\1/p' wrangler.jsonc | head -1)
+          status=$(curl -s -o /dev/null -w '%{http_code}' -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$name/settings")
+          if [ "$status" = "200" ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=No preview yet::The Worker $name does not exist yet (API answered $status). The first push to main creates it with wrangler deploy; pull requests get a preview URL from then on."
+          fi
       - name: Preview alias
         id: alias
-        if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'pull_request'
+        if: steps.worker.outputs.exists == 'true'
         env:
           BRANCH: ${{ github.head_ref }}
         run: |
@@ -105,7 +123,7 @@ jobs:
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
       - name: Upload preview version
         id: preview
-        if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'pull_request'
+        if: steps.worker.outputs.exists == 'true'
         uses: cloudflare/wrangler-action@v4
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -113,7 +131,7 @@ jobs:
           packageManager: pnpm
           command: versions upload --preview-alias ${{ steps.alias.outputs.slug }} --message "PR #${{ github.event.number }} ${{ github.event.pull_request.head.sha }}"
       - name: Comment the preview URL
-        if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        if: steps.worker.outputs.exists == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         env:
           GH_TOKEN: ${{ github.token }}
           OUTPUT: ${{ steps.preview.outputs.command-output }}
