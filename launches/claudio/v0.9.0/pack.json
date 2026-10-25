@@ -86,8 +86,22 @@
     "text": "I built Claudio: it runs Claude Code as a service. The CLI sits behind a REST API and a web UI, so you can start and answer chats from a browser or phone, run agents in parallel git worktrees, and move work to another Claude account before a limit. It only uses the CLI's own interface. Self-hosted, MIT, v0.9.0, with limits written down. https://josegarrido.dev/en/claudio-run-claude-code-as-a-service/?ref=mastodon #ClaudeCode #SelfHosted #OpenSource #AIAgents"
   },
   "instagram": {
-    "caption": "Claude Code lives in a terminal. I wanted to start a chat from my phone and see which agent needs an answer.\n\nSo I built Claudio: it runs Claude Code as a service.\n\nWhat v0.9.0 does:\n- puts the Claude Code CLI behind a REST API and a web UI\n- streams chats and lets you answer permission prompts\n- runs agents in parallel, each in its own git worktree\n- moves work to another Claude account before a limit\n- shows the diff of what the agents changed\n\nIt only uses the interface the CLI ships for programs. Self-hosted, MIT. Linux desktop app, Docker image, or from source.\n\nHonest limits: one shared credential, no per-user permissions, auth off on source installs until you turn it on, Claude Code is the only provider.\n\nFull write-up and install commands: link in bio.\n\n#claudecode #claude #ai #aiagents #opensource #selfhosted #developer #devtools #coding #programming #typescript #nodejs #docker #linux #rest #api #git #automation #buildinpublic #indiedev",
-    "media": "demo-video"
+    "caption": "Claude Code lives in a terminal. I wanted it on my phone too.\n\nSo I built Claudio: the Claude Code CLI behind a REST API and a web UI. Chats from anywhere, agents in parallel git worktrees, and work that moves to the account with quota. Self-hosted and MIT.\n\nFull write-up: link in bio.\n\n#claudecode #selfhosted #opensource #aiagents #devtools",
+    "summary": "The Claude Code CLI behind a REST API and a web UI: chats from your phone, agents in parallel, several accounts.",
+    "slides": [
+      {
+        "title": "Chats from anywhere",
+        "text": "Start, follow and answer Claude Code chats from a browser, your phone or a curl."
+      },
+      {
+        "title": "Agents in parallel",
+        "text": "Each one in its own git worktree, merged into one branch and checked before you review it."
+      },
+      {
+        "title": "Several accounts",
+        "text": "New work moves to the Claude account that still has quota."
+      }
+    ]
   },
   "reddit": [
     {
