@@ -93,14 +93,78 @@ export function profilePage(url: URL, lang: Locale, name: string): JsonLdNode {
   };
 }
 
-/** Home › page, for an article or a standalone page */
-export function breadcrumbs(home: { name: string; url: URL }, page: { name: string; url: URL }): JsonLdNode {
+/** Home › … › page: every crumb is a page of its own, the last one this page */
+export function breadcrumbs(trail: Array<{ name: string; url: URL }>): JsonLdNode {
+  const page = trail.at(-1);
   return {
     '@type': 'BreadcrumbList',
-    '@id': `${page.url}#breadcrumbs`,
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: home.name, item: home.url.href },
-      { '@type': 'ListItem', position: 2, name: page.name, item: page.url.href },
-    ],
+    '@id': `${page?.url.href ?? site}#breadcrumbs`,
+    itemListElement: trail.map((crumb, i) => ({ '@type': 'ListItem', position: i + 1, name: crumb.name, item: crumb.url.href })),
   };
+}
+
+/** An index page (every project, every article) and the ordered list it shows */
+export function collectionPage(input: { url: URL; name: string; description: string; lang: Locale; items: Array<{ name: string; url: URL }> }): JsonLdNode {
+  return {
+    '@type': 'CollectionPage',
+    '@id': `${input.url}#page`,
+    url: input.url.href,
+    name: input.name,
+    description: input.description,
+    inLanguage: input.lang,
+    isPartOf: { '@id': WEBSITE_ID },
+    author: { '@id': PERSON_ID },
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: input.items.length,
+      itemListElement: input.items.map((item, i) => ({ '@type': 'ListItem', position: i + 1, name: item.name, url: item.url.href })),
+    },
+  };
+}
+
+/** A project's page: the page itself and the software it is about, joined to its launch articles */
+export function softwarePage(input: {
+  url: URL;
+  name: string;
+  description: string;
+  lang: Locale;
+  repo: string;
+  image?: URL;
+  version?: string;
+  licence?: string;
+  language?: string;
+  site?: string;
+  wikidata?: string;
+  articles: URL[];
+}): JsonLdNode[] {
+  const software = `${input.url}#software`;
+  return [
+    {
+      '@type': 'WebPage',
+      '@id': `${input.url}#page`,
+      url: input.url.href,
+      name: input.name,
+      description: input.description,
+      inLanguage: input.lang,
+      isPartOf: { '@id': WEBSITE_ID },
+      about: { '@id': software },
+      ...(input.image && { primaryImageOfPage: input.image.href }),
+    },
+    {
+      '@type': 'SoftwareSourceCode',
+      '@id': software,
+      name: input.name,
+      description: input.description,
+      url: input.url.href,
+      codeRepository: input.repo,
+      author: { '@id': PERSON_ID },
+      ...(input.image && { image: input.image.href }),
+      ...(input.version && { version: input.version }),
+      // schema.org wants the licence as a URL; SPDX has one for every id GitHub reports
+      ...(input.licence && { license: `https://spdx.org/licenses/${input.licence}.html` }),
+      ...(input.language && { programmingLanguage: input.language }),
+      ...((input.site || input.wikidata) && { sameAs: [input.site, input.wikidata].filter(Boolean) }),
+      ...(input.articles.length > 0 && { subjectOf: input.articles.map((url) => ({ '@id': `${url}#article` })) }),
+    },
+  ];
 }

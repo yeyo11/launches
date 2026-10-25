@@ -42,6 +42,11 @@ export function motifFor(seed: string): Motif {
   return ALL_MOTIFS[hash(seed) % ALL_MOTIFS.length] ?? 'orb';
 }
 
+/** Every project projects.yml lists, by its lowercase name */
+export function listedProjects(): string[] {
+  return Object.keys(KNOWN);
+}
+
 export function lookOf(project: string): ProjectLook {
   const name = project.toLowerCase();
   const known = Object.hasOwn(KNOWN, name) ? KNOWN[name] : undefined;

@@ -1,0 +1,31 @@
+---
+// The visible breadcrumbs of a page under the home: the same trail as its BreadcrumbList, so a
+// reader and a search engine see one structure
+import { STRINGS, type Locale } from '../site';
+
+interface Props {
+  lang: Locale;
+  /** The pages between the home and this one; this page itself is the last, unlinked */
+  trail: Array<{ name: string; href: string }>;
+  current: string;
+}
+
+const { lang, trail, current } = Astro.props;
+const t = STRINGS[lang];
+---
+
+<nav class="crumbs meta" aria-label={t.breadcrumbs}>
+  <ol>
+    <li><a href={`${import.meta.env.BASE_URL}${lang}/`}>{t.home}</a></li>
+    {trail.map((c) => <li><a href={c.href}>{c.name}</a></li>)}
+    <li aria-current="page">{current}</li>
+  </ol>
+</nav>
+
+<style>
+  .crumbs ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 2); }
+  .crumbs li + li::before { content: '/'; margin-inline-end: calc(var(--space) * 2); color: var(--line); }
+  .crumbs a { text-decoration: none; }
+  .crumbs a:hover { text-decoration: underline; }
+  .crumbs [aria-current] { color: var(--text); }
+</style>

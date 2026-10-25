@@ -32,9 +32,13 @@ interface Props {
   markdown?: string;
   /** Adds Home › this page to the JSON-LD graph, under this name */
   breadcrumb?: string;
+  /** The pages between Home and this one in the breadcrumbs, e.g. Projects on a project's page */
+  trail?: Array<{ name: string; href: string }>;
+  /** Which section of the navigation this page belongs to, marked as the current one */
+  section?: 'projects' | 'articles' | 'about';
 }
 
-const { lang, title, description, alternate, type = 'website', image, home = false, noindex = false, imageAlt, article, jsonLd = [], markdown, breadcrumb } = Astro.props;
+const { lang, title, description, alternate, type = 'website', image, home = false, noindex = false, imageAlt, article, jsonLd = [], markdown, breadcrumb, trail = [], section } = Astro.props;
 const t = STRINGS[lang];
 const base = import.meta.env.BASE_URL;
 const canonical = new URL(Astro.url.pathname, Astro.site);
@@ -43,8 +47,21 @@ const pageTitle = title === t.title ? SITE.author : `${title} | ${SITE.author}`;
 // A page without a launch image of its own is shared with the site's card, in its language
 const shareImage = new URL(image ?? `${base}og-default-${lang}.png`, Astro.site);
 const nodes = breadcrumb
-  ? [...jsonLd, breadcrumbs({ name: t.home, url: new URL(`${base}${lang}/`, Astro.site) }, { name: breadcrumb, url: canonical })]
+  ? [
+      ...jsonLd,
+      breadcrumbs([
+        { name: t.home, url: new URL(`${base}${lang}/`, Astro.site) },
+        ...trail.map((crumb) => ({ name: crumb.name, url: new URL(crumb.href, Astro.site) })),
+        { name: breadcrumb, url: canonical },
+      ]),
+    ]
   : jsonLd;
+// The site's sections, in the header and the footer alike
+const sections = [
+  { key: 'projects', href: pagePath('projects', lang), label: t.projects },
+  { key: 'articles', href: pagePath('articles', lang), label: t.articles },
+  { key: 'about', href: pagePath('about', lang), label: t.about },
+] as const;
 const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
 ---
 
@@ -109,8 +126,10 @@ const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
     <script type="application/ld+json" set:html={graph(nodes)} />
     <meta name="author" content={SITE.author} />
     <meta name="theme-color" content="#000000" />
-    <!-- Before the first paint, so a reader who chose day never sees a flash of night -->
+    <!-- Before the first paint, so a reader who chose day never sees a flash of night, and so the
+         styles that wait for a script (the tabs of a project's page) know one will run -->
     <script is:inline>
+      document.documentElement.classList.add('js');
       if (localStorage.getItem('theme') === 'day') document.documentElement.dataset.theme = 'day';
     </script>
     {
@@ -128,18 +147,18 @@ const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
   <body>
     <a class="skip" href="#main">{t.skip}</a>
     <header class="bar">
-      <nav class="left" aria-label={t.home}>
-        {home ? <a href={`${base}${lang}/`} aria-current="page">{t.title}</a> : <a class="wordmark serif" href={`${base}${lang}/`}><span class="sw">J</span>osé <span class="sw">G</span>arrido</a>}
-        <a href={pagePath('about', lang)}>{t.about}</a>
+      {home ? <a class="home" href={`${base}${lang}/`} aria-current="page">{t.title}</a> : <a class="wordmark serif" href={`${base}${lang}/`}><span class="sw">J</span>osé <span class="sw">G</span>arrido</a>}
+      <nav class="sections" aria-label={t.sections}>
+        {sections.map((s) => <a href={s.href} aria-current={section === s.key ? 'page' : undefined}>{s.label}</a>)}
         <a href={SITE.github} class="hide-s">GitHub</a>
       </nav>
-      <nav class="right">
-        {alternate && <a href={alternate.href} hreflang={alternate.lang} lang={alternate.lang} class="muted" data-set-lang={alternate.lang}>{t.readIn}</a>}
+      <div class="right">
+        {alternate && <a href={alternate.href} hreflang={alternate.lang} lang={alternate.lang} class="muted" data-set-lang={alternate.lang} aria-label={t.readIn}><span class="long">{t.readIn}</span><span class="short">{alternate.lang.toUpperCase()}</span></a>}
         <button type="button" class="theme" data-to-day={t.toDay} data-to-night={t.toNight} aria-label={t.toDay}>
           <svg class="sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>
           <svg class="moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"></path></svg>
         </button>
-      </nav>
+      </div>
     </header>
     <main id="main" tabindex="-1">
       <slot />
@@ -154,8 +173,8 @@ const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
       <div class="elsewhere">
         <Profiles />
         <p class="links">
+          {sections.map((s) => <a href={s.href} class="muted">{s.label}</a>)}
           <a href={`${base}${lang}/rss.xml`} class="muted">RSS</a>
-          <a href={pagePath('about', lang)} class="muted">{t.about}</a>
           <a href={pagePath('privacy', lang)} class="muted">{t.privacy}</a>
         </p>
       </div>
@@ -211,12 +230,19 @@ const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
     padding-inline: clamp(1.25rem, 3vw, 2.5rem);
     border-block-end: 1px solid var(--rule);
   }
-  .bar nav { display: flex; align-items: center; gap: calc(var(--space) * 7); font-size: var(--fs-ui); }
-  .bar a { text-decoration: none; }
-  .bar a:hover { text-decoration: underline; }
+  .bar nav, .bar .right { display: flex; align-items: center; gap: calc(var(--space) * 7); font-size: var(--fs-ui); }
+  .bar .sections { margin-inline-end: auto; }
+  .bar a { text-decoration: none; white-space: nowrap; }
+  .bar a:hover, .bar a[aria-current='page'] { text-decoration: underline; }
+  .bar .sections a[aria-current='page'] { text-decoration-thickness: 2px; text-underline-offset: 0.4em; }
   .wordmark { font-size: 1.6rem; line-height: 1; }
-  .bar a { white-space: nowrap; }
-  @media (max-width: 40rem) { .wordmark { font-size: 1.3rem; } .bar nav { gap: calc(var(--space) * 4); } }
+  /* On a phone the sections drop to a row of their own under the wordmark, so nothing overflows at 320 px */
+  @media (max-width: 48rem) {
+    .bar { flex-wrap: wrap; column-gap: calc(var(--space) * 4); row-gap: 0; padding-block-start: calc(var(--space) * 2); }
+    .wordmark { font-size: 1.3rem; }
+    .bar .right { gap: calc(var(--space) * 4); }
+    .bar .sections { order: 3; flex-basis: 100%; gap: calc(var(--space) * 6); min-height: 2.75rem; border-block-start: 1px solid var(--rule); }
+  }
   .theme {
     width: 44px; height: 44px; flex: none;
     display: grid; place-items: center;
@@ -226,7 +252,10 @@ const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
   .theme .moon { display: none; }
   :global([data-theme='day']) .theme .sun { display: none; }
   :global([data-theme='day']) .theme .moon { display: block; }
-  @media (max-width: 40rem) { .hide-s { display: none; } }
+  @media (max-width: 48rem) { .hide-s { display: none; } }
+  /* At 320 px the wordmark, the language and the theme only share one line with the language as its code */
+  .short { display: none; }
+  @media (max-width: 24rem) { .long { display: none; } .short { display: inline; } }
 
   .foot {
     display: flex; flex-wrap: wrap; justify-content: space-between; gap: calc(var(--space) * 10);

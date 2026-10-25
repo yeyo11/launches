@@ -1,0 +1,14 @@
+tagline:
+  en: Launch your GitHub projects without writing the announcement ten times.
+  es: Lanza tus proyectos de GitHub sin escribir el anuncio diez veces.
+description:
+  en: |
+    Shipcast turns a release into a launch. It reads the project's code, not just its README, writes a piece for every channel (the article on your blog in English and Spanish, dev.to, Bluesky, Mastodon, an Instagram carousel, a newsletter issue and drafts for Show HN and Reddit) and publishes each one once you approve it.
+
+    It runs on your own machine, records every launch so a campaign never goes out twice, and keeps what the code does apart from what is only planned. The articles on this blog are written with it.
+  es: |
+    Shipcast convierte una release en un lanzamiento. Lee el código del proyecto, no solo el README, escribe una pieza para cada canal (el artículo de tu blog en inglés y en español, dev.to, Bluesky, Mastodon, un carrusel de Instagram, un número de la newsletter y borradores para Show HN y Reddit) y publica cada una cuando la apruebas.
+
+    Corre en tu propia máquina, registra cada lanzamiento para que una campaña no salga dos veces y separa lo que hace el código de lo que solo está planeado. Los artículos de este blog están escritos con él.
+repo: https://github.com/yeyo11/shipcast
+wikidata: https://www.wikidata.org/wiki/Q141856152

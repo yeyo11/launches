@@ -1,0 +1,14 @@
+tagline:
+  en: Claude Code as a service, with a REST API, a web UI and agents in parallel.
+  es: Claude Code como servicio, con una API REST, una interfaz web y agentes en paralelo.
+description:
+  en: |
+    Claudio puts the Claude Code CLI behind a REST API and a web UI, so you can start, follow and answer Claude Code chats from a browser, your phone or a curl. The same server backs a Linux desktop app and an installable web app.
+
+    It runs agents in parallel, each in its own git worktree, merges their work on one branch and checks it before you review it, and it rotates between several Claude accounts so new work goes to the one that still has quota. Everything runs on your machine or your server, with your own Claude login.
+  es: |
+    Claudio pone la CLI de Claude Code detrás de una API REST y una interfaz web, así que puedes iniciar, seguir y responder conversaciones de Claude Code desde el navegador, el móvil o un curl. El mismo servidor sirve a una app de escritorio para Linux y a una web instalable.
+
+    Ejecuta agentes en paralelo, cada uno en su propio worktree de git, junta su trabajo en una rama y lo comprueba antes de que lo revises, y rota entre varias cuentas de Claude para que el trabajo nuevo vaya a la que aún tiene cuota. Todo corre en tu máquina o en tu servidor, con tu propio login de Claude.
+repo: https://github.com/yeyo11/claudio
+wikidata: https://www.wikidata.org/wiki/Q141856151

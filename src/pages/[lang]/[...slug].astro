@@ -4,7 +4,7 @@ import Base from '../../layouts/Base.astro';
 import Headline from '../../components/Headline.astro';
 import Subscribe from '../../components/Subscribe.astro';
 import Illo from '../../components/Illo.astro';
-import { SITE, STRINGS, formatDate, type Locale } from '../../site';
+import { RESERVED_SLUGS, SITE, STRINGS, formatDate, projectPath, type Locale } from '../../site';
 import { getPosts, projectName, slugOf, translationOf, urlOf, type Post } from '../../posts';
 import { lookOf } from '../../projects';
 import { Image } from 'astro:assets';
@@ -14,6 +14,9 @@ import { markdownPath } from '../../markdown';
 
 export async function getStaticPaths() {
   const all = await getPosts();
+  // An article at /en/projects/ would hide the project index (or the reverse): stop the build instead
+  const clash = all.find((post) => RESERVED_SLUGS.has(slugOf(post)));
+  if (clash) throw new Error(`${clash.id}: "${slugOf(clash)}" is the path of a page of the site; give the article another slug`);
   return all.map((post) => ({
     params: { lang: post.data.lang, slug: slugOf(post) },
     props: {
@@ -80,7 +83,7 @@ const jsonLd = [
       <div class="slab" style={`--c: ${colour}`}>
         {post.data.repo && (
           <p class="release">
-            <a href={post.data.repo}>{project}</a>
+            <a href={projectPath((project ?? '').toLowerCase(), lang)}>{project}</a>
             {post.data.version && <span>{post.data.version}</span>}
           </p>
         )}

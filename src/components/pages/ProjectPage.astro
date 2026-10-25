@@ -1,0 +1,376 @@
+---
+// A project's own page, at /en/projects/<name>/ and /es/proyectos/<name>/: its card (the look, what it
+// is, its figures from GitHub), its demo and screenshots, and every launch in this language as a
+// timeline. Two tabs, Overview and Launches, are plain anchors to two sections: without JavaScript
+// both show, one after the other; with it they become ARIA tabs.
+import { Picture } from 'astro:assets';
+import Base from '../../layouts/Base.astro';
+import Crumbs from '../Crumbs.astro';
+import Headline from '../Headline.astro';
+import Illo from '../Illo.astro';
+import { STRINGS, articlesPath, formatDate, pagePath, projectPath, type Locale } from '../../site';
+import { urlOf } from '../../posts';
+import { getProject } from '../../catalog';
+import { WIDTHS, publicImage } from '../../images';
+import { softwarePage } from '../../seo';
+
+interface Props {
+  lang: Locale;
+  name: string;
+}
+
+const { lang, name } = Astro.props;
+const t = STRINGS[lang];
+const other: Locale = lang === 'en' ? 'es' : 'en';
+const p = await getProject(name, lang);
+const canonical = new URL(projectPath(name, lang), Astro.site);
+// The newest launch image in either language is the page's share card
+const image = p.latest?.data.image;
+const summary = p.tagline ?? p.description[0] ?? t.projectsNote;
+const description = summary.length > 200 ? `${summary.slice(0, 197).trimEnd()}…` : summary;
+const jsonLd = softwarePage({
+  url: canonical,
+  name,
+  description,
+  lang,
+  repo: p.repo,
+  image: image ? new URL(image, Astro.site) : undefined,
+  version: p.version,
+  licence: p.figures.licence,
+  language: p.figures.language,
+  site: p.site,
+  wikidata: p.wikidata,
+  articles: p.posts.map((post) => new URL(urlOf(post), Astro.site)),
+});
+const repoLabel = (() => {
+  try {
+    return new URL(p.repo).pathname.replace(/^\/|\/$/g, '');
+  } catch {
+    return p.repo;
+  }
+})();
+const first = p.posts.at(-1);
+const fill = (text: string, values: Record<string, string>) => text.replace(/\{(\w+)\}/g, (_, k: string) => values[k] ?? '');
+const count = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
+const vertical = p.demo?.width && p.demo.height ? p.demo.height > p.demo.width : false;
+const shots = p.screenshots.map((s) => ({ ...s, image: publicImage(s.src) }));
+---
+
+<Base
+  lang={lang}
+  title={name}
+  description={description}
+  alternate={{ lang: other, href: projectPath(name, other) }}
+  image={image}
+  imageAlt={p.latest?.data.imageAlt}
+  jsonLd={jsonLd}
+  breadcrumb={name}
+  trail={[{ name: t.projects, href: pagePath('projects', lang) }]}
+  section="projects"
+>
+  <div class="wrap">
+    <div class="top"><Crumbs lang={lang} trail={[{ name: t.projects, href: pagePath('projects', lang) }]} current={name} /></div>
+
+    <header class="phead">
+      <span class="icon serif" style={`--c: ${p.look.colour}`} aria-hidden="true">{name.charAt(0).toUpperCase()}</span>
+      <div class="ptitle">
+        <h1 class="serif"><span class="sw">{name.charAt(0)}</span>{name.slice(1)}</h1>
+        {p.tagline && <p class="tagline serif">{p.tagline}</p>}
+        <ul class="figures meta">
+          {p.version && <li class="mono">{p.version}</li>}
+          {p.figures.stars !== undefined && <li><span aria-hidden="true">★ </span>{count(p.figures.stars, t.star, t.starsLower)}</li>}
+          {p.figures.licence && <li>{p.figures.licence}</li>}
+          {p.figures.language && <li>{p.figures.language}</li>}
+          {p.posts.length > 0 && <li>{count(p.posts.length, t.oneLaunch, t.launchCount)}</li>}
+        </ul>
+      </div>
+      <p class="actions">
+        <a class="pill solid" href={p.repo}>{t.viewSource}</a>
+        {p.site && <a class="pill" href={p.site}>{t.website}</a>}
+      </p>
+    </header>
+
+    <div class="tabbed" data-tabbed>
+      <nav class="tabs" aria-label={name} data-tabs>
+        <a href="#overview">{t.overview}</a>
+        <a href="#launches">{t.launches} <span class="count">{p.posts.length}</span></a>
+      </nav>
+
+      <div class="layout">
+        <div class="panels">
+          <section id="overview" class="panel" aria-labelledby="overview-title">
+            <h2 id="overview-title" class="sr-only">{t.overview}</h2>
+            <div class="lead-art"><Illo project={name} ratio="2 / 1" priority sizes="(min-width: 77.5rem) 53rem, (min-width: 60rem) calc(100vw - 24rem), calc(100vw - 2.5rem)" /></div>
+
+            <div class="block">
+              <h3 class="label">{t.whatItIs}</h3>
+              <div class="about serif">{p.description.map((para) => <p>{para}</p>)}</div>
+            </div>
+
+            {
+              p.demo && (
+                <div class="block">
+                  <h3 class="label">{t.demo}</h3>
+                  <figure class:list={['demo', { vertical }]}>
+                    {p.demo.kind === 'video' ? (
+                      <video controls muted playsinline preload="metadata" width={p.demo.width} height={p.demo.height} aria-label={fill(t.demoLabel, { x: name })}>
+                        <source src={`${p.demo.src}#t=0.1`} type={p.demo.src.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+                      </video>
+                    ) : (
+                      <img src={p.demo.src} alt={fill(t.demoLabel, { x: name })} width={p.demo.width} height={p.demo.height} loading="lazy" decoding="async" />
+                    )}
+                  </figure>
+                </div>
+              )
+            }
+
+            {
+              shots.length > 0 && (
+                <div class="block">
+                  <h3 class="label">{t.screenshots}</h3>
+                  <ul class="shots">
+                    {shots.map((s) => (
+                      <li>
+                        <a href={s.src}>
+                          {s.image ? (
+                            <Picture src={s.image} widths={WIDTHS.filter((w) => w <= s.image!.width)} sizes="(min-width: 60rem) 26rem, calc(100vw - 2.5rem)" formats={['avif', 'webp']} alt={fill(t.screenshotOf, { x: name, page: s.page })} loading="lazy" decoding="async" />
+                          ) : (
+                            <img src={s.src} alt={fill(t.screenshotOf, { x: name, page: s.page })} loading="lazy" decoding="async" />
+                          )}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            }
+
+            {
+              p.latest && (
+                <div class="block">
+                  <h3 class="label">{t.latestLaunch}</h3>
+                  <a class="latest" href={urlOf(p.latest)}>
+                    <span class="meta">{[p.latest.data.version, formatDate(p.latest.data.pubDate, lang)].filter(Boolean).join(' · ')}</span>
+                    <Headline as="span" text={p.latest.data.title} class="h-latest" />
+                    <span class="dek">{p.latest.data.description}</span>
+                    <span class="go">{t.readLaunch} →</span>
+                  </a>
+                </div>
+              )
+            }
+          </section>
+
+          <section id="launches" class="panel" aria-labelledby="launches-title">
+            <h2 id="launches-title" class="sr-only">{t.launches}</h2>
+            {
+              p.posts.length > 0 ? (
+                <ol class="timeline" style={`--c: ${p.look.colour}`}>
+                  {p.posts.map((post) => (
+                    <li class="entry">
+                      <div class="when">
+                        <time class="meta" datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, lang)}</time>
+                        {post.data.version && <span class="ver mono">{post.data.version}</span>}
+                      </div>
+                      <div class="what">
+                        <h3 class="entry-title"><a href={urlOf(post)}><Headline as="span" text={post.data.title} class="h-entry" /></a></h3>
+                        <p class="summary">{post.data.description}</p>
+                        {post.data.tags.length > 0 && (
+                          <ul class="tags meta">
+                            {post.data.tags.map((tag) => <li><a href={articlesPath(lang, { kind: 'topic', value: tag })}>#{tag}</a></li>)}
+                          </ul>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p class="none muted">
+                  {t.noLaunches} <a href={projectPath(name, other)} hreflang={other} lang={other}>{t.otherLanguage}</a>
+                </p>
+              )
+            }
+          </section>
+        </div>
+
+        <aside class="side" aria-label={t.details}>
+          <h2 class="label">{t.details}</h2>
+          <dl>
+            <div><dt>{t.repository}</dt><dd><a href={p.repo}>{repoLabel}</a></dd></div>
+            {p.version && (
+              <div>
+                <dt>{t.version}</dt>
+                <dd><span class="mono">{p.version}</span>{p.figures.releasedAt && <span class="muted"> · {formatDate(p.figures.releasedAt, lang)}</span>}</dd>
+              </div>
+            )}
+            {first && <div><dt>{t.sinceLaunch}</dt><dd>{formatDate(first.data.pubDate, lang)}</dd></div>}
+            {p.figures.licence && <div><dt>{t.licence}</dt><dd>{p.figures.licence}</dd></div>}
+            {p.figures.language && <div><dt>{t.language}</dt><dd>{p.figures.language}</dd></div>}
+            {p.figures.stars !== undefined && <div><dt>{t.stars}</dt><dd>{p.figures.stars}</dd></div>}
+            {p.site && <div><dt>{t.website}</dt><dd><a href={p.site}>{new URL(p.site).host}</a></dd></div>}
+          </dl>
+          {
+            p.tags.length > 0 && (
+              <>
+                <h2 class="label">{t.topics}</h2>
+                <ul class="chips">
+                  {p.tags.map((tag) => <li><a href={articlesPath(lang, { kind: 'topic', value: tag })}>{tag}</a></li>)}
+                </ul>
+              </>
+            )
+          }
+          <p class="meta back">
+            <a href={articlesPath(lang, { kind: 'project', value: name })}>{fill(t.articlesAbout, { x: name })}</a>
+            <a href={pagePath('projects', lang)}>{t.allProjects}</a>
+          </p>
+        </aside>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Progressive enhancement: the two anchors become ARIA tabs (arrow keys, Home and End, the URL's
+  // hash kept in step), and only the chosen section shows. Without this both sections show in order.
+  for (const wrapper of document.querySelectorAll<HTMLElement>('[data-tabbed]')) {
+    const list = wrapper.querySelector<HTMLElement>('[data-tabs]');
+    const links = [...(list?.querySelectorAll<HTMLAnchorElement>('a[href^="#"]') ?? [])];
+    const panels = links.map((a) => document.getElementById(a.hash.slice(1)));
+    if (!list || links.length === 0 || panels.some((panel) => !panel)) continue;
+    list.setAttribute('role', 'tablist');
+    const select = (index: number, focus = false) => {
+      links.forEach((link, i) => {
+        const on = i === index;
+        link.setAttribute('aria-selected', String(on));
+        link.tabIndex = on ? 0 : -1;
+        panels[i]!.hidden = !on;
+      });
+      if (focus) links[index]?.focus();
+    };
+    links.forEach((link, i) => {
+      const panel = panels[i]!;
+      link.id = `tab-${panel.id}`;
+      link.setAttribute('role', 'tab');
+      link.setAttribute('aria-controls', panel.id);
+      panel.setAttribute('role', 'tabpanel');
+      panel.setAttribute('aria-labelledby', link.id);
+      link.addEventListener('click', (event) => {
+        event.preventDefault();
+        select(i);
+        history.replaceState(null, '', link.hash);
+      });
+      link.addEventListener('keydown', (event) => {
+        const last = links.length - 1;
+        const to = { ArrowRight: i === last ? 0 : i + 1, ArrowLeft: i === 0 ? last : i - 1, Home: 0, End: last }[event.key];
+        if (to === undefined) return;
+        event.preventDefault();
+        select(to, true);
+        history.replaceState(null, '', links[to]!.hash);
+      });
+    });
+    const fromHash = () => Math.max(0, links.findIndex((a) => a.hash === location.hash));
+    select(fromHash());
+    window.addEventListener('hashchange', () => select(fromHash()));
+    wrapper.dataset.ready = '';
+  }
+</script>
+
+<style>
+  .top { padding-block: calc(var(--space) * 8) 0; }
+  .phead {
+    display: grid; grid-template-columns: auto minmax(0, 1fr); gap: calc(var(--space) * 4) calc(var(--space) * 6);
+    align-items: start; padding-block: calc(var(--space) * 7) calc(var(--space) * 9);
+  }
+  /* The project's icon: its flat colour as a sticker with the house's hard shadow, its initial in the wonky italic */
+  .icon {
+    width: 5.5rem; aspect-ratio: 1; display: grid; place-items: center;
+    background: var(--c); color: #000; border: 3px solid #000; border-radius: 1.1rem; box-shadow: 6px 6px 0 #000;
+    font-size: 3.4rem; line-height: 1; font-style: italic; font-variation-settings: 'WONK' 1, 'SOFT' 100;
+  }
+  /* The sticker's black outline would vanish on the night page; the paper colour keeps it a sticker */
+  :global(:root:not([data-theme='day'])) .icon { border-color: var(--text); box-shadow: 6px 6px 0 var(--text); }
+  .ptitle { display: flex; flex-direction: column; gap: calc(var(--space) * 2.5); min-width: 0; }
+  .ptitle h1 { margin: 0; font-size: clamp(2.6rem, 6vw, 4rem); line-height: 1; font-variation-settings: 'opsz' 144, 'SOFT' 30; overflow-wrap: anywhere; }
+  .tagline { margin: 0; font-size: clamp(1.15rem, 2vw, 1.35rem); line-height: 1.4; color: var(--body); max-width: 40rem; }
+  .figures { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 1) calc(var(--space) * 4); }
+  .figures li + li::before { content: '·'; margin-inline-end: calc(var(--space) * 4); color: var(--line); }
+  .mono { font-family: var(--font-mono); }
+  .actions { grid-column: 1 / -1; margin: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 3); }
+  @media (min-width: 48rem) {
+    .phead { grid-template-columns: auto minmax(0, 1fr) auto; }
+    .actions { grid-column: auto; align-self: center; }
+  }
+  .pill { min-height: 2.75rem; display: inline-grid; place-items: center; padding-inline: 1.25rem; border-radius: 999px; border: 1.5px solid var(--text); text-decoration: none; font-weight: 500; white-space: nowrap; }
+  .pill.solid { background: var(--text); color: var(--ground); font-weight: 600; }
+  .pill:hover { text-decoration: underline; }
+
+  .tabs { display: flex; gap: calc(var(--space) * 8); border-block-end: 1px solid var(--rule); }
+  .tabs a { display: inline-flex; align-items: center; gap: calc(var(--space) * 2); min-height: 3rem; text-decoration: none; font-weight: 500; color: var(--muted); border-block-end: 2px solid transparent; margin-block-end: -1px; }
+  .tabs a:hover { color: var(--text); }
+  .tabs a[aria-selected='true'] { color: var(--text); border-block-end-color: var(--text); }
+  .count { font-size: var(--fs-meta); padding: 0 0.45rem; border-radius: 999px; border: 1px solid var(--line); line-height: 1.4; }
+  /* With JavaScript on, the second section stays out of the first paint while the tabs set up, so
+     nothing jumps; data-ready hands control to the hidden attribute */
+  :global(:root.js) .tabbed:not([data-ready]) .panel + .panel { display: none; }
+
+  .layout { display: grid; gap: calc(var(--space) * 12); padding-block-start: calc(var(--space) * 9); }
+  @media (min-width: 60rem) { .layout { grid-template-columns: minmax(0, 1fr) 17rem; gap: calc(var(--space) * 14); } }
+  .panels, .panel { min-width: 0; }
+  .panel { display: flex; flex-direction: column; gap: calc(var(--space) * 10); }
+  .panel[hidden] { display: none; }
+  .panel:focus { outline: none; }
+  .block { display: flex; flex-direction: column; gap: calc(var(--space) * 4); }
+  .label { font-family: var(--font-sans); font-size: var(--fs-ui); font-weight: 600; margin: 0; padding-block-end: calc(var(--space) * 3); border-block-end: 1px solid var(--rule); }
+  .about { font-size: 1.2rem; line-height: 1.6; color: var(--body); font-variation-settings: 'SOFT' 30, 'opsz' 14; }
+  .about p { margin: 0 0 1em; }
+  .about p:last-child { margin: 0; }
+
+  .demo { margin: 0; }
+  .demo video, .demo img { display: block; width: 100%; height: auto; background: #000; border: 1px solid var(--rule); }
+  /* A phone recording stands in a phone's proportions, not stretched across the column */
+  .demo.vertical { display: flex; justify-content: center; padding: calc(var(--space) * 6); background: var(--raised); }
+  .demo.vertical video, .demo.vertical img { width: auto; max-width: 100%; max-height: 34rem; border-radius: 1.1rem; border: 3px solid #000; box-shadow: 6px 6px 0 #000; }
+  .shots { list-style: none; margin: 0; padding: 0; display: grid; gap: calc(var(--space) * 4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr)); }
+  .shots a { display: block; border: 1px solid var(--rule); }
+  .shots :global(img) { display: block; width: 100%; height: auto; }
+
+  .latest { display: flex; flex-direction: column; gap: calc(var(--space) * 2); padding: calc(var(--space) * 6); border: 1px solid var(--rule); text-decoration: none; }
+  .latest:hover { border-color: var(--line); }
+  .latest:hover :global(.headline) { text-decoration: underline; text-decoration-thickness: 1px; }
+  :global(.h-latest) { font-size: var(--fs-h3); line-height: 1.2; }
+  .dek { color: var(--body); line-height: 1.55; }
+  .go { font-weight: 600; font-size: var(--fs-meta); }
+
+  /* The launches as a changelog: the date and version on the left, a line through the dots */
+  .timeline { list-style: none; margin: 0; padding: 0; }
+  .entry { display: grid; gap: calc(var(--space) * 2) calc(var(--space) * 8); padding-block-end: calc(var(--space) * 10); }
+  .when { display: flex; flex-wrap: wrap; align-items: baseline; gap: calc(var(--space) * 3); }
+  .ver { font-size: var(--fs-meta); padding: 0.05rem 0.5rem; background: var(--c); color: var(--on-colour); }
+  .what { position: relative; display: flex; flex-direction: column; gap: calc(var(--space) * 3); padding-inline-start: calc(var(--space) * 7); border-inline-start: 1px solid var(--rule); }
+  .what::before { content: ''; position: absolute; left: -0.45rem; top: 0.5rem; width: 0.9rem; height: 0.9rem; border-radius: 50%; background: var(--c); border: 2px solid var(--ground); box-shadow: 0 0 0 1px var(--line); }
+  @media (min-width: 40rem) {
+    .entry { grid-template-columns: 9.5rem minmax(0, 1fr); }
+    .when { flex-direction: column; gap: calc(var(--space) * 2); padding-block-start: 0.35rem; }
+  }
+  .entry-title { margin: 0; }
+  .entry-title a { text-decoration: none; }
+  .entry-title a:hover { text-decoration: underline; text-decoration-thickness: 1px; }
+  :global(.h-entry) { font-size: clamp(1.5rem, 3vw, 1.9rem); line-height: 1.15; }
+  .summary { margin: 0; color: var(--body); font-size: 1.06rem; line-height: 1.6; }
+  .tags { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 1) calc(var(--space) * 4); }
+  .tags a { text-decoration: none; display: inline-block; padding-block: 0.3rem; }
+  .tags a:hover { text-decoration: underline; color: var(--text); }
+  .none { margin: 0; }
+
+  .side { display: flex; flex-direction: column; gap: calc(var(--space) * 4); align-self: start; }
+  @media (min-width: 60rem) { .side { position: sticky; top: calc(var(--space) * 6); } }
+  .side dl { margin: 0 0 calc(var(--space) * 4); display: flex; flex-direction: column; }
+  .side dl div { display: flex; justify-content: space-between; gap: calc(var(--space) * 4); padding-block: calc(var(--space) * 2.5); border-block-end: 1px solid var(--rule); font-size: var(--fs-meta); }
+  .side dt { color: var(--muted); }
+  .side dd { margin: 0; text-align: end; min-width: 0; overflow-wrap: anywhere; }
+  .side dt::first-letter { text-transform: uppercase; }
+  .chips { list-style: none; margin: 0 0 calc(var(--space) * 4); padding: 0; display: flex; flex-wrap: wrap; gap: calc(var(--space) * 2); }
+  .chips a { display: inline-flex; align-items: center; min-height: 2.25rem; padding-inline: 0.8rem; border: 1px solid var(--line); border-radius: 999px; text-decoration: none; font-size: var(--fs-meta); }
+  .chips a:hover { border-color: var(--text); }
+  .back { display: flex; flex-direction: column; gap: calc(var(--space) * 2); margin: 0; }
+  .back a { padding-block: 0.25rem; }
+</style>
