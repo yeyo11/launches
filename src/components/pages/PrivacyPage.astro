@@ -23,6 +23,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
     ? 'What Shipcast, this blog and its newsletter collect, how it is used, and how to have it deleted.'
     : 'Qué recogen Shipcast, este blog y su newsletter, para qué se usa y cómo pedir que se borre.'}
   alternate={{ lang: other, href: pagePath('privacy', other) }}
+  breadcrumb={lang === 'en' ? 'Privacy policy' : 'Política de privacidad'}
 >
   <article class="prose policy">
     {
@@ -64,7 +65,9 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
 
           <h2>This blog</h2>
           <p>
-            This blog sets no cookies and has no advertising or third-party trackers. It counts visits with{' '}
+            This blog has no advertising or third-party trackers, and sets one cookie only if you switch language:{' '}
+            <code>lang</code>, which holds <code>en</code> or <code>es</code> for a year so the home page opens in the
+            language you chose. It is sent only to this site and is never used for anything else. It counts visits with{' '}
             <a href="https://www.cloudflare.com/web-analytics/">Cloudflare Web Analytics</a>, which works without
             cookies or local storage and does not fingerprint visitors: it records the page you open, the site that
             sent you, your country and your browser and device type, and reports them only as totals. Cloudflare
@@ -72,7 +75,8 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
             <a href="https://www.cloudflare.com/privacypolicy/">privacy policy</a>. The numbers tell the author which
             launches and channels people find useful; they are never sold or shared. The blog remembers your choice
             of light or dark theme in your own browser (<code>localStorage</code>), and that value never leaves your
-            device. The site is hosted on GitHub Pages, which may keep technical logs such as IP addresses under the{' '}
+            device. The site is served by Cloudflare (and, while it moves there, by GitHub Pages), which may keep
+            technical logs such as IP addresses under the Cloudflare privacy policy above and the{' '}
             <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">
               GitHub privacy statement
             </a>
@@ -144,7 +148,9 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
 
           <h2>Este blog</h2>
           <p>
-            Este blog no usa cookies ni tiene publicidad ni rastreadores de terceros. Cuenta las visitas con{' '}
+            Este blog no tiene publicidad ni rastreadores de terceros, y solo pone una cookie si cambias de idioma:{' '}
+            <code>lang</code>, que guarda <code>en</code> o <code>es</code> durante un año para que la portada se abra
+            en el idioma que elegiste. Solo se envía a este sitio y no se usa para nada más. Cuenta las visitas con{' '}
             <a href="https://www.cloudflare.com/es-es/web-analytics/">Cloudflare Web Analytics</a>, que funciona sin
             cookies ni almacenamiento local y no toma huellas del navegador: registra la página que abres, la web que
             te ha traído, tu país y el tipo de navegador y dispositivo, y solo los muestra como totales. Cloudflare
@@ -152,7 +158,7 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
             <a href="https://www.cloudflare.com/es-es/privacypolicy/">política de privacidad</a>. Las cifras sirven
             para saber qué lanzamientos y canales le resultan útiles a la gente; nunca se venden ni se comparten.
             El blog recuerda en tu propio navegador si prefieres el tema claro o el oscuro (<code>localStorage</code>),
-            y ese valor nunca sale de tu dispositivo. El sitio está alojado en GitHub Pages, que puede guardar registros técnicos como direcciones IP según la{' '}
+            y ese valor nunca sale de tu dispositivo. El sitio lo sirve Cloudflare (y, mientras se completa el cambio, GitHub Pages), que puede guardar registros técnicos como direcciones IP según la política de privacidad de Cloudflare citada arriba y la{' '}
             <a href="https://docs.github.com/es/site-policy/privacy-policies/github-general-privacy-statement">
               declaración de privacidad de GitHub
             </a>

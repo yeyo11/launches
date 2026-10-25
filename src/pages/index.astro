@@ -1,19 +1,77 @@
 ---
-// Every page lives under a language and a static site cannot negotiate one, so the root sends
-// readers to English, the default, at once; each page links to its Spanish version.
-const target = `${import.meta.env.BASE_URL}en/`;
+// The bare domain. On Cloudflare the Worker (worker/index.ts) answers it with a 302 to /es/ or /en/
+// before this page is ever read; this page is what a local preview, or any host without the Worker,
+// serves instead. Its inline script makes the same choice before the first paint: the language the
+// reader picked on the site (the `lang` cookie), else the first of the browser's languages that the
+// site has, else English. Without JavaScript the reader picks one here.
+import '../styles/global.css';
+import { SITE } from '../site';
+
+const base = import.meta.env.BASE_URL;
+const href = (lang: string) => new URL(`${base}${lang}/`, Astro.site).href;
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>José Antonio Garrido</title>
-    <meta http-equiv="refresh" content={`0;url=${target}`} />
-    <meta name="robots" content="noindex" />
-    <link rel="canonical" href={new URL(target, Astro.site)} />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{SITE.author}</title>
+    <meta name="robots" content="noindex, follow" />
+    <link rel="alternate" hreflang="en" href={href('en')} />
+    <link rel="alternate" hreflang="es" href={href('es')} />
+    <link rel="alternate" hreflang="x-default" href={href('en')} />
+    <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
+    <link rel="icon" type="image/png" sizes="48x48" href={`${base}favicon-48.png`} />
+    <meta name="theme-color" content="#000000" />
+    <script is:inline>
+      (function () {
+        var chosen = /(?:^|;\s*)lang=(en|es)(?:;|$)/.exec(document.cookie);
+        var lang = chosen && chosen[1];
+        if (!lang) {
+          var wanted = navigator.languages && navigator.languages.length ? navigator.languages : [navigator.language || 'en'];
+          for (var i = 0; i < wanted.length && !lang; i++) {
+            var code = String(wanted[i]).toLowerCase().slice(0, 2);
+            if (code === 'es' || code === 'en') lang = code;
+          }
+        }
+        location.replace('/' + (lang || 'en') + '/');
+      })();
+      if (localStorage.getItem('theme') === 'day') document.documentElement.dataset.theme = 'day';
+    </script>
   </head>
   <body>
-    <a href={target}>English</a> · <a href={`${import.meta.env.BASE_URL}es/`}>Español</a>
+    <main class="pick">
+      <p class="name serif"><span class="sw">J</span>osé <span class="sw">G</span>arrido</p>
+      <p class="muted">Open-source tools I build, told the day they ship.</p>
+      <p class="muted" lang="es">Herramientas open source que construyo, contadas el día que salen.</p>
+      <nav class="langs" aria-label="Language · Idioma">
+        <a href={`${base}en/`} hreflang="en" lang="en" data-set-lang="en">English</a>
+        <a href={`${base}es/`} hreflang="es" lang="es" data-set-lang="es">Español</a>
+      </nav>
+    </main>
   </body>
 </html>
+
+<script>
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('a[data-set-lang]')) {
+    link.addEventListener('click', () => {
+      document.cookie = `lang=${link.dataset.setLang}; path=/; max-age=31536000; samesite=lax; secure`;
+    });
+  }
+</script>
+
+<style>
+  .pick {
+    min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: calc(var(--space) * 3); padding: 1.25rem; text-align: center;
+  }
+  .pick p { margin: 0; }
+  .name { font-size: clamp(3rem, 9vw, var(--fs-mast)); line-height: 1; font-variation-settings: 'opsz' 144, 'SOFT' 30; margin-block-end: calc(var(--space) * 4) !important; }
+  .langs { display: flex; gap: calc(var(--space) * 3); margin-block-start: calc(var(--space) * 8); }
+  .langs a {
+    min-height: 3.25rem; display: grid; place-items: center; padding-inline: 1.6rem; border-radius: 999px;
+    border: 1.5px solid var(--text); text-decoration: none; font-weight: 600;
+  }
+  .langs a:first-child { background: var(--text); color: var(--ground); }
+</style>

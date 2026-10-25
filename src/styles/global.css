@@ -25,6 +25,43 @@
   src: url('@fontsource-variable/fraunces/files/fraunces-latin-full-italic.woff2') format('woff2-variations');
 }
 
+/* Until Fraunces arrives the text is set in a local serif scaled to Fraunces' width and line, so the
+   swap does not reflow a paragraph (the cause of the layout shift on an article's summary). Each face
+   is measured against Fraunces at 400 on one long English and Spanish line: size-adjust matches the
+   width, the overrides are Fraunces' own ascent and descent (0.978 and 0.255 em) over that scale.
+   Times New Roman and its metric twins (Liberation Serif, Tinos) cover Apple, Windows and most Linux;
+   Noto Serif is Android's serif; DejaVu Serif is what a bare Linux has. */
+@font-face {
+  font-family: 'Fraunces Fallback';
+  src: local('Times New Roman'), local('TimesNewRomanPSMT'), local('Liberation Serif'), local('Tinos');
+  size-adjust: 93.9%;
+  ascent-override: 104.2%;
+  descent-override: 27.2%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Fraunces Fallback Noto';
+  src: local('Noto Serif'), local('NotoSerif-Regular'), local('Noto Serif Regular');
+  size-adjust: 78.9%;
+  ascent-override: 124%;
+  descent-override: 32.3%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Fraunces Fallback DejaVu';
+  src: local('DejaVu Serif'), local('DejaVuSerif');
+  size-adjust: 73.3%;
+  ascent-override: 133.4%;
+  descent-override: 34.8%;
+  line-gap-override: 0%;
+}
+/* Instrument Sans is within half a percent of Arial's width (Liberation Sans on Linux) */
+@font-face {
+  font-family: 'Instrument Sans Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('Arimo'), local('Helvetica');
+  size-adjust: 100.3%;
+}
+
 :root {
   color-scheme: dark;
   --ground: #000000; /* the page */
@@ -38,8 +75,8 @@
   --band: #3b4bf0; /* the author's own band on the home page */
   --on-band: #ffffff; /* 5.6:1 on the band */
 
-  --font-serif: 'Fraunces', Georgia, serif;
-  --font-sans: 'Instrument Sans Variable', system-ui, sans-serif;
+  --font-serif: 'Fraunces', 'Fraunces Fallback', 'Fraunces Fallback Noto', 'Fraunces Fallback DejaVu', Georgia, serif;
+  --font-sans: 'Instrument Sans Variable', 'Instrument Sans Fallback', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
   --fs-meta: 0.875rem; /* 14 */

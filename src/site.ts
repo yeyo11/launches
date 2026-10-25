@@ -61,6 +61,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     toNight: 'Dark theme',
     privacy: 'Privacy',
     home: 'Home',
+    skip: 'Skip to content',
     intro:
       "I'm José, a full-stack developer. I build tools for developers, mostly in TypeScript, and this is where I tell you about each one: what it solves and how to try it.",
     codeOn: 'The code is on GitHub as',
@@ -103,6 +104,7 @@ export const STRINGS: Record<Locale, Record<string, string>> = {
     toNight: 'Tema oscuro',
     privacy: 'Privacidad',
     home: 'Inicio',
+    skip: 'Saltar al contenido',
     intro:
       'Soy José, desarrollador full-stack. Construyo herramientas para desarrolladores, casi siempre en TypeScript, y aquí te cuento cada una: qué resuelve y cómo probarla.',
     codeOn: 'El código está en GitHub como',

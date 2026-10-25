@@ -7,6 +7,10 @@ import Illo from '../../components/Illo.astro';
 import { SITE, STRINGS, formatDate, type Locale } from '../../site';
 import { getPosts, projectName, slugOf, translationOf, urlOf, type Post } from '../../posts';
 import { lookOf } from '../../projects';
+import { Image } from 'astro:assets';
+import { publicImage } from '../../images';
+import { blogPosting } from '../../seo';
+import { markdownPath } from '../../markdown';
 
 export async function getStaticPaths() {
   const all = await getPosts();
@@ -37,12 +41,42 @@ const project = projectName(post.data.repo);
 const { colour } = lookOf(project ?? post.data.translationKey);
 const words = post.body?.split(/\s+/).length ?? 0;
 const minutes = Math.max(1, Math.round(words / 220));
+const avatar = publicImage('/author.jpg');
+const canonical = new URL(urlOf(post), Astro.site);
+const modified = post.data.updatedDate ?? post.data.pubDate;
+const jsonLd = [
+  blogPosting({
+    url: canonical,
+    title: post.data.title,
+    description: post.data.description,
+    image: new URL(post.data.image ?? `/og-default-${lang}.png`, Astro.site),
+    published: post.data.pubDate,
+    modified,
+    lang,
+    tags: post.data.tags,
+    repo: post.data.repo,
+    project,
+    version: post.data.version,
+  }),
+];
 ---
 
-<Base lang={lang} title={post.data.title} description={post.data.description} alternate={alternate} type="article" image={post.data.image}>
+<Base
+  lang={lang}
+  title={post.data.title}
+  description={post.data.description}
+  alternate={alternate}
+  type="article"
+  image={post.data.image}
+  imageAlt={post.data.imageAlt}
+  article={{ published: post.data.pubDate, modified, tags: post.data.tags }}
+  jsonLd={jsonLd}
+  breadcrumb={post.data.title}
+  markdown={markdownPath(post)}
+>
   <article>
     <header class="wrap hero">
-      <Illo project={project ?? post.data.translationKey} ratio="2 / 1" cover={post.data.cover} />
+      <Illo project={project ?? post.data.translationKey} ratio="2 / 1" cover={post.data.cover} alt={post.data.coverAlt} priority sizes="(min-width: 77.5rem) 75rem, calc(100vw - 2.5rem)" />
       <div class="slab" style={`--c: ${colour}`}>
         {post.data.repo && (
           <p class="release">
@@ -56,7 +90,7 @@ const minutes = Math.max(1, Math.round(words / 220));
     </header>
 
     <div class="byline">
-      <img class="avatar" src={`${import.meta.env.BASE_URL}author.jpg`} alt="" width="44" height="44" />
+      {avatar ? <Image class="avatar" src={avatar} alt="" width={44} height={44} densities={[1, 2, 3]} /> : <img class="avatar" src={`${import.meta.env.BASE_URL}author.jpg`} alt="" width="44" height="44" />}
       <span>
         <span class="name">{SITE.author}</span>
         <span class="meta"><time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate, lang)}</time> · {minutes} min</span>
@@ -84,7 +118,7 @@ const minutes = Math.max(1, Math.round(words / 220));
         <div class="more-grid">
           {more.map((p) => (
             <a href={urlOf(p)}>
-              <Illo project={projectName(p.data.repo) ?? p.data.translationKey} seed={p.id} cover={p.data.cover} />
+              <Illo project={projectName(p.data.repo) ?? p.data.translationKey} seed={p.id} cover={p.data.cover} sizes="(min-width: 77.5rem) 24rem, (min-width: 40rem) 50vw, calc(100vw - 2.5rem)" />
               <span class="meta">{[projectName(p.data.repo), p.data.version].filter(Boolean).join(' · ')}</span>
               <Headline as="h3" text={p.data.title} class="h-card" />
             </a>

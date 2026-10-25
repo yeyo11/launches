@@ -1,4 +1,8 @@
 // Checks every text/background pair of the identity against WCAG 2.x AA: node scripts/contrast.mjs
+import githubDark from '@shikijs/themes/github-dark';
+import githubLight from '@shikijs/themes/github-light';
+import { CODE_COLOURS } from '../src/code-colours.mjs';
+
 const lum = (hex) => {
   const [r, g, b] = hex.match(/\w\w/g).map((c) => parseInt(c, 16) / 255).map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
@@ -18,6 +22,12 @@ for (const [theme, t] of Object.entries({ night, day })) {
 }
 for (const [name, c] of Object.entries(colours)) pairs.push(['both', 'black text', '#000000', name, c, 4.5]);
 pairs.push(['both', 'white text', '#FFFFFF', 'band', '#3B4BF0', 4.5]);
+
+// Every foreground of the code themes, after the swaps in src/code-colours.mjs, on the code background
+for (const [theme, shiki, swaps, t] of [['night', githubDark, CODE_COLOURS.dark, night], ['day', githubLight, CODE_COLOURS.light, day]]) {
+  const used = new Set([shiki.fg, ...(shiki.tokenColors ?? []).map((tc) => tc.settings?.foreground)].filter(Boolean).map((c) => c.slice(0, 7).toUpperCase()));
+  for (const c of used) pairs.push([theme, `code ${c}`, swaps[c] ?? c, 'raised', t.raised, 4.5]);
+}
 
 let failed = 0;
 console.log('| Theme | Foreground | Background | Ratio | Needs | Result |\n| --- | --- | --- | --- | --- | --- |');

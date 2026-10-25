@@ -25,3 +25,9 @@ pnpm-debug.log*
 
 # Playwright MCP screenshots
 .playwright-mcp/
+
+# wrangler dev state
+.wrangler/
+
+# Lighthouse CI reports
+.lighthouseci/

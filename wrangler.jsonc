@@ -1,0 +1,26 @@
+// The blog on Cloudflare Workers static assets: dist/ (pnpm build) served from the edge, with a small
+// Worker (worker/index.ts) in front of the few paths that need a decision. The custom domain
+// (josegarrido.dev) is attached in the Cloudflare dashboard at the cutover, not here, so a deploy
+// from CI never moves the domain on its own.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "josegarrido-dev",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-20",
+  // <version>-josegarrido-dev.<account>.workers.dev: the preview of every pull request
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    // Astro writes /en/about/index.html for trailingSlash: 'always'; /en/about redirects to /en/about/
+    "html_handling": "force-trailing-slash",
+    // dist/404.html, with the status 404, for any path that does not exist
+    "not_found_handling": "404-page",
+    // The Worker runs first only where it decides something: / (the language), the language trees
+    // (Markdown for Accept: text/markdown, and redirects there). Hashed assets, images, feeds and
+    // the rest never invoke it.
+    "run_worker_first": ["/", "/en/*", "/es/*", "!/en/rss.xml", "!/es/rss.xml", "!/*.md"]
+  },
+  "observability": { "enabled": true }
+}
