@@ -5,6 +5,8 @@ import Subscribe from '../../components/Subscribe.astro';
 import Illo from '../../components/Illo.astro';
 import { LOCALES, SITE, STRINGS, formatDate, pagePath, type Locale } from '../../site';
 import { getPosts, projectName, urlOf, type Post } from '../../posts';
+import { Image } from 'astro:assets';
+import { publicImage } from '../../images';
 
 export function getStaticPaths() {
   return LOCALES.map((lang) => ({ params: { lang } }));
@@ -14,6 +16,7 @@ const lang = Astro.params.lang as Locale;
 const t = STRINGS[lang];
 const posts = await getPosts(lang);
 const other: Locale = lang === 'en' ? 'es' : 'en';
+const avatar = publicImage('/author.jpg');
 
 // The front page reads like a magazine: the newest launch leads, the next two flank it, the four
 // after that are listed on the right, and anything older goes to the grid below.
@@ -49,7 +52,7 @@ const meta = (post: Post) =>
           <div class="side">
             {side.map((post) => (
               <a class="story" href={urlOf(post)}>
-                <Illo project={projectName(post.data.repo) ?? post.data.translationKey} seed={post.id} cover={post.data.cover} />
+                <Illo project={projectName(post.data.repo) ?? post.data.translationKey} seed={post.id} cover={post.data.cover} sizes="(min-width: 64rem) 15.75rem, calc(100vw - 2.5rem)" />
                 <span class="meta">{meta(post)}</span>
                 <Headline as="h2" text={post.data.title} class="h-side" />
               </a>
@@ -57,7 +60,7 @@ const meta = (post: Post) =>
           </div>
         )}
         <a class="lead" href={urlOf(lead)}>
-          <Illo project={projectName(lead.data.repo) ?? lead.data.translationKey} cover={lead.data.cover} />
+          <Illo project={projectName(lead.data.repo) ?? lead.data.translationKey} cover={lead.data.cover} priority sizes="(min-width: 77.5rem) 36rem, (min-width: 64rem) calc(100vw - 39rem), calc(100vw - 2.5rem)" />
           <span class="meta">{meta(lead)}</span>
           <Headline as="h2" text={lead.data.title} class="h-lead" />
           <p class="dek serif">{lead.data.description}</p>
@@ -69,7 +72,7 @@ const meta = (post: Post) =>
               {recent.map((post) => (
                 <li>
                   <a href={urlOf(post)}>
-                    <Illo project={projectName(post.data.repo) ?? post.data.translationKey} seed={post.id} cover={post.data.cover} ratio="1 / 1" class="thumb" />
+                    <Illo project={projectName(post.data.repo) ?? post.data.translationKey} seed={post.id} cover={post.data.cover} ratio="1 / 1" class="thumb" sizes="4rem" />
                     <span>
                       <Headline as="span" text={post.data.title} class="h-recent" />
                       <span class="meta">{meta(post)}</span>
@@ -95,7 +98,7 @@ const meta = (post: Post) =>
         <div class="grid">
           {older.map((post) => (
             <a class="story" href={urlOf(post)}>
-              <Illo project={projectName(post.data.repo) ?? post.data.translationKey} seed={post.id} cover={post.data.cover} />
+              <Illo project={projectName(post.data.repo) ?? post.data.translationKey} seed={post.id} cover={post.data.cover} sizes="(min-width: 40rem) 33vw, calc(100vw - 2.5rem)" />
               <span class="meta">{meta(post)}</span>
               <Headline as="h3" text={post.data.title} class="h-side" />
             </a>
@@ -114,7 +117,7 @@ const meta = (post: Post) =>
       {
         [...projects].map(([name, project]) => (
           <div class="project">
-            <a href={urlOf(project.latest)} tabindex="-1" aria-hidden="true"><Illo project={name} /></a>
+            <a href={urlOf(project.latest)} tabindex="-1" aria-hidden="true"><Illo project={name} sizes="(min-width: 77.5rem) 18rem, (min-width: 40rem) 50vw, calc(100vw - 2.5rem)" /></a>
             <h3 class="serif"><span class="sw">{name.charAt(0)}</span>{name.slice(1)}</h3>
             <p class="muted">{project.count} {project.count === 1 ? t.oneLaunch : t.launchCount}</p>
             <p class="links"><a href={urlOf(project.latest)}>{project.latest.data.version ?? t.release}</a><a href={project.repo} class="muted">{t.source}</a></p>
@@ -128,7 +131,7 @@ const meta = (post: Post) =>
   <section class="band">
     <div class="wrap band-in">
       <div>
-        <img class="author" src={`${import.meta.env.BASE_URL}author.jpg`} alt={SITE.author} width="112" height="112" />
+        {avatar ? <Image class="author" src={avatar} alt={SITE.author} width={112} height={112} densities={[1, 2, 3]} /> : <img class="author" src={`${import.meta.env.BASE_URL}author.jpg`} alt={SITE.author} width="112" height="112" />}
         <Headline as="h2" text={t.bandTitle} class="h-band" />
         <p>{t.intro}</p>
         <p><a href={pagePath('about', lang)} class="about-link">{t.aboutLink} →</a></p>

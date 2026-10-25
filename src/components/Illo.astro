@@ -2,7 +2,9 @@
 // The house illustration, drawn in CSS: a flat field of the project's colour, a halftone texture and
 // one bold object (the project's motif) with a hard offset shadow. It stands in until Shipcast
 // generates the real cover with the same rules, and keeps every launch illustrated meanwhile.
+import { Picture } from 'astro:assets';
 import { lookOf, motifFor, type ProjectLook } from '../projects';
+import { WIDTHS, publicImage } from '../images';
 
 interface Props {
   project: string;
@@ -15,24 +17,47 @@ interface Props {
   /** A look of its own, for a page that belongs to no project (the 404) */
   look?: ProjectLook;
   class?: string;
+  /** The page's largest image above the fold: fetched first instead of lazily */
+  priority?: boolean;
+  /** How wide the image is drawn, for the browser to pick a file (the `sizes` attribute) */
+  sizes?: string;
+  /** What a cover shows, when it says something the page around it does not; else decorative */
+  alt?: string;
 }
 
-const { project, seed, ratio = '3 / 2', cover: own, look: given, class: className } = Astro.props;
+const { project, seed, ratio = '3 / 2', cover: own, look: given, class: className, priority = false, sizes = '(min-width: 64rem) 25rem, calc(100vw - 2.5rem)', alt = '' } = Astro.props;
 const look = given ?? lookOf(project);
 const cover = own ?? look.cover;
 const colour = look.colour;
 const motif = seed ? motifFor(seed) : look.motif;
 const bars = [30, 55, 80, 45, 95, 70, 40, 88, 60, 100, 52, 76, 34, 64, 42];
+const image = cover ? publicImage(cover) : undefined;
+const loading = priority ? { loading: 'eager', fetchpriority: 'high' } as const : { loading: 'lazy', decoding: 'async' } as const;
 ---
 
 {
-  cover && (
+  image && (
+    <Picture
+      src={image}
+      widths={WIDTHS.filter((w) => w <= image.width)}
+      sizes={sizes}
+      formats={['avif', 'webp']}
+      class:list={['illo', 'cover', className]}
+      pictureAttributes={{ class: 'illo-picture' }}
+      alt={alt}
+      {...loading}
+      style={`--c: ${colour}; aspect-ratio: ${ratio}`}
+    />
+  )
+}
+{
+  // A cover Astro cannot process (outside the folders in src/images.ts) is served as it is
+  cover && !image && (
     <img
       class:list={['illo', 'cover', className]}
       src={`${import.meta.env.BASE_URL}${cover.replace(/^\//, '')}`}
-      alt=""
-      loading="lazy"
-      decoding="async"
+      alt={alt}
+      {...loading}
       style={`--c: ${colour}; aspect-ratio: ${ratio}`}
     />
   )
@@ -115,6 +140,7 @@ const bars = [30, 55, 80, 45, 95, 70, 40, 88, 60, 100, 52, 76, 34, 64, 42];
 
 <style>
   /* A cover keeps its subject, which the drawings place right of centre, in every frame */
+  :global(.illo-picture) { display: contents; }
   .cover { display: block; width: 100%; height: auto; object-fit: cover; object-position: 72% 50%; background: var(--c); }
   .illo { --paper: #f7f5ef; position: relative; width: 100%; overflow: hidden; background: var(--c); container-type: inline-size; }
   .illo i { display: block; }

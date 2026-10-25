@@ -16,6 +16,8 @@ export default defineConfig({
   redirects: { '/es/privacy/': '/es/privacidad/' },
   // Both code themes ship as CSS variables and follow the page's theme; codeColours() lifts the few
   // colours that fail AA on the code background (checked by scripts/contrast.mjs)
+  // Each page carries its own CSS: no stylesheet blocks the first paint, and the site is small
+  build: { inlineStylesheets: 'always' },
   markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [codeColours()] } },
   i18n: {
     locales: ['en', 'es'],

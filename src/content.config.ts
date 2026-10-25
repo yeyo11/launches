@@ -21,8 +21,12 @@ const posts = defineCollection({
     tags: z.array(z.string()).default([]),
     // The launch image Shipcast renders into public/launches/<project>/<ref>/, for og:image
     image: z.string().startsWith('/').optional(),
+    // What the launch image shows, for og:image:alt; without it, the title
+    imageAlt: z.string().optional(),
     // A drawn cover for this article; without it, the project's cover or the CSS illustration
     cover: z.string().startsWith('/').optional(),
+    // What the cover shows, when it says more than the headline beside it; without it, decorative
+    coverAlt: z.string().optional(),
     draft: z.boolean().default(false),
   }),
 });
