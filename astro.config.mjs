@@ -2,7 +2,7 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 import { codeColours } from './src/code-colours.mjs';
-import { sitemapDetails } from './src/sitemap.mjs';
+import { FILTERED_INDEX, sitemapDetails } from './src/sitemap.mjs';
 import { headersFile } from './src/headers.mjs';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { parse } from 'yaml';
@@ -31,11 +31,12 @@ export default defineConfig({
   site,
   trailingSlash: 'always',
   // The root only picks a language, /subscribed/ is where the newsletter's confirmation lands and
-  // /es/privacy/ is a redirect: none belongs in search results
+  // /es/privacy/ is a redirect, and a filtered article index repeats the full one: none belongs in
+  // search results
   integrations: [
     cloudflareHeaders,
     sitemap({
-      filter: (page) => page !== `${site}/` && page !== `${site}/es/privacy/` && !/\/(subscribed|suscrito)\/$/.test(page),
+      filter: (page) => page !== `${site}/` && page !== `${site}/es/privacy/` && !/\/(subscribed|suscrito)\/$/.test(page) && !FILTERED_INDEX.test(page),
       serialize: (item) => {
         const known = details.get(item.url);
         return known ? { ...item, ...(known.lastmod && { lastmod: known.lastmod }), ...(known.links.length > 0 && { links: known.links }) } : item;
@@ -62,7 +63,10 @@ export default defineConfig({
         `form-action 'self' ${formHosts}`,
         "base-uri 'self'",
         "object-src 'none'",
-        'upgrade-insecure-requests',
+        // Left out only for a build previewed over plain HTTP on another machine (PREVIEW_HTTP=1, e.g.
+        // across a Tailscale address), where it would send every image and font to an https:// that
+        // does not answer; localhost is exempt from it anyway
+        ...(process.env.PREVIEW_HTTP === '1' ? [] : /** @type {const} */ (['upgrade-insecure-requests'])),
       ],
       scriptDirective: { resources: ["'self'", 'https://static.cloudflareinsights.com'] },
       styleDirective: { resources: [{ resource: "'self'", kind: 'element' }, { resource: "'unsafe-inline'", kind: 'attribute' }] },
