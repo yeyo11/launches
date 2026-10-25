@@ -17,7 +17,9 @@ export function person(): JsonLdNode {
     url: `${site}/`,
     image: `${site}/author.jpg`,
     jobTitle: 'Full-stack developer',
-    sameAs: SITE.profiles.map(([, url]) => url),
+    // The Wikidata item is what tells this José Antonio Garrido apart from the namesakes in Google's
+    // Knowledge Graph; it is not a profile to show, so it lives here and not in SITE.profiles
+    sameAs: [...SITE.profiles.map(([, url]) => url), 'https://www.wikidata.org/wiki/Q141856101'],
   };
 }
 
