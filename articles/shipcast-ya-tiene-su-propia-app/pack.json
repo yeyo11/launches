@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "kind": "launch",
+  "project": {
+    "name": "Shipcast ya tiene su propia app",
+    "repo": "https://github.com/yeyo11/launches"
+  },
+  "analysis": {
+    "summary": "Shipcast, antes solo un comando que preparaba borradores de lanzamiento, ahora tiene una app web para gestionar lanzamientos, cuentas, borradores y artículos propios.",
+    "implemented": [
+      "App web de Shipcast, según el artículo"
+    ],
+    "planned": [],
+    "documentedOnly": [],
+    "limitations": []
+  },
+  "article": {
+    "tags": [
+      "devtools",
+      "opensource",
+      "automation"
+    ],
+    "en": {
+      "slug": "shipcast-now-has-its-own-app",
+      "title": "Shipcast now has its own app",
+      "description": "Shipcast goes from a command to a web app: launches, accounts, drafts and your own articles, translated and published to the blog, with or without review.",
+      "markdown": "Until today, Shipcast was a command: `shipcast launch` prepared the drafts for a launch and I reviewed them in a GitHub pull request.\n\nNow it has a web app. From it I see every launch and which channels it was published on, connect the accounts for each network (with OAuth on Mastodon and Instagram, and the secrets in the system keychain), review and edit the drafts before approving them, and launch a repo by choosing its release.\n\nI can also write an article of my own, like this one. Shipcast translates it, prepares a piece for each channel I choose and publishes it on the blog, with review or without it.\n\nThis article is the proof: I wrote it in the app and published it without going through a pull request."
+    },
+    "es": {
+      "slug": "shipcast-ya-tiene-su-propia-app",
+      "title": "Shipcast ya tiene su propia app",
+      "description": "Shipcast pasa de ser un comando a tener una app web: lanzamientos, cuentas, borradores y artículos propios traducidos y publicados en el blog, con o sin revisión.",
+      "markdown": "Hasta hoy, Shipcast era un comando: `shipcast launch` preparaba los borradores de un lanzamiento y yo los revisaba en un pull request de GitHub.\n\nAhora tiene una app web. Desde ella veo cada lanzamiento y en qué canales se publicó, conecto las cuentas de cada red (con OAuth en Mastodon e Instagram, y los secretos en el llavero del sistema), reviso y edito los borradores antes de aprobarlos, y lanzo un repo eligiendo su release.\n\nTambién puedo escribir un artículo propio, como este. Shipcast lo traduce, prepara una pieza para cada canal que elija y lo publica en el blog, con revisión o sin ella.\n\nEste artículo es la prueba: lo he escrito en la app y lo he publicado sin pasar por un pull request."
+    }
+  },
+  "bluesky": {
+    "lang": "en",
+    "text": "Shipcast used to be one command. Now it's a web app: see each launch and its channels, connect accounts, edit drafts before approving, or write your own article and publish it with or without review. This post came from it. https://josegarrido.dev/en/shipcast-now-has-its-own-app/?ref=bluesky"
+  }
+}

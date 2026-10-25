@@ -1,0 +1,18 @@
+# The channels chosen in Shipcast for this article
+enabled: true
+brand: personal
+publishing:
+  blog: approval
+  devto: off
+  bluesky: approval
+  mastodon: off
+  instagram: off
+  reddit: off
+  hackerNews: off
+  hashnode: off
+  linkedin: off
+  x: off
+  productHunt: off
+  newsletter: off
+  telegram: off
+  discord: off
