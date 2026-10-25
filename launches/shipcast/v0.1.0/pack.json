@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "kind": "launch",
+  "project": {
+    "name": "Shipcast",
+    "repo": "https://github.com/yeyo11/shipcast",
+    "version": "v0.1.0"
+  },
+  "analysis": {
+    "summary": "Shipcast automates the launch of GitHub projects: on a release (or a manual launch) it has Claude, through claudio, read the repository, generate a content pack for every channel and publish each piece once, after the owner approves it. It is a TypeScript pnpm monorepo with a CLI and a web app, built for a developer who ships open-source projects and does not want to write the same announcement ten times.",
+    "implemented": [
+      "Per-repo opt-in through .github/launch.yml (Zod schema, line-aware errors), with a mode per channel: auto, approval, manual or off; Hacker News, Product Hunt and Reddit only accept manual or off",
+      "Pre-flight check (pnpm shipcast preflight owner/repo): published release, valid and enabled launch.yml, recognised license, README and a reachable demo",
+      "Launch detection by polling the account's public GitHub events (pnpm shipcast watch, default 300 s, minimum 60 s) and manual launch (pnpm shipcast launch owner/repo [--ref tag])",
+      "Launch registry on node:sqlite so each launch and each channel is published once; publish --retry <channel> gives a failed channel another chance",
+      "claudio as the AI provider; the content pack is a structured JSON validated against a draft-07 JSON Schema, with an analysis that separates implemented, planned and documented-only features",
+      "Drafts delivered as a pull request in the launches repo (the blog's source); merging it publishes, or publish straight away without review",
+      "Connectors over fetch with no SDKs: blog (commit to the launches repo), dev.to, Hashnode, Bluesky, Mastodon, Instagram (carousel, story, comment), Telegram, Discord, Brevo newsletter; a check() per connector; Mastodon and Instagram OAuth flows",
+      "Hashnode, Telegram and Discord connectors are built and tested with fakes only; the live test waits on accounts (per docs/status.md)",
+      "Assets package (Satori and resvg): launch image, Instagram carousel and story, generated covers, demo as a video",
+      "Metrics: Cloudflare Web Analytics and Search Console readers, per-post numbers, collected every 6 h by watch or with pnpm shipcast metrics",
+      "Web app (pnpm app, TanStack Start): Launches, launch review (edit, approve, retry), Launch a repo, Write (own article translated and published the same way) and Channels (accounts per brand, check, OAuth, import from .env); GitHub sign-in limited to allowed logins; secrets in the OS keychain",
+      "Brand separation: accounts per brand, a launch only uses its own brand's",
+      "pnpm shipcast status lists recent launches and configured channels; Telegram notices when drafts wait and when a launch is out",
+      "Used for a real launch: claudio v0.9.0 on blog (en/es), dev.to, Bluesky, Mastodon, Instagram and newsletter"
+    ],
+    "planned": [
+      "Other AI providers besides claudio (phase 6)",
+      "GitHub Action mode (phase 6)",
+      "Documentation and a one-command install (phase 6)",
+      "Set-up of the company brand (josegarridodigio)",
+      "Launching Shipcast v0.1.0 with Shipcast on every connected channel (the goal's final test)"
+    ],
+    "documentedOnly": [
+      "The README says Reddit is not supported while launch.yml accepts a reddit key (manual, off by default) and docs mention Reddit drafts; treat Reddit as not part of the MVP",
+      "The README demo (docs/media/tour.gif) shows the app, not a fresh install; Hashnode, Telegram and Discord are described as channels but have not been tested against real accounts"
+    ],
+    "limitations": [
+      "Alpha, built for and used by its author; installing it takes setup: Node 24, pnpm, a running claudio instance, a launches repo with an Astro blog following the documented contract, and accounts per network",
+      "The app is served on a domain reachable only over Tailscale; its certificate waits on a Cloudflare DNS token, so GitHub sign-in and OAuth on the real address are not yet live",
+      "Mastodon token in the owner's .env is invalid and Instagram app secret is missing",
+      "Hashnode, Telegram and Discord have no live test yet",
+      "Linux needs libsecret-tools for the keychain; ffmpeg for the demo video",
+      "X and LinkedIn dropped for good; Reddit left out of the MVP",
+      "Only the personal brand is set up",
+      "Only claudio works as AI provider"
+    ]
+  },
+  "article": {
+    "tags": [
+      "github",
+      "automation",
+      "ai",
+      "opensource"
+    ],
+    "en": {
+      "slug": "shipcast-launch-your-github-projects",
+      "title": "Shipcast: launch your GitHub projects without writing the announcement ten times",
+      "description": "Shipcast reads your repo's code on each release, writes a piece for every channel and publishes each one once you approve it. Here is how it works and how to run it.",
+      "markdown": "You publish a release and then spend an afternoon on the same announcement: a blog post, a dev.to copy, a Bluesky post, a Mastodon post, an Instagram carousel, a newsletter issue, a Show HN title. Each one has its own length limit and its own tone, and the easiest mistake is to promise in one of them something the code does not do yet.\n\nShipcast does that work from the release. It reads the project's **code**, not just its README, writes a piece for each channel, and publishes each one once you approve it. I used it to launch [claudio](https://github.com/yeyo11/claudio) v0.9.0, and this article is part of its own launch.\n\n## What you get\n\n- The article on your blog in English and Spanish, each with its own URL.\n- Canonical copies on dev.to (and Hashnode, built but not yet tested live).\n- Posts on Bluesky and Mastodon, and an Instagram carousel with its story and a comment.\n- A newsletter issue per language through Brevo.\n- Ready-to-paste Show HN and Product Hunt drafts: neither has an API to post through, so Shipcast never posts them.\n- Telegram and Discord connectors, plus the numbers of each channel on the launch's page.\n\n## Opt in per repo\n\nA project turns launches on with `.github/launch.yml`. Each channel has a mode:\n\n```yaml\nenabled: true\nbrand: personal\nlanguage: en\n\npublishing:\n  blog: approval\n  devto: approval\n  bluesky: approval\n  hackerNews: manual\n\nassets:\n  demo: docs/media/tour.gif\n```\n\n`auto` publishes as soon as the pack is generated, `approval` publishes when you merge the drafts, `manual` leaves a draft you post yourself, and `off` skips the channel. Hacker News and Product Hunt refuse any mode other than `manual` or `off`. The schema is strict: a misspelt key is an error that points at its line instead of a setting silently ignored.\n\n## Check the repo first\n\nBefore spending any AI budget, the pre-flight check confirms the repo is ready:\n\n```bash\npnpm shipcast preflight owner/repo\n```\n\nIt checks that there is a published release, a valid and enabled `launch.yml`, a license GitHub recognises, a README and a demo that answers. Each line prints `ok`, `warn` or `FAIL`, and `launch` refuses to start while a required check fails.\n\n## Trigger a launch\n\nTwo ways. Manually, for the latest release or a given tag:\n\n```bash\npnpm shipcast launch owner/repo --ref v1.2.0\n```\n\nOr let the engine watch your account:\n\n```bash\npnpm shipcast watch --interval 300\n```\n\n`watch` polls your public GitHub events (there are no webhooks, so nothing on your machine is exposed), drafts each new release, publishes it once its pull request is merged and reads the metrics every six hours. The interval cannot go below 60 seconds, which is what GitHub asks of event pollers.\n\n## How it works\n\n1. **Analyse.** Claude, through [claudio](https://github.com/yeyo11/claudio), reads the repository and separates what is implemented from what is only planned or only claimed by the docs. Only the implemented part is presented as working.\n2. **Generate.** The result is one structured content pack validated against a JSON Schema: the article in each language and a piece for each channel within its limits. Shipcast also builds the launch image, the Instagram carousel and story, and a cover in your blog's style when the project has none.\n3. **Approve.** The drafts arrive as a pull request in your launches repo, which is also your blog's source. Read and edit them in the app or on GitHub; merging publishes.\n4. **Publish once.** A SQLite registry records every launch and every channel. Re-running a workflow or publishing a minor version does not repeat a campaign, and a channel that failed for good can be retried:\n\n```bash\npnpm shipcast publish --retry bluesky\n```\n\n`pnpm shipcast status` lists the latest launches, where each stands and which channels are configured.\n\n## The app\n\n```bash\npnpm app\n```\n\nThe web app has Launches (where each one went and what is waiting for you), a review page (edit, approve, retry), Launch a repo, Write, and Channels. Write takes an article in your own words, translates it, writes the piece for each channel and publishes it the same way. Channels lists every network with its accounts per brand, checks each credential, runs OAuth for Mastodon and Instagram and keeps secrets in your operating system's keychain. Sign-in is with GitHub, limited to the logins you allow.\n\nThe personal and company brands have their own accounts, tone and language, and a launch only uses its own brand's accounts.\n\n## Quick start\n\nYou need Node 24 and pnpm, [claudio](https://github.com/yeyo11/claudio) as the AI provider (the repo's `docker-compose.yml` starts it), a launches repo with an Astro blog that accepts the articles ([docs/launches-repo.md](https://github.com/yeyo11/shipcast/blob/main/docs/launches-repo.md) describes the contract), and an account on each network you want. On Linux the keychain needs `libsecret-tools`, and the demo video needs ffmpeg.\n\n```bash\npnpm install\ncp .env.example .env              # fill in what you use\npnpm shipcast preflight owner/repo\npnpm shipcast launch owner/repo   # or: pnpm app\n```\n\nA network or source without its variables is left out, and `pnpm shipcast status` shows what is on.\n\n## What comes next\n\nThe next phase covers other AI providers besides claudio, a GitHub Action mode, a one-command install, and the setup of the company brand. The test of this release is to launch Shipcast with Shipcast on every connected channel.\n\nThe code is MIT-licensed at [github.com/yeyo11/shipcast](https://github.com/yeyo11/shipcast). Issues are welcome, and please open one before a pull request."
+    },
+    "es": {
+      "slug": "shipcast-lanza-tus-proyectos-de-github",
+      "title": "Shipcast: lanza tus proyectos de GitHub sin escribir el anuncio diez veces",
+      "description": "Shipcast lee el código de tu repo en cada release, escribe una pieza para cada canal y publica cada una cuando la apruebas. Así funciona y así se ejecuta.",
+      "markdown": "Publicas una release y te pasas una tarde con el mismo anuncio: un artículo en el blog, una copia en dev.to, un post en Bluesky, otro en Mastodon, un carrusel de Instagram, un número de la newsletter, un título para Show HN. Cada uno tiene su límite de longitud y su tono, y el error más fácil es prometer en alguno algo que el código todavía no hace.\n\nShipcast hace ese trabajo a partir de la release. Lee el **código** del proyecto, no solo el README, escribe una pieza para cada canal y publica cada una cuando tú la apruebas. Lo usé para lanzar [claudio](https://github.com/yeyo11/claudio) v0.9.0, y este artículo forma parte de su propio lanzamiento.\n\n## Qué obtienes\n\n- El artículo en tu blog en inglés y en español, cada uno con su URL.\n- Copias canónicas en dev.to (y en Hashnode, construido pero aún sin probar en real).\n- Posts en Bluesky y Mastodon, y un carrusel de Instagram con su story y un comentario.\n- Un número de newsletter por idioma a través de Brevo.\n- Borradores de Show HN y Product Hunt listos para pegar: ninguno tiene API para publicar, así que Shipcast nunca los publica.\n- Conectores de Telegram y Discord, y las cifras de cada canal en la página del lanzamiento.\n\n## Activa cada repo\n\nUn proyecto activa los lanzamientos con `.github/launch.yml`. Cada canal tiene un modo:\n\n```yaml\nenabled: true\nbrand: personal\nlanguage: es\n\npublishing:\n  blog: approval\n  devto: approval\n  bluesky: approval\n  hackerNews: manual\n\nassets:\n  demo: docs/media/tour.gif\n```\n\n`auto` publica en cuanto se genera el pack, `approval` publica cuando haces merge de los borradores, `manual` deja un borrador que publicas tú y `off` salta el canal. Hacker News y Product Hunt rechazan cualquier modo que no sea `manual` u `off`. El esquema es estricto: una clave mal escrita es un error que apunta a su línea, en vez de un ajuste ignorado en silencio.\n\n## Comprueba primero el repo\n\nAntes de gastar nada de IA, el pre-flight confirma que el repo está listo:\n\n```bash\npnpm shipcast preflight owner/repo\n```\n\nComprueba que haya una release publicada, un `launch.yml` válido y activado, una licencia que GitHub reconozca, un README y una demo que responda. Cada línea sale como `ok`, `warn` o `FAIL`, y `launch` no arranca mientras falle una comprobación obligatoria.\n\n## Lanza\n\nHay dos formas. A mano, para la última release o para una etiqueta concreta:\n\n```bash\npnpm shipcast launch owner/repo --ref v1.2.0\n```\n\nO dejando que el motor vigile tu cuenta:\n\n```bash\npnpm shipcast watch --interval 300\n```\n\n`watch` consulta tus eventos públicos de GitHub (sin webhooks, así que no expones nada de tu máquina), redacta cada release nueva, la publica cuando se hace merge de su pull request y lee las métricas cada seis horas. El intervalo no baja de 60 segundos, que es lo que GitHub pide a quien consulta los eventos.\n\n## Cómo funciona\n\n1. **Analiza.** Claude, a través de [claudio](https://github.com/yeyo11/claudio), lee el repositorio y separa lo que está implementado de lo que solo está planeado o solo aparece en la documentación. Solo lo implementado se presenta como funcionando.\n2. **Genera.** El resultado es un pack de contenido estructurado, validado con un JSON Schema: el artículo en cada idioma y una pieza para cada canal dentro de sus límites. Shipcast también crea la imagen del lanzamiento, el carrusel y la story de Instagram, y una portada con el estilo de tu blog si el proyecto no tiene.\n3. **Aprueba.** Los borradores llegan como un pull request en tu repo de lanzamientos, que además es el código fuente de tu blog. Léelos y edítalos en la app o en GitHub; el merge publica.\n4. **Publica una vez.** Un registro en SQLite anota cada lanzamiento y cada canal. Volver a ejecutar un workflow o publicar una versión menor no repite una campaña, y un canal que falló del todo se puede reintentar:\n\n```bash\npnpm shipcast publish --retry bluesky\n```\n\n`pnpm shipcast status` lista los últimos lanzamientos, en qué punto está cada uno y qué canales hay configurados.\n\n## La app\n\n```bash\npnpm app\n```\n\nLa app web tiene Launches (adónde fue cada uno y qué te espera), una página de revisión (editar, aprobar, reintentar), Launch a repo, Write y Channels. Write toma un artículo escrito con tus palabras, lo traduce, escribe la pieza de cada canal y lo publica igual. Channels lista cada red con sus cuentas por marca, comprueba cada credencial, hace el OAuth de Mastodon e Instagram y guarda los secretos en el llavero de tu sistema operativo. El acceso es con GitHub, limitado a los usuarios que permitas.\n\nLa marca personal y la de empresa tienen sus propias cuentas, tono e idioma, y un lanzamiento solo usa las cuentas de su marca.\n\n## Puesta en marcha\n\nNecesitas Node 24 y pnpm, [claudio](https://github.com/yeyo11/claudio) como proveedor de IA (el `docker-compose.yml` del repo lo arranca), un repo de lanzamientos con un blog en Astro que acepte los artículos ([docs/launches-repo.md](https://github.com/yeyo11/shipcast/blob/main/docs/launches-repo.md) describe el contrato) y una cuenta en cada red que quieras. En Linux el llavero necesita `libsecret-tools`, y el vídeo de la demo necesita ffmpeg.\n\n```bash\npnpm install\ncp .env.example .env              # rellena lo que uses\npnpm shipcast preflight owner/repo\npnpm shipcast launch owner/repo   # o: pnpm app\n```\n\nUna red o fuente sin sus variables se deja fuera, y `pnpm shipcast status` muestra qué está activo.\n\n## Lo que viene\n\nLa siguiente fase incluye otros proveedores de IA además de claudio, un modo GitHub Action, una instalación con un solo comando y la configuración de la marca de empresa. La prueba de esta versión es lanzar Shipcast con Shipcast en todos los canales conectados.\n\nEl código tiene licencia MIT en [github.com/yeyo11/shipcast](https://github.com/yeyo11/shipcast). Las issues son bienvenidas; abre una antes de enviar un pull request."
+    }
+  },
+  "devto": {
+    "tags": [
+      "github",
+      "automation",
+      "ai",
+      "opensource"
+    ]
+  },
+  "hashnode": {
+    "tags": [
+      "github",
+      "automation",
+      "ai",
+      "opensource"
+    ]
+  },
+  "telegram": {
+    "text": "Shipcast v0.1.0 is out.\n\nOn each GitHub release it reads your repo's code, writes the article (en/es) and a piece for every channel, and publishes each one once you approve the drafts pull request.\n\nTry it: pnpm shipcast preflight owner/repo, then pnpm shipcast launch owner/repo.\n\nhttps://github.com/yeyo11/shipcast"
+  },
+  "discord": {
+    "text": "Shipcast v0.1.0 is out. It reads your repo's code on each release, writes a piece for every channel (blog en/es, dev.to, Bluesky, Mastodon, Instagram, newsletter) and publishes each one once you approve the drafts pull request.\n\nTry it: `pnpm shipcast preflight owner/repo`, then `pnpm shipcast launch owner/repo`.\n\nhttps://github.com/yeyo11/shipcast"
+  },
+  "hackerNews": {
+    "title": "Show HN: Shipcast – launch GitHub projects from the code, not the README",
+    "firstComment": "Hi HN. I'm a solo developer and I kept losing an afternoon to the same release announcement: blog post, dev.to copy, Bluesky, Mastodon, Instagram, newsletter, Show HN. Shipcast does it from the release.\n\nHow it works: a .github/launch.yml in the repo turns launches on and sets a mode per channel (auto, approval, manual or off). The engine polls your public GitHub events (no webhooks) or you run `pnpm shipcast launch owner/repo`. A pre-flight check confirms there is a release, a valid launch.yml, a license, a README and a demo. Then Claude, through my claudio project (Claude Code as a service), reads the repository and separates what is implemented from what is only planned or claimed by the docs. The result is one structured content pack validated against a JSON Schema. The drafts arrive as a pull request in a launches repo that is also the blog's source; merging publishes. A SQLite registry makes sure each channel is published once.\n\nToday it publishes to a blog (en/es), dev.to, Bluesky, Mastodon, Instagram (carousel, story, comment) and a Brevo newsletter, with Hashnode, Telegram and Discord connectors built. Show HN and Product Hunt are drafts only. There is a CLI and a web app, with secrets in the OS keychain.\n\nIt is alpha, built for my own use, and it launched claudio v0.9.0. It needs Node 24, a claudio instance and a launches repo with an Astro blog, so setup is not trivial yet. Next: other AI providers, a GitHub Action mode and a one-command install.\n\nMIT, TypeScript. Feedback welcome."
+  },
+  "productHunt": {
+    "tagline": "Launch GitHub projects on every channel from the code",
+    "description": "Shipcast reads your repo's code on each release, writes a piece for every channel and publishes each one after you approve it: blog, dev.to, Bluesky, Mastodon, Instagram, newsletter. Show HN and Product Hunt drafts included.",
+    "firstComment": "Hi, I'm José Antonio, an open-source developer. I built Shipcast because every release meant an afternoon of rewriting the same announcement for a blog, dev.to, Bluesky, Mastodon, Instagram and a newsletter, and it was easy to promise something the code did not do yet.\n\nWhat it does today: a .github/launch.yml sets a mode per channel (auto, approval, manual, off). On a release, or with `pnpm shipcast launch owner/repo`, a pre-flight check runs and Claude reads the repository, telling what is implemented from what is only planned. It generates the article in English and Spanish, a piece per channel, a launch image and an Instagram carousel, and opens a pull request with the drafts. Merging it publishes each channel once, recorded in a SQLite registry. A CLI and a web app cover launches, review, writing your own articles and connecting accounts, with secrets in the OS keychain.\n\nIt is MIT-licensed and in alpha. I used it to launch my project claudio. Questions and feedback welcome."
+  },
+  "bluesky": {
+    "lang": "en",
+    "text": "Shipcast reads your repo's code on each release, writes a piece for every channel (blog, dev.to, Bluesky, Mastodon, Instagram, newsletter) and publishes each one once you approve it. 🚀\n\nhttps://josegarrido.dev/en/shipcast-launch-your-github-projects/?ref=bluesky"
+  },
+  "mastodon": {
+    "lang": "en",
+    "text": "Stop writing the same release announcement ten times. 🚀\n\nShipcast reads your repo's code (not just the README), writes a piece per channel, and publishes each one once you approve the drafts pull request. One launch, recorded once, never repeated.\n\nBlog in en/es, dev.to, Bluesky, Mastodon, Instagram, newsletter. MIT, TypeScript.\n\nhttps://josegarrido.dev/en/shipcast-launch-your-github-projects/?ref=mastodon\n\n#OpenSource #GitHub #DevTools #Automation"
+  },
+  "instagram": {
+    "caption": "One release, every channel, written from the code. 🚀\n\nShipcast reads your repo, writes the blog post, social posts, carousel and newsletter, and publishes each piece once you approve it.\n\nLink in bio.\n\n#opensource #githubreleases #devtools #typescript #buildinpublic",
+    "summary": "Shipcast turns a GitHub release into the launch pieces for every channel, and publishes each after you approve it.",
+    "slides": [
+      {
+        "title": "Reads the code",
+        "text": "Claude separates what is implemented from what is only planned or documented, and only the first is presented as working."
+      },
+      {
+        "title": "A mode per channel",
+        "text": "launch.yml sets auto, approval or manual for each channel; Show HN and Product Hunt stay as drafts you post."
+      },
+      {
+        "title": "Published once",
+        "text": "A SQLite registry records every launch and channel, so re-runs and minor versions never repeat a campaign."
+      }
+    ]
+  },
+  "reddit": [],
+  "newsletter": {
+    "en": {
+      "subject": "Shipcast v0.1.0: one release, every channel",
+      "previewText": "A tool that reads your repo's code and writes the launch for each channel, published once you approve it.",
+      "markdown": "Hi,\n\nThis week I published the first version of Shipcast, the tool I built so I would stop rewriting the same announcement every time I ship a release.\n\nYou publish a release and Shipcast reads the project's code, not just its README. It then writes the article in English and Spanish and a piece for each channel, and opens a pull request with the drafts. When you merge it, each channel is published once: blog, dev.to, Bluesky, Mastodon, Instagram and the newsletter. Show HN and Product Hunt come as drafts for you to post.\n\nI already used it to launch claudio v0.9.0, and this very issue is part of Shipcast's own launch.\n\nThe article walks through `launch.yml`, the pre-flight check, the commands and the web app:\n\n[Read the article](https://josegarrido.dev/en/shipcast-launch-your-github-projects/?ref=newsletter)\n\nThe code is at [github.com/yeyo11/shipcast](https://github.com/yeyo11/shipcast). If you try it, reply and tell me how it went.\n\nJosé Antonio"
+    },
+    "es": {
+      "subject": "Shipcast v0.1.0: una release, todos los canales",
+      "previewText": "Una herramienta que lee el código de tu repo y escribe el lanzamiento de cada canal, publicado cuando tú lo apruebas.",
+      "markdown": "Hola,\n\nEsta semana he publicado la primera versión de Shipcast, la herramienta que hice para dejar de reescribir el mismo anuncio cada vez que saco una release.\n\nPublicas una release y Shipcast lee el código del proyecto, no solo el README. Después escribe el artículo en inglés y en español y una pieza para cada canal, y abre un pull request con los borradores. Cuando haces merge, cada canal se publica una sola vez: blog, dev.to, Bluesky, Mastodon, Instagram y la newsletter. Show HN y Product Hunt llegan como borradores para que los publiques tú.\n\nYa lo usé para lanzar claudio v0.9.0, y este mismo número forma parte del lanzamiento de Shipcast.\n\nEn el artículo explico `launch.yml`, el pre-flight, los comandos y la app web:\n\n[Lee el artículo](https://josegarrido.dev/es/shipcast-lanza-tus-proyectos-de-github/?ref=newsletter)\n\nEl código está en [github.com/yeyo11/shipcast](https://github.com/yeyo11/shipcast). Si lo pruebas, respóndeme y cuéntame qué tal.\n\nJosé Antonio"
+    }
+  }
+}
