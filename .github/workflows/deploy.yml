@@ -1,23 +1,159 @@
 name: Deploy
 
-# Merging a launch's drafts pull request into main is what publishes its article: this builds the
-# site and puts it on GitHub Pages, served at https://josegarrido.dev.
+# Merging a launch's drafts pull request into main is what publishes its article. Every push to main
+# builds the site and deploys it to Cloudflare Workers (wrangler.jsonc); every pull request uploads a
+# preview version of the Worker and comments its URL, so an article can be read rendered before it is
+# merged. GitHub Pages keeps serving josegarrido.dev until the cutover described in README.md: its
+# jobs run while the repository variable GITHUB_PAGES is not "off".
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
-  cancel-in-progress: false
+  group: deploy-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm build
+      - run: node scripts/contrast.mjs > /dev/null
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist
+          include-hidden-files: true
+          retention-days: 3
+
+  # A Lighthouse gate on the built site, mobile profile, the median of three runs: the English front
+  # page and its newest article (thresholds in lighthouserc.json)
+  lighthouse:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist
+      - name: Lighthouse CI
+        run: |
+          article=$(sed -n 's#.*<a class="lead" href="\([^"]*\)".*#\1#p' dist/en/index.html | head -1)
+          npx --yes @lhci/cli@0.15.1 autorun --collect.url=http://localhost/en/ ${article:+--collect.url=http://localhost$article}
+
+  cloudflare:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      # Secrets cannot be read in `if:`; their presence can. Pull requests from forks never get them.
+      HAS_CLOUDFLARE: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
+    steps:
+      - name: Skip without Cloudflare credentials
+        if: env.HAS_CLOUDFLARE != 'true'
+        run: echo "::notice title=Cloudflare skipped::CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are not available to this run, so nothing was uploaded to Cloudflare."
+      - uses: actions/checkout@v7
+        if: env.HAS_CLOUDFLARE == 'true'
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v6
+        if: env.HAS_CLOUDFLARE == 'true'
+      - uses: actions/setup-node@v7
+        if: env.HAS_CLOUDFLARE == 'true'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - if: env.HAS_CLOUDFLARE == 'true'
+        run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v8
+        if: env.HAS_CLOUDFLARE == 'true'
+        with:
+          name: dist
+          path: dist
+
+      # Pull requests: a version of the Worker that serves no traffic, reachable at its own preview
+      # URL and at a stable alias for the branch (lowercase, a letter first, short enough for a
+      # DNS label together with the Worker's name)
+      - name: Preview alias
+        id: alias
+        if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'pull_request'
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          slug=$(printf '%s' "$BRANCH" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-+//' | cut -c1-40 | sed -E 's/-+$//')
+          case "$slug" in [a-z]*) ;; *) slug="b-$slug" ;; esac
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+      - name: Upload preview version
+        id: preview
+        if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: pnpm
+          command: versions upload --preview-alias ${{ steps.alias.outputs.slug }} --message "PR #${{ github.event.number }} ${{ github.event.pull_request.head.sha }}"
+      - name: Comment the preview URL
+        if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OUTPUT: ${{ steps.preview.outputs.command-output }}
+          PREVIEW_URL: ${{ steps.preview.outputs.preview-url }}
+          SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          version=${PREVIEW_URL:-$(printf '%s\n' "$OUTPUT" | grep -i 'version preview url' | grep -oE 'https://[a-z0-9-]+\.[a-z0-9.-]+\.workers\.dev' | head -1)}
+          alias=$(printf '%s\n' "$OUTPUT" | grep -i 'alias' | grep -oE 'https://[a-z0-9-]+\.[a-z0-9.-]+\.workers\.dev' | head -1)
+          if [ -z "$version$alias" ]; then
+            echo "::warning::No preview URL in wrangler's output (are preview URLs enabled for the Worker?)"
+            exit 0
+          fi
+          {
+            echo "<!-- cloudflare-preview -->"
+            echo "**Preview on Cloudflare Workers** for \`${SHA:0:7}\`"
+            echo
+            [ -n "$alias" ] && echo "- Branch: $alias"
+            [ -n "$version" ] && echo "- This version: $version"
+            echo
+            echo "The bare domain picks a language (try \`/\`), and articles answer Markdown to \`Accept: text/markdown\`."
+          } > comment.md
+          gh pr comment "${{ github.event.number }}" --body-file comment.md --edit-last --create-if-none
+
+      # main: the production deploy, then IndexNow for the articles this push added or changed
+      - name: Deploy
+        if: env.HAS_CLOUDFLARE == 'true' && github.event_name != 'pull_request'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          packageManager: pnpm
+          command: deploy --message "${{ github.sha }}"
+      - name: IndexNow
+        if: env.HAS_CLOUDFLARE == 'true' && github.event_name == 'push'
+        run: node scripts/indexnow.mjs "${{ github.event.before }}" "${{ github.sha }}"
+
+  # GitHub Pages, until the cutover: set the repository variable GITHUB_PAGES to "off" once the
+  # domain is served by the Worker, then delete these two jobs
+  pages-build:
+    if: github.event_name != 'pull_request' && vars.GITHUB_PAGES != 'off'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -26,9 +162,15 @@ jobs:
         with:
           node-version: 24.22.1
 
-  deploy:
-    needs: build
+  pages-deploy:
+    needs: pages-build
     runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
