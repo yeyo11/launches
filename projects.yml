@@ -10,3 +10,4 @@ claudio:
 shipcast:
   colour: "#FFD43B"
   motif: label
+  cover: /covers/shipcast.jpg
