@@ -1,0 +1,14 @@
+---
+import ArticlesPage from '../../../components/pages/ArticlesPage.astro';
+import { indexViews, viewParam, type IndexView } from '../../../article-index';
+
+export async function getStaticPaths() {
+  return (await indexViews('en')).map((view) => ({ params: { path: viewParam('en', view) }, props: { view } }));
+}
+
+interface Props {
+  view: IndexView;
+}
+---
+
+<ArticlesPage lang="en" view={Astro.props.view} />
