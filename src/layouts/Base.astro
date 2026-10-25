@@ -6,6 +6,8 @@ import { breadcrumbs, graph, type JsonLdNode } from '../seo';
 // The same files global.css declares, so each preload and its @font-face share one request
 import frauncesUrl from '@fontsource-variable/fraunces/files/fraunces-latin-full-normal.woff2?url';
 import frauncesItalicUrl from '@fontsource-variable/fraunces/files/fraunces-latin-full-italic.woff2?url';
+// The interface's text font: without a preload it is only found once the inlined CSS is parsed
+import sansUrl from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url';
 
 interface Props {
   lang: Locale;
@@ -58,6 +60,7 @@ const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
         summary reflows (CLS 0.09) and the first paint comes 1.5 s later on a mobile profile */}
     <link rel="preload" href={frauncesUrl} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={frauncesItalicUrl} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={sansUrl} as="font" type="font/woff2" crossorigin />
     <meta name="description" content={description} />
     <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1'} />
     {!noindex && <link rel="canonical" href={canonical} />}
