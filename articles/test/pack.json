@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "kind": "launch",
+  "project": {
+    "name": "TEST",
+    "repo": "https://github.com/yeyo11/launches"
+  },
+  "analysis": {
+    "summary": "The article is a test post whose title and body are both \"TEST\".",
+    "implemented": [
+      "None: the article describes no features"
+    ],
+    "planned": [],
+    "documentedOnly": [],
+    "limitations": []
+  },
+  "article": {
+    "tags": [],
+    "en": {
+      "slug": "test",
+      "title": "TEST",
+      "description": "A test article whose title and body are both TEST.",
+      "markdown": "TEST",
+      "imageAlt": "Launch image for the TEST test article"
+    },
+    "es": {
+      "slug": "prueba",
+      "title": "TEST",
+      "description": "Artículo de prueba con el título y el cuerpo TEST.",
+      "markdown": "TEST",
+      "imageAlt": "Imagen de lanzamiento del artículo de prueba TEST"
+    }
+  },
+  "threads": {
+    "text": "Just a quick test post going out today. Nothing to install, nothing to configure, only checking the pipeline end to end. https://josegarrido.dev/en/test/?ref=threads"
+  }
+}
