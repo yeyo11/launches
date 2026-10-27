@@ -108,14 +108,12 @@ Justo con la primera petición de vídeo llegan los módulos opcionales del repr
 
 Repetí el escenario con *Big Buck Bunny* y 90 segundos de reproducción, y lo comparé otra vez con mi registro. Coinciden petición a petición. Mientras ves el vídeo, el navegador hace esto:
 
-| Petición | Cuándo, en la prueba |
-| --- | --- |
-| `POST *.googlevideo.com/videoplayback` | Cada 3 a 9 segundos, mientras se llena el búfer. Cada respuesta trae de 0,5 a 1,1 MB de vídeo, y cada petición lleva de 1,7 a 2 KB del navegador. |
-| `POST /api/stats/watchtime` | Cada 10 segundos (a los 10, 20 y 30 s). |
-| `POST /api/stats/qoe` | Al empezar y después cada 10 a 30 segundos. |
-| `POST /api/stats/playback` y `GET /ptracking` | Una vez, al empezar. |
-| `POST /api/stats/atr` | Una vez, a los 2 segundos. |
-| `POST /youtubei/v1/log_event` | Un par de veces al cargar. |
+- **`POST *.googlevideo.com/videoplayback`**: cada 3 a 9 segundos, mientras se llena el búfer. Cada respuesta trae de 0,5 a 1,1 MB de vídeo, y cada petición lleva de 1,7 a 2 KB del navegador.
+- **`POST /api/stats/watchtime`**: cada 10 segundos (a los 10, 20 y 30 s).
+- **`POST /api/stats/qoe`**: al empezar y después cada 10 a 30 segundos.
+- **`POST /api/stats/playback`** y **`GET /ptracking`**: una vez, al empezar.
+- **`POST /api/stats/atr`**: una vez, a los 2 segundos.
+- **`POST /youtubei/v1/log_event`**: un par de veces al cargar.
 
 A los 40 segundos, el reproductor ya tenía 55 segundos de vídeo descargados por delante.
 

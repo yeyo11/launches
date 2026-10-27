@@ -108,14 +108,12 @@ Right with the first video request come the player's optional modules: `offline.
 
 I repeated the scenario with *Big Buck Bunny* and 90 seconds of playback, and compared it with my log again. They match request for request. While you watch, the browser does this:
 
-| Request | When, in the test |
-| --- | --- |
-| `POST *.googlevideo.com/videoplayback` | Every 3 to 9 seconds, while the buffer fills. Each response brings 0.5 to 1.1 MB of video, and each request carries 1.7 to 2 KB from the browser. |
-| `POST /api/stats/watchtime` | Every 10 seconds (at 10, 20 and 30 s). |
-| `POST /api/stats/qoe` | At the start, then every 10 to 30 seconds. |
-| `POST /api/stats/playback` and `GET /ptracking` | Once, at the start. |
-| `POST /api/stats/atr` | Once, at 2 seconds. |
-| `POST /youtubei/v1/log_event` | A couple of times while loading. |
+- **`POST *.googlevideo.com/videoplayback`**: every 3 to 9 seconds, while the buffer fills. Each response brings 0.5 to 1.1 MB of video, and each request carries 1.7 to 2 KB from the browser.
+- **`POST /api/stats/watchtime`**: every 10 seconds (at 10, 20 and 30 s).
+- **`POST /api/stats/qoe`**: at the start, then every 10 to 30 seconds.
+- **`POST /api/stats/playback`** and **`GET /ptracking`**: once, at the start.
+- **`POST /api/stats/atr`**: once, at 2 seconds.
+- **`POST /youtubei/v1/log_event`**: a couple of times while loading.
 
 By 40 seconds in, the player already had 55 seconds of video downloaded ahead.
 
