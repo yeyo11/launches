@@ -171,6 +171,13 @@ a:hover { text-decoration-thickness: 2px; }
 .prose hr { border: 0; border-block-start: 1px solid var(--rule); margin-block: 2.5em; }
 .prose img { max-width: 100%; height: auto; }
 
+/* A wide table scrolls sideways inside the column, as a code block does, rather than widening the
+   page on a phone: the same approach as GitHub's rendered Markdown */
+.prose table { display: block; width: max-content; max-width: 100%; overflow-x: auto; border-collapse: collapse; margin-block: 1.6em; font-family: var(--font-sans); font-size: 0.86em; line-height: 1.5; }
+.prose th, .prose td { text-align: start; vertical-align: top; padding: 0.55em 0.8em; border: 1px solid var(--rule); }
+.prose th { color: var(--text); font-weight: 600; }
+.prose td code { white-space: nowrap; }
+
 code {
   font-family: var(--font-mono);
   font-size: 0.82em;

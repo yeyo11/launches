@@ -1,7 +1,9 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import { satteri } from '@astrojs/markdown-satteri';
 import { codeColours } from './src/code-colours.mjs';
+import { articleImages } from './src/article-images.mjs';
 import { FILTERED_INDEX, sitemapDetails } from './src/sitemap.mjs';
 import { headersFile } from './src/headers.mjs';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -74,7 +76,8 @@ export default defineConfig({
   },
   // Each page carries its own CSS: no stylesheet blocks the first paint, and the site is small
   build: { inlineStylesheets: 'always' },
-  markdown: { shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [codeColours()] } },
+  // articleImages defers an article's images and gives them their size (src/article-images.mjs)
+  markdown: { processor: satteri({ hastPlugins: [articleImages] }), shikiConfig: { themes: { light: 'github-light', dark: 'github-dark' }, defaultColor: false, transformers: [codeColours()] } },
   i18n: {
     locales: ['en', 'es'],
     defaultLocale: 'en',
