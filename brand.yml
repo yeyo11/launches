@@ -40,6 +40,8 @@ newsletter:
 # The blog is written in both; the other channels default to English.
 languages:
   blog: [en, es]
+  # The LinkedIn post is written in Spanish and its card shares the Spanish article
+  linkedin: es
 
 # How the AI writes for this brand. Refine it with real published launches.
 tone: >

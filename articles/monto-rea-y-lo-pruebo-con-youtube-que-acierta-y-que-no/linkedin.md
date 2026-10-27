@@ -2,20 +2,20 @@
 
 > **Approval:** published when this pull request is merged. Edit it here if it needs changes.
 
-I asked an agent to explain what YouTube's player does when you press play. Then I checked every answer myself.
+Le pedí a un agente que me explicara qué hace el reproductor de YouTube cuando le das al play. Después comprobé cada respuesta por mi cuenta.
 
-I set up REA (Reverse Engineer Anything), an open-source MIT toolset that lets an agent inspect software without its source code, and ran it from Claude Code against YouTube. I verified each answer with my own network log over the DevTools protocol and the player's stats panel.
+Monté REA (Reverse Engineer Anything), herramientas de código abierto (MIT) para que un agente inspeccione software sin su código fuente, y lo usé desde Claude Code contra YouTube. Contrasté cada respuesta con mi propio registro de red y con el panel de estadísticas del reproductor.
 
-What held up:
-- The network inventory matched my log request by request: 81 requests in 28 seconds, with the 19-second video arriving in a single POST.
-- observe-web-execution gives the call stack of each request, so you know which script and function sent it (reportStats in base.js for the qoe report).
+Lo que acertó:
+- Su inventario de red coincidió con mi registro petición a petición: 81 peticiones en 28 segundos, y los 19 segundos de vídeo llegan en una sola petición POST.
+- observe-web-execution da la pila de llamadas de cada petición: sabes qué script y qué función la envió.
 
-What didn't:
-- analyze-web-bundle left the two scripts that matter (12.4 of 13.7 MB) unanalysed, even with 10 minutes per script.
-- So REA did not find where quality is decided. What I know about that came from the browser.
+Lo que no:
+- analyze-web-bundle dejó sin analizar los dos scripts que importan (12,4 de 13,7 MB), incluso con 10 minutos por script.
+- Así que REA no encontró dónde se decide la calidad. Eso lo saqué del navegador.
 
-Using it from Claude Code also depends on the prompt: one run read a 1.17-million-character result for 12 turns without answering, another picked a tool that only records navigation. Naming the tool and the origins fixed it.
+Desde Claude Code, el prompt importa: una vez leyó un resultado de 1,17 millones de caracteres durante 12 turnos sin responder; otra eligió una herramienta que solo registra la navegación. Nombrar la herramienta y los orígenes lo arregló.
 
-The article has the commands, the scenario file and the numbers.
+En el artículo tienes los comandos, el fichero del escenario y las cifras.
 
-#ClaudeCode #MCP #ReverseEngineering
+#ClaudeCode #MCP #IngenieríaInversa
