@@ -1,6 +1,6 @@
 ---
 title: "Monto REA y lo pruebo con YouTube: qué acierta y qué no"
-description: "Instalo REA en Claude Code y le pregunto qué carga, qué envía y cómo elige la calidad el reproductor de YouTube, comprobando cada respuesta con mi propio registro de red."
+description: "Instalo REA con Claude Code y le pregunto qué hace el reproductor de YouTube. Compruebo cada respuesta en el navegador: dónde acierta y dónde no llega."
 pubDate: 2026-10-27
 lang: es
 translationKey: "i-set-up-rea-and-test-it-on-youtube"
