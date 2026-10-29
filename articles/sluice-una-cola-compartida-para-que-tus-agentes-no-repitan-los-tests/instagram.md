@@ -18,7 +18,7 @@ Comment: Full write-up: josegarrido.dev/en/sluice-shared-queue-so-your-agents-st
 
 Five agents, five test suites at once, and the same tests rerunning on code that already passed.
 
-Sluice is an open source queue and cache shared by every AI agent on a Linux machine. It runs each gate once per git tree, under a common CPU and memory budget, and plugs into Claude Code as a plugin and MCP server.
+Sluice is an open source queue and cache shared by every AI agent on a Linux machine. It runs each gate once per git tree, under a common CPU and memory budget, and works with any agent that supports MCP, with a plugin for Claude Code.
 
 Link in bio.
 

@@ -6,7 +6,7 @@ Cinco agentes de IA eran cinco suites de tests a la vez, y los mismos tests se r
 
 He publicado Sluice, una cola y una caché de verificación compartidas por todos los agentes de una máquina Linux.
 
-Lo construí porque trabajo con entre 1 y 20 agentes de Claude Code a la vez, y la máquina acababa bloqueada: GNOME sin responder y el OOM killer matando procesos.
+Lo construí porque trabajo con decenas de agentes de IA a la vez, y la máquina acababa bloqueada: GNOME sin responder y el OOM killer matando procesos.
 
 Lo que hace hoy:
 
@@ -16,7 +16,7 @@ Lo que hace hoy:
 - Marca como STALLED los trabajos colgados, sin matarlos.
 - Puede ser el punto de entrada de los hooks de husky sin tocar el repositorio.
 
-Es de código abierto (MIT), está escrito en Rust y se integra con Claude Code como plugin y servidor MCP. No sustituye a tu CI.
+Es de código abierto (MIT), está escrito en Rust y funciona con cualquier agente que soporte MCP, con un plugin para Claude Code. No sustituye a tu CI.
 
 En el artículo explico cómo se instala y los números medidos.
 

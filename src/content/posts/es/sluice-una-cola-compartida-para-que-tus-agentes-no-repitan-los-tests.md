@@ -9,13 +9,13 @@ image: "/articles/sluice-una-cola-compartida-para-que-tus-agentes-no-repitan-los
 imageAlt: "Salida de sluice status: 1.874 ejecuciones, 1.147 respuestas desde caché y 19 h 24 min ahorradas"
 ---
 
-[Sluice](https://github.com/josegarridodigio/sluice) es una cola y una caché de verificación compartidas por todos los agentes de IA de una máquina Linux: ejecuta cada *gate* (tests, linters, *type checks*) una sola vez por árbol de git, bajo un presupuesto común de CPU y memoria, y guarda el resultado. Es de código abierto (licencia MIT), está escrito en Rust y se integra con Claude Code como plugin y servidor MCP. Lo hice yo, y en este artículo te cuento por qué, cómo se instala y qué ha cambiado en mis máquinas, con los números medidos.
+[Sluice](https://github.com/josegarridodigio/sluice) es una cola y una caché de verificación compartidas por todos los agentes de IA de una máquina Linux: ejecuta cada *gate* (tests, linters, *type checks*) una sola vez por árbol de git, bajo un presupuesto común de CPU y memoria, y guarda el resultado. Es de código abierto (licencia MIT), está escrito en Rust y funciona con cualquier agente de IA de programación: los hooks de git no necesitan nada del agente, los agentes que soportan MCP se conectan a su servidor MCP y para Claude Code hay además un plugin. Lo hice yo, y en este artículo te cuento por qué, cómo se instala y qué ha cambiado en mis máquinas, con los números medidos.
 
 ![sluice status en una máquina con agentes trabajando todo el día: 1.874 ejecuciones, 1.147 respuestas desde caché y 19 h 24 min ahorradas](/articles/sluice-una-cola-compartida-para-que-tus-agentes-no-repitan-los-tests/sluice-status.png)
 
 ## ¿Qué problema resuelve?
 
-Trabajo en Digio desarrollando software para clientes con agentes de IA. En un día normal tengo entre 1 y 20 agentes de Claude Code a la vez, cada uno en su propio *worktree* de git, sobre proyectos con verificaciones caras: suites de tests de varios minutos, linters y *type checks* metidos en `pre-commit` y `pre-push`. Son hooks que define el equipo de cada proyecto y que no siempre puedo tocar.
+Trabajo en Digio desarrollando software para clientes con agentes de IA. En un día normal tengo decenas de agentes a la vez (yo uso Claude Code), cada uno en su propio *worktree* de git, sobre proyectos con verificaciones caras: suites de tests de varios minutos, linters y *type checks* metidos en `pre-commit` y `pre-push`. Son hooks que define el equipo de cada proyecto y que no siempre puedo tocar.
 
 Nada coordinaba a esos agentes. Cinco agentes eran cinco suites a la vez. La máquina se bloqueaba, los *pushes* tardaban una eternidad y los mismos tests se repetían sobre código que ya había pasado. Lo que me hizo decir "basta" fue ver el escritorio rendirse: GNOME dejaba de responder y Linux empezaba a matar procesos por su cuenta. El OOM killer del kernel se llevaba por delante el navegador y las aplicaciones, y `systemd-oomd`, las herramientas de los propios agentes.
 
@@ -30,10 +30,10 @@ Y una restricción que lo complica todo: la herramienta de shell de un agente ti
 ## ¿Qué necesitas?
 
 - Linux (solo funciona en Linux) con `git` 2.31 o posterior. Hay binarios estáticos para x86_64 y aarch64.
-- Claude Code, para el plugin. Otros agentes pueden usar el servidor MCP directamente.
+- Un agente de IA de programación. Cualquier agente que soporte MCP puede usar el servidor MCP (`sluice mcp`); para Claude Code hay además un plugin que lo deja todo listo.
 - Para aislar los trabajos: cgroup v2 y un gestor de usuario de systemd. La política de memoria usa `systemd-oomd` con systemd 257 o posterior. `sluice doctor` te dice qué tienes.
 
-## ¿Cómo lo instalo con Claude Code?
+## ¿Cómo lo instalo?
 
 El binario se instala en `~/.local/bin`:
 
@@ -41,12 +41,14 @@ El binario se instala en `~/.local/bin`:
 curl -fsSL https://raw.githubusercontent.com/josegarridodigio/sluice/main/scripts/install.sh | sh
 ```
 
-`SLUICE_VERSION` fija una versión concreta y, más adelante, `sluice update` actualiza en el sitio verificando la suma de comprobación. Después, dentro de Claude Code, instala el plugin:
+`SLUICE_VERSION` fija una versión concreta y, más adelante, `sluice update` actualiza en el sitio verificando la suma de comprobación. Después conecta tu agente. En Claude Code, instala el plugin:
 
 ```
 /plugin marketplace add josegarridodigio/sluice
 /plugin install sluice@sluice
 ```
+
+Con cualquier otro agente que soporte MCP, registra `sluice mcp` como servidor MCP en su configuración y pega en su `AGENTS.md` el bloque de instrucciones de la [guía de agentes](https://github.com/josegarridodigio/sluice/blob/main/docs/agents.md). Si el agente no define ninguna variable que Sluice reconozca, exporta `SLUICE_AGENT=1` en su shell para que los hooks sepan que es un agente; y si solo tiene shell, `sluice shim install`, con el directorio de los *shims* primero en su `PATH`, mete también sus builds y tests en la cola.
 
 Y en cada repositorio, primero mira qué haría y después escríbelo:
 
@@ -55,7 +57,7 @@ sluice init --dry-run   # detecta el stack y tus hooks; muestra el plan, no escr
 sluice init             # escribe .sluice.toml y reconecta tus hooks
 ```
 
-No hay que tocar el `PATH` ni el `CLAUDE.md`. Al empezar cada sesión, el plugin instala unos *shims* de shell, los pone primero en el `PATH` de la sesión y le da al agente las reglas. Un *gate* es un comando con nombre en `.sluice.toml`:
+Con el plugin de Claude Code no hay que tocar el `PATH` ni el `CLAUDE.md`: al empezar cada sesión, instala unos *shims* de shell, los pone primero en el `PATH` de la sesión y le da al agente las reglas. Un *gate* es un comando con nombre en `.sluice.toml`:
 
 ```toml
 version = 1
@@ -165,9 +167,9 @@ En un repositorio sin `.sluice.toml`, esas unidades de los hooks pasan a ser los
 
 ## ¿Cómo lo usa un agente sin chocar con el timeout del shell?
 
-Por MCP. El plugin registra `sluice mcp`, cuyo `verify` bloquea hasta que terminan los *gates* y manda una notificación de progreso cada 15 segundos. Claude Code solo corta una llamada MCP si pasa su ventana de inactividad (30 minutos por defecto) sin respuesta ni progreso, así que el agente espera lo que haga falta, sin el límite del shell.
+Por MCP. `sluice mcp` ofrece una herramienta `verify` que bloquea hasta que terminan los *gates* y manda una notificación de progreso cada 15 segundos. Claude Code, por ejemplo, solo corta una llamada MCP si pasa su ventana de inactividad (30 minutos por defecto) sin respuesta ni progreso, así que el agente espera lo que haga falta, sin el límite del shell.
 
-El resto del plugin lleva al agente por ahí: una *skill* que le enseña a usar `verify` y la cola de merge, y un *guard* que reescribe los comandos de los *gates* a `sluice run <gate> -v` y los pesados (builds, test runners) a `sluice exec -- ...`, para que compartan el presupuesto. Y si un agente hace commit con un árbol que no está en caché, el hook reconectado por `sluice init` contesta al momento con el código de salida 3 y le dice que use `verify`, en lugar de quedarse esperando dentro de `git commit`.
+En Claude Code, el resto del plugin lleva al agente por ahí: una *skill* que le enseña a usar `verify` y la cola de merge, y un *guard* que reescribe los comandos de los *gates* a `sluice run <gate> -v` y los pesados (builds, test runners) a `sluice exec -- ...`, para que compartan el presupuesto. Con otros agentes, el bloque de `AGENTS.md` lleva las mismas instrucciones que la *skill*. Y si un agente hace commit con un árbol que no está en caché, el hook reconectado por `sluice init` contesta al momento con el código de salida 3 y le dice que use `verify`, en lugar de quedarse esperando dentro de `git commit`.
 
 ## ¿Cómo integro las ramas de varios agentes?
 
@@ -179,7 +181,7 @@ sluice queue status            # el plan: trenes, conflictos y qué está listo
 sluice queue approve <tren>    # lo haces tú
 ```
 
-Por defecto, nada se empuja hasta que una persona aprueba el tren: el demonio rechaza la aprobación de un agente, por MCP o desde la terminal, y el plugin también se la bloquea. Puedes permitirla de forma explícita en tu configuración personal (`allow_agent_approval = true`); un repositorio no puede activarla por su cuenta. Aun así, dos casos siguen siendo solo humanos: un tren que cambia la propia configuración de verificación del proyecto y el aterrizaje mediante *pull request*. Si tu rama de destino está protegida y solo acepta *pull requests*, `[queue] land = "pull-request"` empuja el resultado verificado a una rama `sluice/train/<id>` y, al aprobar, abre el *pull request* con tu propio `gh`. Sluice nunca hace el merge.
+Por defecto, nada se empuja hasta que una persona aprueba el tren: el demonio rechaza la aprobación de un agente, por MCP o desde la terminal, y el plugin de Claude Code también se la bloquea. Puedes permitirla de forma explícita en tu configuración personal (`allow_agent_approval = true`); un repositorio no puede activarla por su cuenta. Aun así, dos casos siguen siendo solo humanos: un tren que cambia la propia configuración de verificación del proyecto y el aterrizaje mediante *pull request*. Si tu rama de destino está protegida y solo acepta *pull requests*, `[queue] land = "pull-request"` empuja el resultado verificado a una rama `sluice/train/<id>` y, al aprobar, abre el *pull request* con tu propio `gh`. Sluice nunca hace el merge.
 
 Y una cosa que conviene tener clara: Sluice no sustituye a tu CI. Una respuesta desde caché es una optimización local; el CI sigue siendo la autoridad.
 
@@ -191,7 +193,7 @@ Cada cambio grande siguió el mismo ciclo: análisis del código y de datos real
 
 ## Pruébalo
 
-Instala el binario y el plugin como arriba, y en tu repositorio:
+Instala el binario y conecta tu agente como arriba, y en tu repositorio:
 
 ```bash
 sluice doctor
