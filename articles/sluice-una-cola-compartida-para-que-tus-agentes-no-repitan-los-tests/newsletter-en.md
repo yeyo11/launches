@@ -2,7 +2,7 @@
 
 > **Approval:** published when this pull request is merged. Edit it here if it needs changes.
 
-Subject: Sluice: a shared queue so your agents stop repeating tests
+Subject: From agents fighting over the machine to zero crashes: how Sluice works
 Preview: Each gate runs once per git tree, under one CPU and memory budget. About 28 hours of checks skipped in a week.
 
 Hi,

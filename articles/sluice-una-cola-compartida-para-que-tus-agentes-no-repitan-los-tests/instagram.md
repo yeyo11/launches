@@ -4,7 +4,7 @@
 
 Carousel, from the images in `public/articles/sluice-una-cola-compartida-para-que-tus-agentes-no-repitan-los-tests/` (their texts are drawn into them; only the caption and the comment below can be edited here):
 
-1. Cover: Sluice: a shared queue so your agents stop repeating tests. Sluice: a shared queue and cache so your AI agents don't repeat the same tests.
+1. Cover: Sluice: one queue for every build, test and heavy command your agents run. Sluice: a shared queue and cache so your AI agents don't repeat the same tests.
 2. Run each gate once: The cache key is the exact git tree plus the gate definition, shared by all worktrees. A cached typecheck answers in 0.22 s.
 3. Memory-aware scheduling: Sluice learns each gate's memory use, isolates jobs in cgroups and makes them the first victims if memory runs short.
 4. Backfilling the queue: Short jobs no longer wait behind a 12 GB suite: wait per minute of work dropped from 1.92 to 0.44 min.

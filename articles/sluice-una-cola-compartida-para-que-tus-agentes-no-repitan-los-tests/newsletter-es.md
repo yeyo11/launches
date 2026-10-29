@@ -2,7 +2,7 @@
 
 > **Approval:** published when this pull request is merged. Edit it here if it needs changes.
 
-Subject: Sluice: una cola compartida para que tus agentes no repitan los tests
+Subject: De agentes peleándose por la máquina a cero caídas: así funciona Sluice
 Preview: Cada gate se ejecuta una vez por árbol de git, con un presupuesto común de CPU y memoria. Unas 28 horas de checks ahorradas en una semana.
 
 Hola:

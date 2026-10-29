@@ -1,6 +1,6 @@
 ---
-title: "Sluice: a shared queue so your agents stop repeating tests"
-description: "Sluice is a shared verification queue and cache for the AI agents on a Linux machine: each gate runs once per git tree, under a common CPU and memory budget."
+title: "Sluice: one queue for every build, test and heavy command your agents run"
+description: "Sluice queues the tests, builds and heavy commands of your AI agents under a common CPU and memory budget, and runs each check once per git tree."
 pubDate: 2026-10-29
 lang: en
 translationKey: "sluice-shared-queue-so-your-agents-stop-repeating-tests"

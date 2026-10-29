@@ -1,6 +1,6 @@
 ---
-title: "Sluice: una cola compartida para que tus agentes no repitan los tests"
-description: "Sluice es una cola y una caché de verificación para los agentes de IA de una máquina Linux: cada gate se ejecuta una vez por árbol de git, con presupuesto común de CPU y memoria."
+title: "Sluice: una sola cola para los builds, tests y comandos pesados de todos tus agentes"
+description: "Sluice encola los tests, builds y comandos pesados de tus agentes de IA con presupuesto común de CPU y memoria, y ejecuta cada check una vez por árbol de git."
 pubDate: 2026-10-29
 lang: es
 translationKey: "sluice-shared-queue-so-your-agents-stop-repeating-tests"

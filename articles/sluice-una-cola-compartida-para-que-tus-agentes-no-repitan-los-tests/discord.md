@@ -2,7 +2,7 @@
 
 > **Approval:** published when this pull request is merged. Edit it here if it needs changes.
 
-**Sluice: a shared queue so your agents stop repeating tests** 🚦
+**Sluice: one queue for every build, test and heavy command your agents run** 🚦
 
 If you run several Claude Code agents on one Linux machine, you know the pain: five agents, five test suites at once, and the same tests rerunning on code that already passed.
 
