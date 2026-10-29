@@ -15,9 +15,9 @@ imageAlt: "Salida de sluice status: 1.874 ejecuciones, 1.147 respuestas desde ca
 
 ## ¿Qué problema resuelve?
 
-Trabajo en Digio desarrollando software para clientes con agentes de IA. En un día normal tengo decenas de agentes a la vez (yo uso Claude Code), cada uno en su propio *worktree* de git, sobre proyectos con verificaciones caras: suites de tests de varios minutos, linters y *type checks* metidos en `pre-commit` y `pre-push`. Son hooks que define el equipo de cada proyecto y que no siempre puedo tocar.
+En mi trabajo desarrollo software para clientes con agentes de IA. En un día normal tengo decenas de agentes a la vez (yo uso Claude Code), cada uno en su propio *worktree* de git, sobre proyectos con verificaciones caras: suites de tests de varios minutos, linters y *type checks* metidos en `pre-commit` y `pre-push`. Son hooks que define el equipo de cada proyecto y que no siempre puedo tocar.
 
-Nada coordinaba a esos agentes. Cinco agentes eran cinco suites a la vez. La máquina se bloqueaba, los *pushes* tardaban una eternidad y los mismos tests se repetían sobre código que ya había pasado. Lo que me hizo decir "basta" fue ver el escritorio rendirse: GNOME dejaba de responder y Linux empezaba a matar procesos por su cuenta. El OOM killer del kernel se llevaba por delante el navegador y las aplicaciones, y `systemd-oomd`, las herramientas de los propios agentes.
+Nada coordinaba a esos agentes. Trabajando con varios agentes de IA en paralelo, mi máquina se pasaba el día ejecutando los mismos tests y builds una y otra vez, hasta quedarse sin memoria, y los *pushes* tardaban una eternidad. Lo que me hizo decir "basta" fue ver el escritorio rendirse: GNOME dejaba de responder y Linux empezaba a matar procesos por su cuenta. El OOM killer del kernel se llevaba por delante el navegador y las aplicaciones, y `systemd-oomd`, las herramientas de los propios agentes.
 
 Detrás había tres causas distintas:
 
@@ -182,8 +182,6 @@ sluice queue approve <tren>    # lo haces tú
 ```
 
 Por defecto, nada se empuja hasta que una persona aprueba el tren: el demonio rechaza la aprobación de un agente, por MCP o desde la terminal, y el plugin de Claude Code también se la bloquea. Puedes permitirla de forma explícita en tu configuración personal (`allow_agent_approval = true`); un repositorio no puede activarla por su cuenta. Aun así, dos casos siguen siendo solo humanos: un tren que cambia la propia configuración de verificación del proyecto y el aterrizaje mediante *pull request*. Si tu rama de destino está protegida y solo acepta *pull requests*, `[queue] land = "pull-request"` empuja el resultado verificado a una rama `sluice/train/<id>` y, al aprobar, abre el *pull request* con tu propio `gh`. Sluice nunca hace el merge.
-
-Y una cosa que conviene tener clara: Sluice no sustituye a tu CI. Una respuesta desde caché es una optimización local; el CI sigue siendo la autoridad.
 
 ## ¿Cómo lo construí?
 

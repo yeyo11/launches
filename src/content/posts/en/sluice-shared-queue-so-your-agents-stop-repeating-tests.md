@@ -15,9 +15,9 @@ imageAlt: "Output of sluice status: 1,874 runs, 1,147 cache answers and 19 h 24 
 
 ## What problem does it solve?
 
-At Digio I build software for clients with AI agents. On a normal day I have dozens of agents running at once (I use Claude Code), each in its own git *worktree*, on projects with expensive checks: test suites that take several minutes, linters and type checks wired into `pre-commit` and `pre-push`. Those hooks are defined by each project's team and I can't always touch them.
+In my day job I build software for clients with AI agents. On a normal day I have dozens of agents running at once (I use Claude Code), each in its own git *worktree*, on projects with expensive checks: test suites that take several minutes, linters and type checks wired into `pre-commit` and `pre-push`. Those hooks are defined by each project's team and I can't always touch them.
 
-Nothing coordinated those agents. Five agents meant five suites at once. The machine froze, pushes took forever and the same tests ran again on code that had already passed. What made me say "enough" was watching the desktop give up: GNOME stopped responding and Linux started killing processes on its own. The kernel's OOM killer took out the browser and the applications, and `systemd-oomd` took out the agents' own tools.
+Nothing coordinated those agents. Working with several AI agents in parallel, my machine spent the day running the same tests and builds over and over, until it ran out of memory, and pushes took forever. What made me say "enough" was watching the desktop give up: GNOME stopped responding and Linux started killing processes on its own. The kernel's OOM killer took out the browser and the applications, and `systemd-oomd` took out the agents' own tools.
 
 There were three separate causes behind it:
 
@@ -182,8 +182,6 @@ sluice queue approve <train>   # you do this
 ```
 
 By default, nothing is pushed until a person approves the train: the daemon rejects an agent's approval, over MCP or from the terminal, and the Claude Code plugin blocks it too. You can allow it explicitly in your personal configuration (`allow_agent_approval = true`); a repository can't turn it on by itself. Even so, two cases remain human-only: a train that changes the project's own verification configuration and landing through a *pull request*. If your target branch is protected and only accepts *pull requests*, `[queue] land = "pull-request"` pushes the verified result to a `sluice/train/<id>` branch and, on approval, opens the *pull request* with your own `gh`. Sluice never does the merge.
-
-And one thing worth being clear about: Sluice doesn't replace your CI. A cache answer is a local optimization; CI remains the authority.
 
 ## How did I build it?
 

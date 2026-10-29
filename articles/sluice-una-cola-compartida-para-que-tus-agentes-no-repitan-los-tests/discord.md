@@ -4,9 +4,9 @@
 
 **Sluice: one queue for every build, test and heavy command your agents run** 🚦
 
-If you run several AI coding agents on one Linux machine, you know the pain: five agents, five test suites at once, and the same tests rerunning on code that already passed.
+Orchestrating dozens of AI agents on one machine has a hidden cost: each one runs its own tests, builds and hooks.
 
-Sluice is a verification queue and cache shared by all the agents on the machine. It's open source (MIT) and written in Rust.
+Sluice queues the tests, builds and heavy commands of every agent on the machine. It's open source (MIT) and written in Rust.
 
 • Each gate (tests, linters, type checks) runs once per git tree and the result is cached
 • One CPU and memory budget, with each job in its own cgroup
