@@ -15,4 +15,4 @@ publishing:
   discord: approval
   githubDiscussions: off
   threads: approval
-  youtube: off
+  youtube: approval

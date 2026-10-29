@@ -102,5 +102,219 @@
   },
   "threads": {
     "text": "Orchestrating dozens of AI agents on one machine has a hidden cost: each one runs its own tests, builds and hooks. For a while they kept freezing my machine, so I built Sluice: one queue for the tests, builds and heavy commands of every agent on the machine, where each gate runs once per git tree. About 28 hours of checks skipped in a week. 🚦\n\nhttps://josegarrido.dev/en/sluice-shared-queue-so-your-agents-stop-repeating-tests/?ref=threads"
+  },
+  "youtube": {
+    "short": {
+      "title": "Sluice: one queue for the tests and builds of all your AI agents",
+      "description": "Working with many AI agents in parallel, my machine ran the same tests and builds over and over until it ran out of memory. Sluice puts the tests, builds and heavy commands of every agent on a Linux machine in one queue, under one CPU and memory budget, and runs each check once per git tree.\n\nWhat the Short shows, measured on my two machines: a cached typecheck answering in 0.22 s instead of 54 s, about 28 hours of checks that did not run in a week, and 0 out-of-memory episodes in 2.5 days since version 0.6.0.\n\nOpen source (MIT), written in Rust. It works with any AI coding agent that supports MCP, and Claude Code has a plugin.",
+      "tags": [
+        "sluice",
+        "ai agents",
+        "claude code",
+        "mcp",
+        "rust",
+        "developer tools",
+        "coding agents",
+        "git hooks",
+        "test cache",
+        "linux",
+        "open source"
+      ],
+      "lang": "en",
+      "scenes": [
+        {
+          "kind": "card",
+          "title": "Many AI agents, one machine",
+          "text": "Each one runs its own tests, builds and hooks. Nothing coordinates them.",
+          "subtitle": "Working with many AI agents in parallel, my machine ran the same tests and builds over and over.",
+          "seconds": 6
+        },
+        {
+          "kind": "card",
+          "title": "Until memory ran out",
+          "text": "GNOME stopped responding and the OOM killer took the browser and the agents' tools.",
+          "subtitle": "Until it ran out of memory and Linux started killing processes.",
+          "seconds": 5
+        },
+        {
+          "kind": "card",
+          "title": "Sluice",
+          "text": "One queue for the tests, builds and heavy commands of every agent on a Linux machine.",
+          "subtitle": "So I built Sluice: one queue for the tests, builds and heavy commands of all my agents.",
+          "seconds": 6
+        },
+        {
+          "kind": "screenshot",
+          "screenshot": 2,
+          "chapter": "Once per git tree",
+          "subtitle": "Each check runs once per git tree. A cached typecheck answers in 0.22 s instead of 54 s.",
+          "seconds": 7
+        },
+        {
+          "kind": "screenshot",
+          "screenshot": 1,
+          "chapter": "28 hours saved",
+          "subtitle": "About 28 hours of checks that did not run in a week, on my two machines.",
+          "seconds": 7
+        },
+        {
+          "kind": "screenshot",
+          "screenshot": 4,
+          "chapter": "No more out of memory",
+          "subtitle": "Each job in its own cgroup, under one memory budget: 0 out-of-memory episodes in 2.5 days.",
+          "seconds": 7
+        },
+        {
+          "kind": "card",
+          "title": "Works with any MCP agent",
+          "text": "And a plugin for Claude Code. Open source, MIT, written in Rust.",
+          "subtitle": "It works with any agent that supports MCP, and Claude Code has a plugin.",
+          "seconds": 6
+        },
+        {
+          "kind": "cover",
+          "subtitle": "How to install it and the measured numbers: in the article, linked in the description.",
+          "seconds": 5,
+          "chapter": "Read the article"
+        }
+      ]
+    },
+    "video": {
+      "title": "Sluice: one queue for the tests, builds and heavy commands of your AI agents",
+      "description": "Working with dozens of AI agents in parallel, each in its own git worktree, my machine spent the day running the same tests and builds over and over, until it ran out of memory. This video walks through Sluice, the open source queue and cache I built for it: it puts the tests, builds and heavy commands of every agent on a Linux machine in one queue, under one CPU and memory budget, and runs each check once per git tree.\n\nWhat it shows, with the numbers measured on my two machines:\n- the cache: a typecheck that took 54 s answers in 0.22 s, and about 28 hours of checks did not run in a week;\n- memory: each job in its own cgroup and admitted only if its learned memory fits; 0 out-of-memory episodes in 2.5 days since version 0.6.0;\n- backfilling: short jobs go ahead of a 12 GB test suite when they fit, and queue wait per minute of work dropped about 4x in my measurement;\n- hung tests shown as STALLED, never killed;\n- sluice hooks on, for hooks you can't edit, like husky's.\n\nSluice is MIT licensed and written in Rust. It works with any AI coding agent that supports MCP, and Claude Code has a plugin that sets everything up.",
+      "tags": [
+        "sluice",
+        "ai agents",
+        "claude code",
+        "mcp",
+        "rust",
+        "developer tools",
+        "coding agents",
+        "git hooks",
+        "husky",
+        "test cache",
+        "build queue",
+        "cgroups",
+        "linux",
+        "open source"
+      ],
+      "lang": "en",
+      "scenes": [
+        {
+          "kind": "card",
+          "chapter": "The problem",
+          "title": "Many AI agents, one machine",
+          "text": "Dozens of agents at once, each in its own git worktree, each running its own tests, builds and hooks.",
+          "subtitle": "On a normal day I have dozens of AI agents working at once, each in its own git worktree.",
+          "seconds": 7
+        },
+        {
+          "kind": "card",
+          "title": "Nothing coordinated them",
+          "text": "The same tree verified before the commit, in pre-commit, in pre-push, and again after a rebase.",
+          "subtitle": "Nothing coordinated them: the same tests and builds ran over and over, until memory ran out.",
+          "seconds": 8
+        },
+        {
+          "kind": "card",
+          "title": "52% already verified",
+          "text": "Of the checks requested, 52% on one machine and 38% on the other were on code already verified.",
+          "subtitle": "I measured it: 52% and 38% of the checks on my two machines were on code already verified.",
+          "seconds": 8
+        },
+        {
+          "kind": "card",
+          "chapter": "One queue",
+          "title": "Sluice",
+          "text": "One queue and cache for the tests, builds and heavy commands of every agent on a Linux machine.",
+          "subtitle": "Sluice puts the tests, builds and heavy commands of every agent on the machine in one queue.",
+          "seconds": 7
+        },
+        {
+          "kind": "card",
+          "title": "Works with any MCP agent",
+          "text": "Git hooks need nothing from the agent, MCP agents call verify, and Claude Code has a plugin.",
+          "subtitle": "It works with any agent that supports MCP, and Claude Code has a plugin that sets it all up.",
+          "seconds": 7
+        },
+        {
+          "kind": "screenshot",
+          "screenshot": 2,
+          "chapter": "Once per git tree",
+          "subtitle": "The cache key is the exact git tree plus the gate: a 54 s typecheck answers in 0.22 s.",
+          "seconds": 9
+        },
+        {
+          "kind": "screenshot",
+          "screenshot": 3,
+          "subtitle": "--explain shows the tree, the key and the cache lookup, without running anything.",
+          "seconds": 7
+        },
+        {
+          "kind": "screenshot",
+          "screenshot": 1,
+          "subtitle": "Measured by each daemon: about 28 hours of checks that did not run in a week, on two machines.",
+          "seconds": 10,
+          "chapter": "28 hours saved"
+        },
+        {
+          "kind": "screenshot",
+          "screenshot": 4,
+          "chapter": "Memory",
+          "subtitle": "Each job runs in its own cgroup, and a gate starts only if its learned memory fits.",
+          "seconds": 8
+        },
+        {
+          "kind": "card",
+          "title": "0 out-of-memory episodes",
+          "text": "Since version 0.6.0, on the second machine: 2.5 days of agents working, nights included.",
+          "subtitle": "Since version 0.6.0: 0 out-of-memory episodes on the second machine in 2.5 days measured.",
+          "seconds": 7
+        },
+        {
+          "kind": "card",
+          "chapter": "Backfilling",
+          "title": "A 0.1 s linter waited 23 minutes",
+          "text": "It sat behind a test suite that used 12 GB, while the CPU was idle.",
+          "subtitle": "A 0.1-second linter waited up to 23 minutes behind a test suite that used 12 GB.",
+          "seconds": 8
+        },
+        {
+          "kind": "card",
+          "title": "About 4x less waiting",
+          "text": "Short jobs go ahead when they fit and don't delay the head. Wait per minute of work: 1.92 min, then 0.44 min.",
+          "subtitle": "With backfilling, queue wait per minute of work dropped about 4x, in my measurement.",
+          "seconds": 9
+        },
+        {
+          "kind": "card",
+          "chapter": "Hung tests and hooks",
+          "title": "STALLED, never killed",
+          "text": "A job with no progress shows up as STALLED in sluice status. The gate's timeout stays the only limit.",
+          "subtitle": "A hung test shows up as STALLED in sluice status, and the agent is told. Sluice never kills it.",
+          "seconds": 7
+        },
+        {
+          "kind": "card",
+          "title": "sluice hooks on",
+          "text": "Your clone's hooks, husky's included, go through the queue without touching the repository.",
+          "subtitle": "With sluice hooks on, hooks you can't edit, like husky's, go through the queue too.",
+          "seconds": 7
+        },
+        {
+          "kind": "card",
+          "chapter": "Try it",
+          "title": "Try it",
+          "text": "sluice doctor, sluice init --dry-run, sluice init, sluice status",
+          "subtitle": "Open source, MIT, written in Rust. Install it and run sluice init in your repository.",
+          "seconds": 7
+        },
+        {
+          "kind": "cover",
+          "subtitle": "How to install it and the measured numbers are in the article, linked in the description.",
+          "seconds": 5
+        }
+      ]
+    }
   }
 }
