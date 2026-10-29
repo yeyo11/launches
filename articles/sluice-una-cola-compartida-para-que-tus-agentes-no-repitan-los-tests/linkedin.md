@@ -1,0 +1,23 @@
+# LinkedIn
+
+> **Approval:** published when this pull request is merged. Edit it here if it needs changes.
+
+Cinco agentes de IA eran cinco suites de tests a la vez, y los mismos tests se repetían sobre código que ya había pasado.
+
+He publicado Sluice, una cola y una caché de verificación compartidas por todos los agentes de una máquina Linux.
+
+Lo construí porque trabajo con entre 1 y 20 agentes de Claude Code a la vez, y la máquina acababa bloqueada: GNOME sin responder y el OOM killer matando procesos.
+
+Lo que hace hoy:
+
+- Ejecuta cada gate (tests, linters, type checks) una sola vez por árbol de git y guarda el resultado. En mis dos equipos, unas 28 horas de verificaciones que no se ejecutaron en una semana.
+- Reparte un presupuesto común de CPU y memoria, con cada trabajo en su propio cgroup. Desde la 0.6.0, 0 episodios de falta de memoria en el segundo equipo.
+- Hace backfilling: la espera por minuto de trabajo pasó de 1,92 a 0,44 min.
+- Marca como STALLED los trabajos colgados, sin matarlos.
+- Puede ser el punto de entrada de los hooks de husky sin tocar el repositorio.
+
+Es de código abierto (MIT), está escrito en Rust y se integra con Claude Code como plugin y servidor MCP. No sustituye a tu CI.
+
+En el artículo explico cómo se instala y los números medidos.
+
+#Rust #ClaudeCode #DevTools
