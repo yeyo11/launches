@@ -1,0 +1,18 @@
+# The channels chosen in Shipcast for this article
+enabled: true
+brand: personal
+publishing:
+  blog: approval
+  devto: approval
+  bluesky: approval
+  mastodon: approval
+  instagram: approval
+  reddit: off
+  hashnode: off
+  linkedin: approval
+  newsletter: approval
+  telegram: approval
+  discord: approval
+  githubDiscussions: off
+  threads: approval
+  youtube: approval
