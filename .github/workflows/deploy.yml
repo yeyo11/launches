@@ -33,9 +33,14 @@ jobs:
       - run: pnpm test
       # The project pages read stars and releases from GitHub's API at build time; the job's own token
       # lifts the anonymous limit a shared runner address often hits (without it, figures are omitted)
+      # Umami (README.md, Analytics) from the repository's variables; while they are unset the pages
+      # carry no Umami script and the CSP stays as it is
       - run: pnpm build
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          UMAMI_SCRIPT_URL: ${{ vars.UMAMI_SCRIPT_URL }}
+          UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          UMAMI_HOST_URL: ${{ vars.UMAMI_HOST_URL }}
       - run: node scripts/contrast.mjs > /dev/null
       - uses: actions/upload-artifact@v7
         with:

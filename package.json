@@ -11,7 +11,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "check": "astro check && tsc -p worker",
-    "test": "node --test worker/*.test.ts",
+    "test": "node --test worker/*.test.ts src/*.test.mjs",
     "preview:worker": "wrangler dev --port 8787"
   },
   "dependencies": {

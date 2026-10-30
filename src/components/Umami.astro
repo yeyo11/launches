@@ -1,0 +1,121 @@
+---
+// Umami's tracker and the site's own events (named and described in README.md, Analytics). Rendered by
+// Base.astro only on a production build with Umami configured (src/umami.mjs), so without it neither
+// script reaches the page. Neither draws anything, and the tracker is only fetched once the page has
+// loaded and the browser is idle: its start-up (about 100 ms on Lighthouse's mobile profile) never
+// competes with the page's own.
+import type { Umami } from '../umami.mjs';
+
+interface Props {
+  umami: Umami;
+}
+
+const { umami } = Astro.props;
+// Only the published site counts: a pull request's preview (workers.dev) or Lighthouse on localhost
+// load the tracker but send nothing
+const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
+---
+
+{/* The tracker's script tag, written by the script below with these attributes */}
+<meta name="umami" content={umami.src} data-website-id={umami.websiteId} data-domains={domain} data-host-url={umami.hostUrl} />
+
+<script>
+  type Data = Record<string, string | number>;
+  type Tracker = { track: (name: string, data?: Data) => unknown };
+  const tracker = () => (window as Window & { umami?: Tracker }).umami;
+
+  // An event sent before the tracker is ready waits for it; a blocked tracker drops them
+  const waiting: Array<[string, Data]> = [];
+  const track = (name: string, data: Data) => {
+    const umami = tracker();
+    if (umami) umami.track(name, data);
+    else if (waiting.length < 20) waiting.push([name, data]);
+  };
+
+  // The tracker reads its settings from its own script tag's data-* attributes
+  const config = document.querySelector<HTMLMetaElement>('meta[name="umami"]');
+  const start = () => {
+    if (!config) return;
+    const script = document.createElement('script');
+    script.src = config.content;
+    for (const [key, value] of Object.entries(config.dataset)) if (value) script.dataset[key] = value;
+    script.addEventListener('load', () => {
+      for (const [name, data] of waiting.splice(0)) tracker()?.track(name, data);
+    });
+    document.head.append(script);
+  };
+  const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 3000 }) : setTimeout(start, 1));
+  if (document.readyState === 'complete') idle();
+  else window.addEventListener('load', idle, { once: true });
+
+  // newsletter-signup: a subscribe form's success (Subscribe.astro announces it)
+  document.addEventListener('newsletter-signup', (event) => {
+    const form = event.target as HTMLFormElement;
+    track('newsletter-signup', { lang: document.documentElement.lang, form: form.dataset.tone ?? '' });
+  });
+
+  // github-click: any link to github.com, wherever it is (header, footer, an article's body), opened
+  // with a click, the keyboard or the middle button
+  const onLink = (event: MouseEvent) => {
+    if (event.type === 'auxclick' && event.button !== 1) return;
+    const link = (event.target as Element | null)?.closest?.('a[href]');
+    if (!(link instanceof HTMLAnchorElement)) return;
+    const host = link.hostname.toLowerCase();
+    if (host !== 'github.com' && !host.endsWith('.github.com')) return;
+    track('github-click', { url: `${link.origin}${link.pathname}` });
+  };
+  document.addEventListener('click', onLink, { capture: true });
+  document.addEventListener('auxclick', onLink, { capture: true });
+
+  // scroll-depth: 25, 50, 75 and 100 % of the page, each sent once per page view; measured at most
+  // once a frame, and reaching a mark sends the ones below it that were skipped
+  const marks = [25, 50, 75, 100];
+  let sent = 0;
+  let pending = false;
+  const measure = () => {
+    pending = false;
+    const root = document.documentElement;
+    const seen = ((window.scrollY + window.innerHeight) / root.scrollHeight) * 100;
+    while (sent < marks.length && seen >= marks[sent]! - (marks[sent] === 100 ? 1 : 0)) track('scroll-depth', { depth: marks[sent++]! });
+    if (sent === marks.length) window.removeEventListener('scroll', onScroll);
+  };
+  const onScroll = () => {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(measure);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // reading-time: on an article, each mark of time on screen (a hidden tab does not count) is sent
+  // once, while the reader is still there: Umami's tracker gets no request out while the page unloads,
+  // so a total sent on leaving would be lost. One timer at a time, for the next mark only, paused
+  // while the tab is hidden.
+  if (document.querySelector('meta[property="og:type"]')?.getAttribute('content') === 'article') {
+    const MARKS = [15, 30, 60, 120, 300, 600];
+    let next = 0;
+    let shown = 0;
+    let visibleSince = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const schedule = () => {
+      if (next < MARKS.length) timer = setTimeout(reach, MARKS[next]! * 1000 - shown);
+    };
+    const reach = () => {
+      shown = MARKS[next]! * 1000;
+      visibleSince = performance.now();
+      track('reading-time', { seconds: MARKS[next++]! });
+      schedule();
+    };
+    const onVisibility = () => {
+      clearTimeout(timer);
+      if (document.visibilityState === 'visible') {
+        visibleSince = performance.now();
+        schedule();
+      } else if (visibleSince) {
+        shown += performance.now() - visibleSince;
+        visibleSince = 0;
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    if (document.visibilityState === 'visible') onVisibility();
+  }
+</script>
