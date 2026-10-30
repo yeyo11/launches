@@ -1,8 +1,9 @@
 ---
 // Umami's tracker and the site's own events (named and described in README.md, Analytics). Rendered by
 // Base.astro only on a production build with Umami configured (src/umami.mjs), so without it neither
-// script reaches the page. Both are deferred and draw nothing: no request blocks the first paint and
-// nothing moves the layout.
+// script reaches the page. Neither draws anything, and the tracker is only fetched once the page has
+// loaded and the browser is idle: its start-up (about 100 ms on Lighthouse's mobile profile) never
+// competes with the page's own.
 import type { Umami } from '../umami.mjs';
 
 interface Props {
@@ -15,23 +16,37 @@ const { umami } = Astro.props;
 const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
 ---
 
-<script is:inline defer src={umami.src} data-website-id={umami.websiteId} data-domains={domain} data-host-url={umami.hostUrl}></script>
+{/* The tracker's script tag, written by the script below with these attributes */}
+<meta name="umami" content={umami.src} data-website-id={umami.websiteId} data-domains={domain} data-host-url={umami.hostUrl} />
 
 <script>
   type Data = Record<string, string | number>;
   type Tracker = { track: (name: string, data?: Data) => unknown };
   const tracker = () => (window as Window & { umami?: Tracker }).umami;
 
-  // An event sent before the deferred tracker is ready waits for it; a blocked tracker drops them
+  // An event sent before the tracker is ready waits for it; a blocked tracker drops them
   const waiting: Array<[string, Data]> = [];
   const track = (name: string, data: Data) => {
     const umami = tracker();
     if (umami) umami.track(name, data);
     else if (waiting.length < 20) waiting.push([name, data]);
   };
-  document.querySelector('script[data-website-id]')?.addEventListener('load', () => {
-    for (const [name, data] of waiting.splice(0)) tracker()?.track(name, data);
-  });
+
+  // The tracker reads its settings from its own script tag's data-* attributes
+  const config = document.querySelector<HTMLMetaElement>('meta[name="umami"]');
+  const start = () => {
+    if (!config) return;
+    const script = document.createElement('script');
+    script.src = config.content;
+    for (const [key, value] of Object.entries(config.dataset)) if (value) script.dataset[key] = value;
+    script.addEventListener('load', () => {
+      for (const [name, data] of waiting.splice(0)) tracker()?.track(name, data);
+    });
+    document.head.append(script);
+  };
+  const idle = () => ('requestIdleCallback' in window ? requestIdleCallback(start, { timeout: 3000 }) : setTimeout(start, 1));
+  if (document.readyState === 'complete') idle();
+  else window.addEventListener('load', idle, { once: true });
 
   // newsletter-signup: a subscribe form's success (Subscribe.astro announces it)
   document.addEventListener('newsletter-signup', (event) => {

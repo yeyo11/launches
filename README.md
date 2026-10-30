@@ -77,8 +77,9 @@ Two counters, side by side, both on production builds only and both without cook
   `src/umami.mjs` turns them into the script tag (`src/components/Umami.astro`, rendered by
   `src/layouts/Base.astro`) and into the page's CSP (`script-src` and `connect-src` in
   `astro.config.mjs`), so both always agree; a malformed or plain-HTTP URL stops the build. The
-  tracker is deferred and draws nothing, so it neither blocks the first paint nor moves the layout,
-  and it sends only from `josegarrido.dev` (`data-domains`): a pull request's preview and the
+  tracker draws nothing and is only fetched once the page has loaded and the browser is idle (its
+  start-up is a ~100 ms task on Lighthouse's mobile profile, which would otherwise add to the
+  blocking time); events from before that wait for it. It sends only from `josegarrido.dev` (`data-domains`): a pull request's preview and the
   Lighthouse run load it but count nothing. The privacy policy describes Umami only when it is
   configured.
 
