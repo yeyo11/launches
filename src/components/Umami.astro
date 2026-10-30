@@ -32,13 +32,17 @@ const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
     else if (waiting.length < 20) waiting.push([name, data]);
   };
 
-  // The tracker reads its settings from its own script tag's data-* attributes
+  const isArticle = document.querySelector('meta[property="og:type"]')?.getAttribute('content') === 'article';
+
+  // The tracker reads its settings from its own script tag's data-* attributes. An article's page
+  // views and events carry Umami's tag `article`, so any report can be narrowed to the articles.
   const config = document.querySelector<HTMLMetaElement>('meta[name="umami"]');
   const start = () => {
     if (!config) return;
     const script = document.createElement('script');
     script.src = config.content;
     for (const [key, value] of Object.entries(config.dataset)) if (value) script.dataset[key] = value;
+    if (isArticle) script.dataset.tag = 'article';
     script.addEventListener('load', () => {
       for (const [name, data] of waiting.splice(0)) tracker()?.track(name, data);
     });
@@ -53,6 +57,30 @@ const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
     const form = event.target as HTMLFormElement;
     track('newsletter-signup', { lang: document.documentElement.lang, form: form.dataset.tone ?? '' });
   });
+
+  // newsletter-confirmed: the page the double opt-in's confirmation link lands on (SubscribedPage.astro)
+  if (document.querySelector('[data-newsletter-confirmed]')) track('newsletter-confirmed', { lang: document.documentElement.lang });
+
+  // copy-command: text copied from a code block (a command, a config), with its first line
+  document.addEventListener('copy', () => {
+    const selection = document.getSelection();
+    const node = selection?.anchorNode;
+    const element = node instanceof Element ? node : node?.parentElement;
+    if (!selection || !element?.closest('pre, code')) return;
+    const line = selection.toString().trim().split('\n')[0]?.trim().slice(0, 80);
+    if (line) track('copy-command', { text: line });
+  });
+
+  // engaged-read: on an article, once the reader has passed 75 % of the page and had it on screen for
+  // 60 s, in either order; sent once per page view
+  let scrolledDeep = false;
+  let readLong = false;
+  let engaged = false;
+  const checkEngaged = () => {
+    if (engaged || !isArticle || !scrolledDeep || !readLong) return;
+    engaged = true;
+    track('engaged-read', { lang: document.documentElement.lang });
+  };
 
   // github-click: any link to github.com, wherever it is (header, footer, an article's body), opened
   // with a click, the keyboard or the middle button
@@ -76,7 +104,12 @@ const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
     pending = false;
     const root = document.documentElement;
     const seen = ((window.scrollY + window.innerHeight) / root.scrollHeight) * 100;
-    while (sent < marks.length && seen >= marks[sent]! - (marks[sent] === 100 ? 1 : 0)) track('scroll-depth', { depth: marks[sent++]! });
+    while (sent < marks.length && seen >= marks[sent]! - (marks[sent] === 100 ? 1 : 0)) {
+      const depth = marks[sent++]!;
+      track('scroll-depth', { depth });
+      if (depth >= 75) scrolledDeep = true;
+    }
+    checkEngaged();
     if (sent === marks.length) window.removeEventListener('scroll', onScroll);
   };
   const onScroll = () => {
@@ -90,7 +123,7 @@ const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
   // once, while the reader is still there: Umami's tracker gets no request out while the page unloads,
   // so a total sent on leaving would be lost. One timer at a time, for the next mark only, paused
   // while the tab is hidden.
-  if (document.querySelector('meta[property="og:type"]')?.getAttribute('content') === 'article') {
+  if (isArticle) {
     const MARKS = [15, 30, 60, 120, 300, 600];
     let next = 0;
     let shown = 0;
@@ -102,7 +135,12 @@ const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
     const reach = () => {
       shown = MARKS[next]! * 1000;
       visibleSince = performance.now();
-      track('reading-time', { seconds: MARKS[next++]! });
+      const seconds = MARKS[next++]!;
+      track('reading-time', { seconds });
+      if (seconds >= 60) {
+        readLong = true;
+        checkEngaged();
+      }
       schedule();
     };
     const onVisibility = () => {

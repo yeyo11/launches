@@ -17,7 +17,7 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <Base lang={lang} title={t.subscribedTitle} description={t.subscribedNote} alternate={{ lang: other, href: pagePath('subscribed', other) }} noindex>
-  <section class="wrap done">
+  <section class="wrap done" data-newsletter-confirmed>
     <Headline as="h1" text={t.subscribedTitle} class="h-done" />
     <p>{t.subscribedNote}</p>
     <a href={`${base}${lang}/`} class="back">{t.backToLaunches}</a>
