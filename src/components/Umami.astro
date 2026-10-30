@@ -16,8 +16,9 @@ const { umami } = Astro.props;
 const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
 ---
 
-{/* The tracker's script tag, written by the script below with these attributes */}
-<meta name="umami" content={umami.src} data-website-id={umami.websiteId} data-domains={domain} data-host-url={umami.hostUrl} />
+{/* The tracker's script tag, written by the script below with these attributes; data-performance has it send
+    each page view's Web Vitals (LCP, INP, CLS, FCP, TTFB) from real readers */}
+<meta name="umami" content={umami.src} data-website-id={umami.websiteId} data-domains={domain} data-host-url={umami.hostUrl} data-performance="true" />
 
 <script>
   type Data = Record<string, string | number>;
@@ -58,6 +59,30 @@ const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
     track('newsletter-signup', { lang: document.documentElement.lang, form: form.dataset.tone ?? '' });
   });
 
+  // newsletter-view: a subscribe form at least half on screen, once per form and page view, so the
+  // signups can be read against the readers who saw the form
+  if ('IntersectionObserver' in window) {
+    const seen = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue;
+        seen.unobserve(entry.target);
+        const form = entry.target as HTMLFormElement;
+        track('newsletter-view', { lang: document.documentElement.lang, form: form.dataset.tone ?? '' });
+      }
+    }, { threshold: 0.5 });
+    for (const form of document.querySelectorAll('form[data-subscribe]')) seen.observe(form);
+  }
+
+  // Where on the page a link is: the site's header or footer, an article's text (`article-body`) or the
+  // rest of its page, such as its source link (`article`), or another page's content (`page`)
+  const placementOf = (link: Element) => {
+    if (link.closest('body > header')) return 'header';
+    if (link.closest('body > footer')) return 'footer';
+    if (isArticle && link.closest('.prose')) return 'article-body';
+    if (isArticle) return 'article';
+    return 'page';
+  };
+
   // newsletter-confirmed: the page the double opt-in's confirmation link lands on (SubscribedPage.astro)
   if (document.querySelector('[data-newsletter-confirmed]')) track('newsletter-confirmed', { lang: document.documentElement.lang });
 
@@ -90,7 +115,7 @@ const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
     if (!(link instanceof HTMLAnchorElement)) return;
     const host = link.hostname.toLowerCase();
     if (host !== 'github.com' && !host.endsWith('.github.com')) return;
-    track('github-click', { url: `${link.origin}${link.pathname}` });
+    track('github-click', { url: `${link.origin}${link.pathname}`, placement: placementOf(link) });
   };
   document.addEventListener('click', onLink, { capture: true });
   document.addEventListener('auxclick', onLink, { capture: true });
