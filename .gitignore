@@ -31,3 +31,7 @@ pnpm-debug.log*
 
 # Lighthouse CI reports
 .lighthouseci/
+
+# Claude Code: per-machine settings and agents' worktrees
+.claude/settings.local.json
+.claude/worktrees/
