@@ -12,7 +12,9 @@ interface Props {
 const { lang } = Astro.props;
 const other: Locale = lang === 'en' ? 'es' : 'en';
 const CONTACT = 'yeyochico@gmail.com';
-const UPDATED = new Date('2026-10-25');
+// Umami is described only once the build has it (src/umami.mjs), and the date moves with it
+const UPDATED = new Date(SITE.umami ? '2026-10-30' : '2026-10-25');
+const umamiCloud = SITE.umami && new URL(SITE.umami.src).hostname.endsWith('umami.is');
 const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dateStyle: 'long' }).format(UPDATED);
 ---
 
@@ -72,8 +74,24 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
             cookies or local storage and does not fingerprint visitors: it records the page you open, the site that
             sent you, your country and your browser and device type, and reports them only as totals. Cloudflare
             processes this under its{' '}
-            <a href="https://www.cloudflare.com/privacypolicy/">privacy policy</a>. The numbers tell the author which
-            launches and channels people find useful; they are never sold or shared. The blog remembers your choice
+            <a href="https://www.cloudflare.com/privacypolicy/">privacy policy</a>.
+            {SITE.umami && (
+              <>
+                {' '}It also counts them with <a href="https://umami.is/">Umami</a>, which uses no cookies or local
+                storage either and keeps nothing that identifies you: besides the page, the site that sent you, your
+                country and your browser and device type, it records the campaign tags of the link you followed
+                (<code>utm_*</code>), how far down a page you scroll, how long an article stays on your screen, and
+                whether you open a link to GitHub or subscribe to the newsletter (never your email address), and
+                reports them only as totals.
+                {umamiCloud && (
+                  <>
+                    {' '}Umami Software processes this under its{' '}
+                    <a href="https://umami.is/privacy">privacy policy</a>.
+                  </>
+                )}
+              </>
+            )}{' '}
+            The numbers tell the author which launches and channels people find useful; they are never sold or shared. The blog remembers your choice
             of light or dark theme in your own browser (<code>localStorage</code>), and that value never leaves your
             device. The site is served by Cloudflare (and, while it moves there, by GitHub Pages), which may keep
             technical logs such as IP addresses under the Cloudflare privacy policy above and the{' '}
@@ -155,7 +173,24 @@ const updated = new Intl.DateTimeFormat(lang === 'es' ? 'es-ES' : 'en-GB', { dat
             cookies ni almacenamiento local y no toma huellas del navegador: registra la página que abres, la web que
             te ha traído, tu país y el tipo de navegador y dispositivo, y solo los muestra como totales. Cloudflare
             los trata según su{' '}
-            <a href="https://www.cloudflare.com/es-es/privacypolicy/">política de privacidad</a>. Las cifras sirven
+            <a href="https://www.cloudflare.com/es-es/privacypolicy/">política de privacidad</a>.
+            {SITE.umami && (
+              <>
+                {' '}También las cuenta con <a href="https://umami.is/">Umami</a>, que tampoco usa cookies ni
+                almacenamiento local y no guarda nada que te identifique: además de la página, la web que te ha traído,
+                tu país y el tipo de navegador y dispositivo, registra las etiquetas de campaña del enlace que seguiste
+                (<code>utm_*</code>), hasta dónde bajas en una página, cuánto tiempo está un artículo en tu pantalla y
+                si abres un enlace a GitHub o te suscribes a la newsletter (nunca tu email), y solo lo muestra como
+                totales.
+                {umamiCloud && (
+                  <>
+                    {' '}Umami Software lo trata según su{' '}
+                    <a href="https://umami.is/privacy">política de privacidad</a>.
+                  </>
+                )}
+              </>
+            )}{' '}
+            Las cifras sirven
             para saber qué lanzamientos y canales le resultan útiles a la gente; nunca se venden ni se comparten.
             El blog recuerda en tu propio navegador si prefieres el tema claro o el oscuro (<code>localStorage</code>),
             y ese valor nunca sale de tu dispositivo. El sitio lo sirve Cloudflare (y, mientras se completa el cambio, GitHub Pages), que puede guardar registros técnicos como direcciones IP según la política de privacidad de Cloudflare citada arriba y la{' '}
