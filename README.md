@@ -96,6 +96,6 @@ The site's own events, sent with `umami.track` from `src/components/Umami.astro`
 | `newsletter-signup` | A subscribe form gets Brevo's success (the double opt-in email is on its way); a form posted without JavaScript is not counted | `lang` (`en`, `es`), `form` (`band`, `page`) |
 | `github-click` | A click (or middle click) on any link to `github.com` or a subdomain: header, footer, project pages, an article's body | `url`, the link without its query string |
 | `scroll-depth` | The reader scrolls past 25, 50, 75 and 100 % of the page, each mark once per page view (a jump sends the marks it skipped); measured at most once a frame | `depth` (`25`, `50`, `75`, `100`) |
-| `reading-time` | On an article, once per page view, when the reader leaves or first switches away from the tab: how long it was on screen (a hidden tab does not count; no timer runs) | `seconds` (capped at 3600), `range` (`0-10s`, `10-30s`, `30-60s`, `1-2m`, `2-5m`, `5-10m`, `10m+`) |
+| `reading-time` | On an article, when it has been on screen for 15 s, 30 s, 1, 2, 5 and 10 minutes (a hidden tab does not count), each mark once per page view; sent while the reader is still there, since Umami's tracker gets no request out while a page unloads | `seconds` (`15`, `30`, `60`, `120`, `300`, `600`) |
 
 A new event is named in lowercase-kebab and added to this table.

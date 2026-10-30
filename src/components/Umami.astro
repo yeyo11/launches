@@ -71,25 +71,36 @@ const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
   };
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  // reading-time: on an article, the time it was on screen (a hidden tab does not count), sent once,
-  // when the reader leaves or switches away for the first time. No timer runs meanwhile.
+  // reading-time: on an article, each mark of time on screen (a hidden tab does not count) is sent
+  // once, while the reader is still there: Umami's tracker gets no request out while the page unloads,
+  // so a total sent on leaving would be lost. One timer at a time, for the next mark only, paused
+  // while the tab is hidden.
   if (document.querySelector('meta[property="og:type"]')?.getAttribute('content') === 'article') {
-    let visibleSince = document.visibilityState === 'visible' ? performance.now() : 0;
+    const MARKS = [15, 30, 60, 120, 300, 600];
+    let next = 0;
     let shown = 0;
-    let done = false;
-    const RANGES: Array<[number, string]> = [[10, '0-10s'], [30, '10-30s'], [60, '30-60s'], [120, '1-2m'], [300, '2-5m'], [600, '5-10m'], [Infinity, '10m+']];
-    const leave = () => {
-      if (done) return;
-      done = true;
-      if (visibleSince) shown += performance.now() - visibleSince;
-      // A tab left open overnight is not an hour of reading
-      const seconds = Math.min(3600, Math.round(shown / 1000));
-      track('reading-time', { seconds, range: RANGES.find(([limit]) => seconds < limit)![1] });
+    let visibleSince = 0;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const schedule = () => {
+      if (next < MARKS.length) timer = setTimeout(reach, MARKS[next]! * 1000 - shown);
     };
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') leave();
-      else if (!visibleSince) visibleSince = performance.now();
-    });
-    window.addEventListener('pagehide', leave);
+    const reach = () => {
+      shown = MARKS[next]! * 1000;
+      visibleSince = performance.now();
+      track('reading-time', { seconds: MARKS[next++]! });
+      schedule();
+    };
+    const onVisibility = () => {
+      clearTimeout(timer);
+      if (document.visibilityState === 'visible') {
+        visibleSince = performance.now();
+        schedule();
+      } else if (visibleSince) {
+        shown += performance.now() - visibleSince;
+        visibleSince = 0;
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    if (document.visibilityState === 'visible') onVisibility();
   }
 </script>
