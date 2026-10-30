@@ -95,14 +95,18 @@ The site's own events, sent with `umami.track` from `src/components/Umami.astro`
 | Event | When | Data |
 | --- | --- | --- |
 | `newsletter-signup` | A subscribe form gets Brevo's success (the double opt-in email is on its way); a form posted without JavaScript is not counted | `lang` (`en`, `es`), `form` (`band`, `page`) |
-| `github-click` | A click (or middle click) on any link to `github.com` or a subdomain: header, footer, project pages, an article's body | `url`, the link without its query string |
+| `github-click` | A click (or middle click) on any link to `github.com` or a subdomain: header, footer, project pages, an article's body | `url`, the link without its query string; `placement`: `header`, `footer`, `article-body` (an article's text), `article` (the rest of an article's page, such as its source link) or `page` (any other page's content) |
 | `scroll-depth` | The reader scrolls past 25, 50, 75 and 100 % of the page, each mark once per page view (a jump sends the marks it skipped); measured at most once a frame | `depth` (`25`, `50`, `75`, `100`) |
 | `reading-time` | On an article, when it has been on screen for 15 s, 30 s, 1, 2, 5 and 10 minutes (a hidden tab does not count), each mark once per page view; sent while the reader is still there, since Umami's tracker gets no request out while a page unloads | `seconds` (`15`, `30`, `60`, `120`, `300`, `600`) |
+| `newsletter-view` | A subscribe form is at least half on screen, once per form and page view | `lang`, `form` (`band`, `page`) |
 | `newsletter-confirmed` | The page the double opt-in's confirmation link opens (`/en/subscribed/`, `/es/suscrito/`) loads: the reader is on the list | `lang` |
 | `engaged-read` | On an article, once the reader has both passed 75 % of the page and had it on screen for 60 s (the same measures as `scroll-depth` and `reading-time`), once per page view | `lang` |
 | `copy-command` | Text is copied from a code block (`pre` or `code`): a command, a config | `text`, the copy's first line, at most 80 characters |
 
 On an article, the tracker also carries Umami's tag `article` (`data-tag`), so its page views and
 events can be filtered to the articles in any report.
+
+The tracker also sends each page view's Web Vitals (LCP, INP, CLS, FCP, TTFB) from real readers
+(`data-performance`), read in Umami's Performance report.
 
 A new event is named in lowercase-kebab and added to this table.
