@@ -56,3 +56,46 @@ GitHub Pages served the site until 2026-10-25. The cutover, for the record:
 - The zone's AI bot settings are off (no blocking, no managed robots.txt), so the site's own
   `robots.txt` is the one served and every crawler gets in.
 - GitHub Pages is unpublished and its jobs are gone from the workflow.
+
+## Analytics
+
+Two counters, side by side, both on production builds only and both without cookies:
+
+- **Cloudflare Web Analytics**, the beacon whose token is `analytics.cloudflareWebAnalytics` in
+  `brand.yml`: page views, referrers, countries and devices. It does not read query strings.
+- **Umami**, configured at build time from the environment and left out until both of the first two
+  variables are set (nothing changes before that: no script, no CSP change):
+
+  | Variable | What it is |
+  | --- | --- |
+  | `UMAMI_SCRIPT_URL` | The tracker, e.g. `https://cloud.umami.is/script.js` or `https://<your-umami>/script.js` |
+  | `UMAMI_WEBSITE_ID` | The website's id in Umami (public: it ends up in every page) |
+  | `UMAMI_HOST_URL` | Optional: where the tracker sends, when that is not its default (the script's origin, or `https://gateway.umami.is` for Umami Cloud) |
+
+  CI reads them from the repository's **variables** (Settings → Secrets and variables → Actions →
+  Variables), not secrets; locally, from the environment or a `.env` file (ignored by git).
+  `src/umami.mjs` turns them into the script tag (`src/components/Umami.astro`, rendered by
+  `src/layouts/Base.astro`) and into the page's CSP (`script-src` and `connect-src` in
+  `astro.config.mjs`), so both always agree; a malformed or plain-HTTP URL stops the build. The
+  tracker is deferred and draws nothing, so it neither blocks the first paint nor moves the layout,
+  and it sends only from `josegarrido.dev` (`data-domains`): a pull request's preview and the
+  Lighthouse run load it but count nothing. The privacy policy describes Umami only when it is
+  configured.
+
+Umami records each page view with its referrer and its `utm_*` tags on its own. The links Shipcast
+publishes carry `utm_source`, `utm_medium`, `utm_campaign` and `utm_content` (Shipcast's
+`docs/tracking.md`); the Worker keeps the query string on every redirect it answers (`/`, moved
+pages) and serves an article with tags as the article (`worker/index.test.ts`), and the canonical
+URL, `og:url` and `hreflang` links are built from the path alone, so a tagged link never becomes a
+second URL for search engines.
+
+The site's own events, sent with `umami.track` from `src/components/Umami.astro`:
+
+| Event | When | Data |
+| --- | --- | --- |
+| `newsletter-signup` | A subscribe form gets Brevo's success (the double opt-in email is on its way); a form posted without JavaScript is not counted | `lang` (`en`, `es`), `form` (`band`, `page`) |
+| `github-click` | A click (or middle click) on any link to `github.com` or a subdomain: header, footer, project pages, an article's body | `url`, the link without its query string |
+| `scroll-depth` | The reader scrolls past 25, 50, 75 and 100 % of the page, each mark once per page view (a jump sends the marks it skipped); measured at most once a frame | `depth` (`25`, `50`, `75`, `100`) |
+| `reading-time` | On an article, once per page view, when the reader leaves or first switches away from the tab: how long it was on screen (a hidden tab does not count; no timer runs) | `seconds` (capped at 3600), `range` (`0-10s`, `10-30s`, `30-60s`, `1-2m`, `2-5m`, `5-10m`, `10m+`) |
+
+A new event is named in lowercase-kebab and added to this table.
