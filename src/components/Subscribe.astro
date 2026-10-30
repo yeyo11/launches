@@ -19,7 +19,7 @@ const id = `nl-${tone}`;
 
 {
   action && (
-    <form class:list={['subscribe', tone]} method="post" action={action} data-subscribe data-invalid={t.nlInvalid} data-error={t.nlError} data-done={t.nlDone} data-sending={t.nlSending}>
+    <form class:list={['subscribe', tone]} method="post" action={action} data-subscribe data-tone={tone} data-invalid={t.nlInvalid} data-error={t.nlError} data-done={t.nlDone} data-sending={t.nlSending}>
       <Headline as="h2" text={t.nlTitle} class="nl-title" />
       <p class="nl-note">{t.nlNote}</p>
       <label for={id} class="nl-label">{t.nlLabel}</label>
@@ -61,6 +61,8 @@ const id = `nl-${tone}`;
         if (response.ok && answer.success) {
           say(form.dataset.done!, 'done');
           form.reset();
+          // For the analytics (Umami.astro), which counts it as newsletter-signup when configured
+          form.dispatchEvent(new Event('newsletter-signup', { bubbles: true }));
         } else say(form.dataset.error!, 'error');
       } catch {
         say(form.dataset.error!, 'error');

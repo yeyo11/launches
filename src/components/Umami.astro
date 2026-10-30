@@ -1,0 +1,95 @@
+---
+// Umami's tracker and the site's own events (named and described in README.md, Analytics). Rendered by
+// Base.astro only on a production build with Umami configured (src/umami.mjs), so without it neither
+// script reaches the page. Both are deferred and draw nothing: no request blocks the first paint and
+// nothing moves the layout.
+import type { Umami } from '../umami.mjs';
+
+interface Props {
+  umami: Umami;
+}
+
+const { umami } = Astro.props;
+// Only the published site counts: a pull request's preview (workers.dev) or Lighthouse on localhost
+// load the tracker but send nothing
+const domain = new URL(Astro.site ?? 'https://josegarrido.dev').hostname;
+---
+
+<script is:inline defer src={umami.src} data-website-id={umami.websiteId} data-domains={domain} data-host-url={umami.hostUrl}></script>
+
+<script>
+  type Data = Record<string, string | number>;
+  type Tracker = { track: (name: string, data?: Data) => unknown };
+  const tracker = () => (window as Window & { umami?: Tracker }).umami;
+
+  // An event sent before the deferred tracker is ready waits for it; a blocked tracker drops them
+  const waiting: Array<[string, Data]> = [];
+  const track = (name: string, data: Data) => {
+    const umami = tracker();
+    if (umami) umami.track(name, data);
+    else if (waiting.length < 20) waiting.push([name, data]);
+  };
+  document.querySelector('script[data-website-id]')?.addEventListener('load', () => {
+    for (const [name, data] of waiting.splice(0)) tracker()?.track(name, data);
+  });
+
+  // newsletter-signup: a subscribe form's success (Subscribe.astro announces it)
+  document.addEventListener('newsletter-signup', (event) => {
+    const form = event.target as HTMLFormElement;
+    track('newsletter-signup', { lang: document.documentElement.lang, form: form.dataset.tone ?? '' });
+  });
+
+  // github-click: any link to github.com, wherever it is (header, footer, an article's body), opened
+  // with a click, the keyboard or the middle button
+  const onLink = (event: MouseEvent) => {
+    if (event.type === 'auxclick' && event.button !== 1) return;
+    const link = (event.target as Element | null)?.closest?.('a[href]');
+    if (!(link instanceof HTMLAnchorElement)) return;
+    const host = link.hostname.toLowerCase();
+    if (host !== 'github.com' && !host.endsWith('.github.com')) return;
+    track('github-click', { url: `${link.origin}${link.pathname}` });
+  };
+  document.addEventListener('click', onLink, { capture: true });
+  document.addEventListener('auxclick', onLink, { capture: true });
+
+  // scroll-depth: 25, 50, 75 and 100 % of the page, each sent once per page view; measured at most
+  // once a frame, and reaching a mark sends the ones below it that were skipped
+  const marks = [25, 50, 75, 100];
+  let sent = 0;
+  let pending = false;
+  const measure = () => {
+    pending = false;
+    const root = document.documentElement;
+    const seen = ((window.scrollY + window.innerHeight) / root.scrollHeight) * 100;
+    while (sent < marks.length && seen >= marks[sent]! - (marks[sent] === 100 ? 1 : 0)) track('scroll-depth', { depth: marks[sent++]! });
+    if (sent === marks.length) window.removeEventListener('scroll', onScroll);
+  };
+  const onScroll = () => {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(measure);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // reading-time: on an article, the time it was on screen (a hidden tab does not count), sent once,
+  // when the reader leaves or switches away for the first time. No timer runs meanwhile.
+  if (document.querySelector('meta[property="og:type"]')?.getAttribute('content') === 'article') {
+    let visibleSince = document.visibilityState === 'visible' ? performance.now() : 0;
+    let shown = 0;
+    let done = false;
+    const RANGES: Array<[number, string]> = [[10, '0-10s'], [30, '10-30s'], [60, '30-60s'], [120, '1-2m'], [300, '2-5m'], [600, '5-10m'], [Infinity, '10m+']];
+    const leave = () => {
+      if (done) return;
+      done = true;
+      if (visibleSince) shown += performance.now() - visibleSince;
+      // A tab left open overnight is not an hour of reading
+      const seconds = Math.min(3600, Math.round(shown / 1000));
+      track('reading-time', { seconds, range: RANGES.find(([limit]) => seconds < limit)![1] });
+    };
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') leave();
+      else if (!visibleSince) visibleSince = performance.now();
+    });
+    window.addEventListener('pagehide', leave);
+  }
+</script>
