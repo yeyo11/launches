@@ -1,5 +1,6 @@
 import { parse } from 'yaml';
 import brandFile from '../brand.yml?raw';
+import { umamiConfig } from './umami.mjs';
 
 interface Brand {
   displayName: string;
@@ -29,6 +30,12 @@ export const SITE = {
   ].filter((p): p is [string, string] => Boolean(p[1])),
   support: brand.support,
   analyticsToken: brand.analytics?.cloudflareWebAnalytics,
+  /** Umami, from the build's environment (not brand.yml): undefined until the owner sets it */
+  umami: umamiConfig({
+    UMAMI_SCRIPT_URL: import.meta.env.UMAMI_SCRIPT_URL,
+    UMAMI_WEBSITE_ID: import.meta.env.UMAMI_WEBSITE_ID,
+    UMAMI_HOST_URL: import.meta.env.UMAMI_HOST_URL,
+  }),
   /** Where each language's subscription form posts: a Brevo form with double opt-in */
   newsletterForms: brand.newsletter?.forms ?? {},
 };

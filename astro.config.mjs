@@ -6,7 +6,8 @@ import { codeColours } from './src/code-colours.mjs';
 import { articleImages } from './src/article-images.mjs';
 import { FILTERED_INDEX, sitemapDetails } from './src/sitemap.mjs';
 import { headersFile } from './src/headers.mjs';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { umamiConfig } from './src/umami.mjs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { parse } from 'yaml';
 
 const site = 'https://josegarrido.dev';
@@ -15,6 +16,11 @@ const details = sitemapDetails(site);
 // The newsletter's forms post to Brevo (their URLs are in brand.yml): the page may send to that host
 const brand = parse(readFileSync(new URL('./brand.yml', import.meta.url), 'utf8'));
 const formHosts = [...new Set(Object.values(brand.newsletter?.forms ?? {}).map((url) => new URL(String(url)).origin))].join(' ');
+
+// Umami, when UMAMI_SCRIPT_URL and UMAMI_WEBSITE_ID are set (in the environment or a local .env, which
+// Vite reads for the pages too): the page may load its tracker and send to its collector
+if (existsSync('.env')) process.loadEnvFile('.env');
+const umami = umamiConfig(process.env);
 
 /** Writes dist/_headers from src/headers.mjs, the list the Worker applies too
  * @type {import('astro').AstroIntegration} */
@@ -51,7 +57,8 @@ export default defineConfig({
   // colours that fail AA on the code background (checked by scripts/contrast.mjs)
   // Each page gets a Content-Security-Policy <meta> with the hashes of its own inline scripts and
   // styles, so neither needs 'unsafe-inline'. Inline style *attributes* (each project's colour, Shiki's
-  // code colours) are allowed through style-src-attr only. The beacon is Cloudflare Web Analytics.
+  // code colours) are allowed through style-src-attr only. The beacon is Cloudflare Web Analytics, and
+  // Umami's tracker and collector when it is configured (src/umami.mjs).
   security: {
     csp: {
       directives: [
@@ -61,7 +68,7 @@ export default defineConfig({
         "font-src 'self' data:",
         "media-src 'self'",
         "manifest-src 'self'",
-        `connect-src 'self' https://cloudflareinsights.com ${formHosts}`,
+        `connect-src 'self' https://cloudflareinsights.com ${formHosts}${umami ? ` ${umami.connectOrigin}` : ''}`,
         `form-action 'self' ${formHosts}`,
         "base-uri 'self'",
         "object-src 'none'",
@@ -70,7 +77,7 @@ export default defineConfig({
         // does not answer; localhost is exempt from it anyway
         ...(process.env.PREVIEW_HTTP === '1' ? [] : /** @type {const} */ (['upgrade-insecure-requests'])),
       ],
-      scriptDirective: { resources: ["'self'", 'https://static.cloudflareinsights.com'] },
+      scriptDirective: { resources: ["'self'", 'https://static.cloudflareinsights.com', ...(umami ? [umami.scriptOrigin] : [])] },
       styleDirective: { resources: [{ resource: "'self'", kind: 'element' }, { resource: "'unsafe-inline'", kind: 'attribute' }] },
     },
   },

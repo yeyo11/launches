@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Profiles from '../components/Profiles.astro';
+import Umami from '../components/Umami.astro';
 import { SITE, STRINGS, pagePath, type Locale } from '../site';
 import { breadcrumbs, graph, type JsonLdNode } from '../seo';
 // The same files global.css declares, so each preload and its @font-face share one request
@@ -143,6 +144,8 @@ const ogLocale = (l: Locale) => (l === 'es' ? 'es_ES' : 'en_US');
         />
       )
     }
+    {/* Umami, next to the beacon, once UMAMI_SCRIPT_URL and UMAMI_WEBSITE_ID are set at build time */}
+    {import.meta.env.PROD && SITE.umami && <Umami umami={SITE.umami} />}
   </head>
   <body>
     <a class="skip" href="#main">{t.skip}</a>
